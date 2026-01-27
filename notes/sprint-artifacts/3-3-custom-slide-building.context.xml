@@ -1,0 +1,247 @@
+<story-context id="3-3-custom-slide-building" v="1.0">
+  <metadata>
+    <epicId>3</epicId>
+    <storyId>3.3</storyId>
+    <title>Custom Slide Building</title>
+    <status>drafted</status>
+    <generatedAt>2026-01-27</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>notes/sprint-artifacts/3-3-custom-slide-building.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>system</asA>
+    <iWant>to generate a custom slide layout for complex content</iWant>
+    <soThat>users aren't limited to predefined templates</soThat>
+    <tasks>
+      <task id="1" ac="1">
+        <title>Extend build-one Workflow for Custom Build Path</title>
+        <subtasks>
+          <subtask id="1.1">Update `.slide-builder/workflows/build-one/instructions.md` to add Phase 3B: Custom Build</subtask>
+          <subtask id="1.2">Add condition in Phase 2 (Template Decision) to route to Phase 3B when suggested_template: "custom"</subtask>
+          <subtask id="1.3">Add fallback route when template file is missing</subtask>
+        </subtasks>
+      </task>
+      <task id="2" ac="1,2,3,4,5">
+        <title>Implement Custom Build Logic (Phase 3B)</title>
+        <subtasks>
+          <subtask id="2.1">Load theme.json completely for skill context</subtask>
+          <subtask id="2.2">Prepare frontend-design skill invocation context with theme, intent, key_points, visual_guidance, and constraints</subtask>
+          <subtask id="2.3">Invoke frontend-design skill with prepared context</subtask>
+          <subtask id="2.4">Capture generated HTML output</subtask>
+        </subtasks>
+      </task>
+      <task id="3" ac="3,5">
+        <title>Validate and Post-Process Custom Slide</title>
+        <subtasks>
+          <subtask id="3.1">Validate generated HTML has contenteditable on text elements</subtask>
+          <subtask id="3.2">If missing, add contenteditable="true" to text elements (h1, h2, h3, p, li, span)</subtask>
+          <subtask id="3.3">Validate data-field attributes exist on contenteditable elements</subtask>
+          <subtask id="3.4">If missing, generate unique data-field values based on element type and position</subtask>
+          <subtask id="3.5">Validate CSS variables from theme are used</subtask>
+          <subtask id="3.6">Validate dimensions (viewport 1920x1080)</subtask>
+        </subtasks>
+      </task>
+      <task id="4" ac="5">
+        <title>Add Auto-Save Script and Viewport Scaling</title>
+        <subtasks>
+          <subtask id="4.1">Check if auto-save JavaScript exists in generated slide</subtask>
+          <subtask id="4.2">If missing, inject the standard auto-save script (from Story 3.2 pattern)</subtask>
+          <subtask id="4.3">Add viewport auto-scaling CSS (from Story 3.2 template modifications)</subtask>
+          <subtask id="4.4">Ensure script handles all contenteditable elements with data-field</subtask>
+        </subtasks>
+      </task>
+      <task id="5" ac="1">
+        <title>Save Custom Slide and Update State</title>
+        <subtasks>
+          <subtask id="5.1">Save validated HTML to `.slide-builder/single/slide.html`</subtask>
+          <subtask id="5.2">Update status.yaml: built_count: 1, last_action, history array</subtask>
+          <subtask id="5.3">Display slide file path to user</subtask>
+          <subtask id="5.4">Log "Custom layout generated" for observability</subtask>
+        </subtasks>
+      </task>
+      <task id="6" ac="1-6">
+        <title>Testing and Validation</title>
+        <subtasks>
+          <subtask id="6.1">Test with plan.yaml having suggested_template: "custom" (Venn diagram intent)</subtask>
+          <subtask id="6.2">Test with complex diagram request (flowchart with multiple branches)</subtask>
+          <subtask id="6.3">Test with unique layout request (comparison matrix)</subtask>
+          <subtask id="6.4">Verify slide.html created with correct dimensions</subtask>
+          <subtask id="6.5">Verify all text elements have contenteditable and data-field</subtask>
+          <subtask id="6.6">Verify CSS variables match theme.json</subtask>
+          <subtask id="6.7">Verify status.yaml shows custom build in last_action</subtask>
+          <subtask id="6.8">Run Frontend Test Gate checklist</subtask>
+          <subtask id="6.9">Cross-browser test: Chrome, Firefox, Safari</subtask>
+        </subtasks>
+      </task>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <criterion id="AC3.3.1">Given a single-slide plan exists with no matching template (suggested_template: "custom"), when the user runs `/build-one`, then the system invokes the frontend-design skill</criterion>
+    <criterion id="AC3.3.2">The frontend-design skill receives: full theme.json, slide intent, content requirements</criterion>
+    <criterion id="AC3.3.3">The generated custom slide follows all theme primitives (colors, fonts, shapes)</criterion>
+    <criterion id="AC3.3.4">The custom slide renders at 1920x1080</criterion>
+    <criterion id="AC3.3.5">All text elements in the custom slide have contenteditable attributes</criterion>
+    <criterion id="AC3.3.6">Given a complex diagram or unique layout is requested, when the frontend-design skill generates the slide, then the output is production-quality, not placeholder</criterion>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>notes/sprint-artifacts/tech-spec-epic-3.md</path>
+        <title>Epic 3 Technical Specification</title>
+        <section>Story 3.3: Custom Slide Building</section>
+        <snippet>Custom Builder module generates custom layout via frontend-design skill when templates don't match. Skill receives full theme.json, slide intent, and constraints (1920x1080, contenteditable required).</snippet>
+      </doc>
+      <doc>
+        <path>notes/architecture.md</path>
+        <title>Slide Builder Architecture</title>
+        <section>Pattern 2: Template-or-Custom Decision</section>
+        <snippet>If no template match found, invoke frontend-design skill for custom layout. Log decision in status.yaml. ADR-002 establishes hybrid approach for brand consistency via templates with flexibility via skill.</snippet>
+      </doc>
+      <doc>
+        <path>notes/architecture.md</path>
+        <title>Slide Builder Architecture</title>
+        <section>HTML Slide Pattern</section>
+        <snippet>All text elements MUST have contenteditable="true" and data-field attributes. Slides MUST use theme CSS variables (--color-primary, --font-heading, etc.) and render at 1920x1080.</snippet>
+      </doc>
+      <doc>
+        <path>notes/epics.md</path>
+        <title>Epic Breakdown</title>
+        <section>Story 3.3: Custom Slide Building</section>
+        <snippet>System invokes frontend-design skill with slide intent and theme, generates custom HTML layout, applies theme CSS variables. Output is production-quality for complex diagrams or unique layouts.</snippet>
+      </doc>
+      <doc>
+        <path>notes/prd.md</path>
+        <title>Product Requirements Document</title>
+        <section>Building - FR28</section>
+        <snippet>FR28: System can create custom layouts for complex content. Layout flexibility allows Claude to build fully custom layouts for complex stories.</snippet>
+      </doc>
+      <doc>
+        <path>notes/sprint-artifacts/3-2-template-based-slide-building.md</path>
+        <title>Previous Story - Template-Based Slide Building</title>
+        <section>Dev Agent Record</section>
+        <snippet>Established build-one workflow at .slide-builder/workflows/build-one/. Auto-save script pattern, viewport scaling, data-field attributes all implemented. Test Gate PASSED.</snippet>
+      </doc>
+    </docs>
+    <code>
+      <artifact>
+        <path>.slide-builder/workflows/build-one/workflow.yaml</path>
+        <kind>workflow-config</kind>
+        <symbol>build-one</symbol>
+        <reason>Workflow to extend with Phase 3B custom build path. Contains template_mapping and output locations.</reason>
+      </artifact>
+      <artifact>
+        <path>.slide-builder/workflows/build-one/instructions.md</path>
+        <kind>workflow-instructions</kind>
+        <symbol>Phase 2, Phase 3</symbol>
+        <lines>73-124</lines>
+        <reason>Template decision logic (Phase 2) and template build (Phase 3) - add Phase 3B for custom build. Already has placeholder for custom at line 96.</reason>
+      </artifact>
+      <artifact>
+        <path>.slide-builder/theme.json</path>
+        <kind>config</kind>
+        <symbol>theme</symbol>
+        <reason>Complete theme object to pass to frontend-design skill. Contains colors, typography, shapes required for custom slide generation.</reason>
+      </artifact>
+      <artifact>
+        <path>.slide-builder/status.yaml</path>
+        <kind>state</kind>
+        <symbol>status</symbol>
+        <reason>State file to update after custom build. Pattern: built_count, last_action, history array.</reason>
+      </artifact>
+      <artifact>
+        <path>.slide-builder/templates/01-title.html</path>
+        <kind>template</kind>
+        <symbol>layout-title</symbol>
+        <reason>Reference for HTML slide structure: viewport scaling CSS, contenteditable pattern, auto-save script, data-field attributes.</reason>
+      </artifact>
+      <artifact>
+        <path>.slide-builder/single/plan.yaml</path>
+        <kind>input</kind>
+        <symbol>plan</symbol>
+        <reason>Input file containing intent, key_points, visual_guidance, suggested_template. When suggested_template is "custom", triggers Phase 3B.</reason>
+      </artifact>
+    </code>
+    <dependencies>
+      <npm>
+        <package name="puppeteer" version="^23.0.0" />
+        <package name="googleapis" version="^140.0.0" />
+      </npm>
+      <skills>
+        <skill name="frontend-design">Claude Code skill for generating custom HTML layouts. Receives theme + intent, outputs complete HTML slide.</skill>
+      </skills>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint source="Architecture ADR-002">Hybrid Template + Skill Generation: Template-based builds preferred for speed; custom builds via skill used for novel layouts that don't match templates.</constraint>
+    <constraint source="Architecture ADR-003">HTML Slide Pattern: Custom slides MUST follow same structure as template slides - contenteditable attributes, data-field selectors, theme CSS variables.</constraint>
+    <constraint source="Tech Spec NFR2">Custom slide generation should complete within 30 seconds (frontend-design skill invocation).</constraint>
+    <constraint source="Architecture">Slides MUST render at 1920x1080 (16:9 standard).</constraint>
+    <constraint source="Architecture">All text elements MUST have contenteditable="true" and data-field attributes.</constraint>
+    <constraint source="Architecture">Slides MUST use theme CSS variables from theme.json (--color-primary, --font-heading, etc.).</constraint>
+    <constraint source="Architecture">Slides MUST be self-contained HTML (no external dependencies except Google Fonts).</constraint>
+  </constraints>
+
+  <interfaces>
+    <interface>
+      <name>frontend-design skill</name>
+      <kind>skill-invocation</kind>
+      <signature>
+        Input:
+          - Theme JSON object (complete: colors, typography, shapes)
+          - Slide intent description (from plan.yaml)
+          - Content requirements (key_points, visual_guidance from plan.yaml)
+          - Dimension constraints (1920x1080)
+        Output: Complete HTML slide with embedded CSS
+      </signature>
+      <path>Claude Code built-in skill</path>
+    </interface>
+    <interface>
+      <name>plan.yaml suggested_template field</name>
+      <kind>routing-decision</kind>
+      <signature>
+        When suggested_template === "custom" OR template file missing:
+          → Route to Phase 3B (Custom Build)
+        Else:
+          → Route to Phase 3A (Template Build)
+      </signature>
+      <path>.slide-builder/single/plan.yaml</path>
+    </interface>
+    <interface>
+      <name>Auto-save script pattern</name>
+      <kind>javascript</kind>
+      <signature>
+        const saveEdits = () => {
+          // Captures all [contenteditable] elements with data-field
+          // Saves to localStorage as slide-edits JSON
+        };
+        // Attaches blur and input listeners to contenteditable elements
+        // Restores edits on page load
+      </signature>
+      <path>.slide-builder/workflows/build-one/instructions.md#auto-save-script</path>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>
+      Per Architecture test strategy: Unit tests verify skill invocation with correct context and HTML validation/post-processing. Integration tests verify full /build-one workflow from custom plan to saved slide. Cross-browser tests verify custom slide renders correctly in Chrome, Firefox, Safari. Quality tests perform visual inspection of complex diagrams (Venn, flowchart, matrix) for production-readiness.
+    </standards>
+    <locations>
+      <location>Manual testing via Frontend Test Gate checklist in story file</location>
+      <location>Browser DevTools inspection for contenteditable, data-field, CSS variables</location>
+      <location>Cross-browser testing: Chrome, Firefox, Safari at 1920x1080</location>
+    </locations>
+    <ideas>
+      <idea ac="AC3.3.1">Plan slide with "Venn diagram showing overlap of 3 concepts" - verify frontend-design skill is invoked when suggested_template is "custom"</idea>
+      <idea ac="AC3.3.2">Log/trace skill invocation parameters - verify theme.json, intent, and key_points are passed correctly</idea>
+      <idea ac="AC3.3.3">Inspect generated CSS for theme variable usage (--color-primary, --font-heading, --corner-radius)</idea>
+      <idea ac="AC3.3.4">Open slide in browser, verify viewport meta and body dimensions are 1920x1080</idea>
+      <idea ac="AC3.3.5">Use DevTools to query all text elements - verify each has contenteditable="true" and data-field attribute</idea>
+      <idea ac="AC3.3.6">Visual inspection: Complex Venn diagram should show actual overlapping circles with meaningful content, not placeholder boxes</idea>
+      <idea ac="ALL">Test edge cases: missing template file (fallback to custom), very complex intent (multi-branch flowchart), minimal intent</idea>
+    </ideas>
+  </tests>
+</story-context>

@@ -47,22 +47,22 @@ development_status:
   epic-2: contexted
   2-1-brand-asset-input-collection: done
   2-2-brand-primitive-extraction: done
-  2-3-theme-file-generation: backlog
-  2-4-sample-deck-generation: backlog
-  2-5-theme-feedback-loop: backlog
+  2-3-theme-file-generation: done
+  2-4-sample-deck-generation: done
+  2-5-theme-feedback-loop: done
   epic-2-retrospective: optional
 
   # Epic 3: Single Slide Workflow
-  epic-3: backlog
-  3-1-single-slide-planning: backlog
-  3-2-template-based-slide-building: backlog
-  3-3-custom-slide-building: backlog
-  3-4-slide-preview-in-browser: backlog
-  3-5-text-auto-save: backlog
+  epic-3: contexted
+  3-1-single-slide-planning: done
+  3-2-template-based-slide-building: done
+  3-3-custom-slide-building: done
+  3-4-slide-preview-in-browser: done
+  3-5-text-auto-save: done
   epic-3-retrospective: optional
 
   # Epic 4: Slide Editing
-  epic-4: backlog
+  epic-4: contexted
   4-1-edit-command-invocation: backlog
   4-2-natural-language-layout-changes: backlog
   4-3-edit-preservation-across-regenerations: backlog

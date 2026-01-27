@@ -1,0 +1,320 @@
+<story-context id="2-5-theme-feedback-loop" v="1.0">
+  <metadata>
+    <epicId>2</epicId>
+    <storyId>5</storyId>
+    <title>Theme Feedback Loop</title>
+    <status>drafted</status>
+    <generatedAt>2026-01-27</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>notes/sprint-artifacts/2-5-theme-feedback-loop.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>user</asA>
+    <iWant>to provide high-level feedback ("too corporate", "colors off") and see updated samples</iWant>
+    <soThat>the theme matches my vision without micro-managing details</soThat>
+    <tasks>
+      <task id="1" ac="1">
+        <title>Implement Feedback Interpreter Module</title>
+        <subtasks>
+          <subtask>1.1: Create feedback parsing logic to identify feedback type</subtask>
+          <subtask>1.2: Map gestalt terms to theme adjustments per tech spec table</subtask>
+          <subtask>1.3: Handle ambiguous feedback by asking clarifying questions</subtask>
+          <subtask>1.4: Generate theme modification instructions from parsed feedback</subtask>
+        </subtasks>
+      </task>
+      <task id="2" ac="1,2">
+        <title>Implement Theme Update Logic</title>
+        <subtasks>
+          <subtask>2.1: Apply feedback-derived modifications to theme.json</subtask>
+          <subtask>2.2: Recalculate dependent values (e.g., text colors for contrast)</subtask>
+          <subtask>2.3: Preserve unaffected theme sections</subtask>
+          <subtask>2.4: Save updated theme.json to .slide-builder/theme.json</subtask>
+        </subtasks>
+      </task>
+      <task id="3" ac="2">
+        <title>Implement Sample Deck Regeneration</title>
+        <subtasks>
+          <subtask>3.1: Re-invoke frontend-design skill for all 6 slides with updated theme</subtask>
+          <subtask>3.2: Follow same sample generation flow as Story 2.4</subtask>
+          <subtask>3.3: Overwrite existing samples with regenerated versions</subtask>
+          <subtask>3.4: Report progress during regeneration</subtask>
+        </subtasks>
+      </task>
+      <task id="4" ac="6">
+        <title>Implement Iteration Tracking</title>
+        <subtasks>
+          <subtask>4.1: Track feedback iteration count in status.yaml</subtask>
+          <subtask>4.2: After 3 iterations, check if user still not satisfied</subtask>
+          <subtask>4.3: Offer direct theme.json editing as escape hatch</subtask>
+          <subtask>4.4: Document escape hatch path in completion message</subtask>
+        </subtasks>
+      </task>
+      <task id="5" ac="3,4,5">
+        <title>Implement Template Finalizer Module</title>
+        <subtasks>
+          <subtask>5.1: On approval, create .slide-builder/templates/ directory</subtask>
+          <subtask>5.2: Copy sample files to templates with naming conversion</subtask>
+          <subtask>5.3: Update theme.json layouts section with file references</subtask>
+          <subtask>5.4: Create .slide-builder/theme-history/ directory if not exists</subtask>
+          <subtask>5.5: Save theme snapshot to theme-history/theme-v1-{date}.json</subtask>
+        </subtasks>
+      </task>
+      <task id="6" ac="1-6">
+        <title>Update Setup Workflow Instructions - Phase 5</title>
+        <subtasks>
+          <subtask>6.1: Expand Phase 5 placeholder in setup/instructions.md</subtask>
+          <subtask>6.2: Add feedback loop with iteration counter</subtask>
+          <subtask>6.3: Add action to interpret feedback and modify theme</subtask>
+          <subtask>6.4: Add action to regenerate samples</subtask>
+          <subtask>6.5: Add check for 3+ iterations and escape hatch offer</subtask>
+          <subtask>6.6: Add finalization actions (copy to templates, save history)</subtask>
+          <subtask>6.7: Update status.yaml with phase completion</subtask>
+        </subtasks>
+      </task>
+      <task id="7" ac="1-6">
+        <title>Testing and Validation</title>
+        <subtasks>
+          <subtask>7.1: Test feedback "make it bolder" - verify higher contrast</subtask>
+          <subtask>7.2: Test feedback "too corporate" - verify softer tones</subtask>
+          <subtask>7.3: Test approval flow - verify templates created</subtask>
+          <subtask>7.4: Test 4 iterations - verify escape hatch offered</subtask>
+          <subtask>7.5: Verify theme-history entry created with timestamp</subtask>
+          <subtask>7.6: Verify theme.json layouts section updated</subtask>
+        </subtasks>
+      </task>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <ac id="2.5.1">Given the sample deck is displayed, when the user provides gestalt feedback (e.g., "too corporate", "colors off"), then the system interprets the feedback and adjusts theme primitives</ac>
+    <ac id="2.5.2">The system regenerates the sample deck with updated theme for re-validation</ac>
+    <ac id="2.5.3">Given the user approves the samples ("Perfect"), when they confirm approval, then the theme is locked (saved to theme.json)</ac>
+    <ac id="2.5.4">Upon approval, sample slides are copied to templates/ as layout templates (layout-title.html, layout-list.html, etc.)</ac>
+    <ac id="2.5.5">A version entry is created in theme-history/ with timestamp</ac>
+    <ac id="2.5.6">Given feedback exceeds 3 rounds, then direct theme.json editing is offered as escape hatch</ac>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>notes/sprint-artifacts/tech-spec-epic-2.md</path>
+        <title>Epic 2 Technical Specification</title>
+        <section>Story 2.5: Theme Feedback Loop</section>
+        <snippet>Defines acceptance criteria, feedback interpretation mapping table, and Phase 5 workflow sequence for the feedback loop.</snippet>
+      </doc>
+      <doc>
+        <path>notes/sprint-artifacts/tech-spec-epic-2.md</path>
+        <title>Epic 2 Technical Specification</title>
+        <section>Services and Modules</section>
+        <snippet>Specifies Feedback Interpreter module (parses natural language, maps to theme adjustments) and Template Finalizer module (copies samples to templates, saves theme history).</snippet>
+      </doc>
+      <doc>
+        <path>notes/architecture.md</path>
+        <title>Architecture Document</title>
+        <section>Project Structure</section>
+        <snippet>Defines .slide-builder/ directory structure including templates/ and theme-history/ subdirectories for layout storage and version snapshots.</snippet>
+      </doc>
+      <doc>
+        <path>notes/architecture.md</path>
+        <title>Architecture Document</title>
+        <section>ADR-002: Hybrid Template + Skill Generation</section>
+        <snippet>Templates generated during setup are reused during build phase. Sample slides become layout templates after user approval.</snippet>
+      </doc>
+      <doc>
+        <path>notes/prd.md</path>
+        <title>Product Requirements Document</title>
+        <section>Theme Management (FR5-FR7)</section>
+        <snippet>Users provide high-level feedback on sample deck, system interprets gestalt feedback and updates theme, regenerates sample deck for re-validation.</snippet>
+      </doc>
+      <doc>
+        <path>notes/epics.md</path>
+        <title>Epics and Stories</title>
+        <section>Story 2.5: Theme Feedback Loop</section>
+        <snippet>User story definition and high-level acceptance criteria for feedback loop implementation.</snippet>
+      </doc>
+      <doc>
+        <path>notes/sprint-artifacts/2-4-sample-deck-generation.md</path>
+        <title>Story 2.4: Sample Deck Generation</title>
+        <section>Dev Agent Record</section>
+        <snippet>Previous story learnings: Sample naming uses 01-title.html pattern, all 6 slides exist in .slide-builder/samples/, CSS variables pattern established.</snippet>
+      </doc>
+    </docs>
+
+    <code>
+      <file>
+        <path>.slide-builder/workflows/setup/instructions.md</path>
+        <kind>workflow-instructions</kind>
+        <symbol>Phase 5 placeholder (step n="5")</symbol>
+        <lines>1499-1518</lines>
+        <reason>Phase 5 feedback loop placeholder needs expansion with full feedback interpretation, iteration tracking, and finalization logic</reason>
+      </file>
+      <file>
+        <path>.slide-builder/workflows/setup/workflow.yaml</path>
+        <kind>workflow-config</kind>
+        <symbol>setup workflow definition</symbol>
+        <lines>all</lines>
+        <reason>Main workflow configuration that orchestrates the setup process including the feedback loop phase</reason>
+      </file>
+      <file>
+        <path>.slide-builder/theme.json</path>
+        <kind>data-file</kind>
+        <symbol>theme configuration</symbol>
+        <lines>all</lines>
+        <reason>Theme file that will be modified based on feedback. Contains colors, typography, shapes, layouts, and personality sections.</reason>
+      </file>
+      <file>
+        <path>.slide-builder/status.yaml</path>
+        <kind>state-file</kind>
+        <symbol>workflow state tracking</symbol>
+        <lines>all</lines>
+        <reason>Status file needs iteration tracking field added for feedback loop count</reason>
+      </file>
+      <file>
+        <path>.slide-builder/samples/01-title.html</path>
+        <kind>sample-slide</kind>
+        <symbol>title slide template</symbol>
+        <lines>all</lines>
+        <reason>Sample slide that will be regenerated with theme updates and copied to templates/ on approval</reason>
+      </file>
+      <file>
+        <path>.slide-builder/samples/02-agenda.html</path>
+        <kind>sample-slide</kind>
+        <symbol>agenda slide template</symbol>
+        <lines>all</lines>
+        <reason>Sample slide for list/agenda layout, regenerated during feedback loop</reason>
+      </file>
+      <file>
+        <path>.slide-builder/samples/03-flow.html</path>
+        <kind>sample-slide</kind>
+        <symbol>flow slide template</symbol>
+        <lines>all</lines>
+        <reason>Sample slide for process flow layout, regenerated during feedback loop</reason>
+      </file>
+      <file>
+        <path>.slide-builder/samples/04-comparison.html</path>
+        <kind>sample-slide</kind>
+        <symbol>comparison slide template</symbol>
+        <lines>all</lines>
+        <reason>Sample slide for comparison layout, regenerated during feedback loop</reason>
+      </file>
+      <file>
+        <path>.slide-builder/samples/05-callout.html</path>
+        <kind>sample-slide</kind>
+        <symbol>callout slide template</symbol>
+        <lines>all</lines>
+        <reason>Sample slide for callout/insight layout, regenerated during feedback loop</reason>
+      </file>
+      <file>
+        <path>.slide-builder/samples/06-technical.html</path>
+        <kind>sample-slide</kind>
+        <symbol>technical slide template</symbol>
+        <lines>all</lines>
+        <reason>Sample slide for code/technical layout, regenerated during feedback loop</reason>
+      </file>
+    </code>
+
+    <dependencies>
+      <node>
+        <package>puppeteer</package>
+        <version>^23.0.0</version>
+        <usage>Headless browser for HTML-to-image conversion during export</usage>
+      </node>
+      <node>
+        <package>googleapis</package>
+        <version>^140.0.0</version>
+        <usage>Google Slides API integration for export workflow</usage>
+      </node>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint source="architecture.md">Per ADR-002: Templates generated during setup are reused during build phase - do not create new template patterns</constraint>
+    <constraint source="architecture.md">theme-history/ directory stores version snapshots with timestamp naming: theme-v{n}-{date}.json</constraint>
+    <constraint source="prd.md">Per NFR5: Theme feedback loop iteration should "feel responsive" - minimize wait time between feedback and regeneration</constraint>
+    <constraint source="prd.md">Per NFR15: Theme changes must not corrupt existing slides - preserve structure while updating values</constraint>
+    <constraint source="prd.md">Target 1-3 feedback rounds before approval - offer escape hatch after 3 iterations</constraint>
+    <constraint source="tech-spec-epic-2.md">Use frontend-design skill for slide regeneration - same pattern as Story 2.4 Phase 4</constraint>
+    <constraint source="tech-spec-epic-2.md">Template naming convention: 01-title.html → layout-title.html (use actual sample filenames, not spec'd sample-1-* pattern)</constraint>
+    <constraint source="workflow.xml">All workflow instructions must follow BMAD workflow.xml execution patterns including step/action/check tags</constraint>
+  </constraints>
+
+  <interfaces>
+    <interface>
+      <name>theme.json schema</name>
+      <kind>data-schema</kind>
+      <signature>{ meta: {name, version, created, sources, locked, approved}, colors: {primary, secondary, accent, background: {default, alt}, text: {heading, body}, semantic: {...}}, typography: {fonts: {heading, body, mono}, scale: {hero, h1, h2, h3, body, small}, weights: {...}}, shapes: {boxes: {...}, arrows: {...}, lines: {...}}, layouts: {...}, personality: {classification, confidence, notes} }</signature>
+      <path>.slide-builder/theme.json</path>
+    </interface>
+    <interface>
+      <name>status.yaml schema</name>
+      <kind>data-schema</kind>
+      <signature>{ mode, phase, workflow_version, assets: {...}, extraction: {...}, theme: {file, status, personality, confidence, approved}, templates: {directory, count, files: []}, last_action, last_modified, history: [] }</signature>
+      <path>.slide-builder/status.yaml</path>
+    </interface>
+    <interface>
+      <name>Feedback Interpretation Mapping</name>
+      <kind>logic-mapping</kind>
+      <signature>
+        "too corporate" → softer colors (+10% saturation reduction), larger corner radius (+4px), warmer text colors
+        "not bold enough" → higher contrast (darken primary by 15%), reduce corner radius (-4px), increase font weights
+        "colors off" → re-weight extraction sources, ask clarifying question
+        "too busy" → increase whitespace (larger margins), reduce shadow intensity
+        "too plain" → add accent color usage, increase shadow depth
+        "fonts don't feel right" → re-analyze sources, ask for preference
+      </signature>
+      <path>notes/sprint-artifacts/tech-spec-epic-2.md</path>
+    </interface>
+    <interface>
+      <name>Sample to Template Filename Mapping</name>
+      <kind>naming-convention</kind>
+      <signature>
+        01-title.html → layout-title.html
+        02-agenda.html → layout-list.html
+        03-flow.html → layout-flow.html
+        04-comparison.html → layout-columns-2.html
+        05-callout.html → layout-callout.html
+        06-technical.html → layout-code.html
+      </signature>
+      <path>.slide-builder/samples/ → .slide-builder/templates/</path>
+    </interface>
+    <interface>
+      <name>frontend-design skill invocation</name>
+      <kind>skill-api</kind>
+      <signature>Skill(skill="frontend-design") - loads professional design expertise for slide generation</signature>
+      <path>.slide-builder/workflows/setup/instructions.md (step 4.2.0)</path>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>
+      This project uses BMAD workflow-based validation. Testing is primarily manual via the Frontend Test Gate pattern:
+      1. Prerequisites verification (prior story completion, file existence)
+      2. Manual browser testing following test steps table
+      3. Success criteria validation with checklist
+      4. Feedback questions for qualitative assessment
+
+      No automated test framework is currently configured (package.json shows "no test specified").
+      Testing validates workflow execution and visual output quality.
+    </standards>
+    <locations>
+      <location>notes/sprint-artifacts/*.md (Frontend Test Gate sections)</location>
+      <location>.slide-builder/samples/ (visual validation of generated slides)</location>
+      <location>.slide-builder/templates/ (post-approval template verification)</location>
+      <location>.slide-builder/theme-history/ (version history verification)</location>
+    </locations>
+    <ideas>
+      <idea ac="2.5.1">Test feedback "make it bolder" - verify theme.json shows higher contrast values (darker primary, heavier weights)</idea>
+      <idea ac="2.5.1">Test feedback "too corporate" - verify theme.json shows softer colors, larger corner radius</idea>
+      <idea ac="2.5.1">Test feedback "colors off" - verify system asks clarifying question before adjusting</idea>
+      <idea ac="2.5.2">Verify all 6 sample slides regenerate with updated CSS variables after theme modification</idea>
+      <idea ac="2.5.2">Verify regeneration preserves slide structure while updating visual styling</idea>
+      <idea ac="2.5.3">Test approval with "Perfect" response - verify theme.json meta.locked = true and meta.approved set</idea>
+      <idea ac="2.5.4">Verify .slide-builder/templates/ directory created with 6 layout files using correct naming</idea>
+      <idea ac="2.5.4">Verify template content matches final sample content (CSS variables, structure)</idea>
+      <idea ac="2.5.5">Verify .slide-builder/theme-history/theme-v1-{date}.json created with full theme snapshot</idea>
+      <idea ac="2.5.6">Test 4 feedback iterations - verify escape hatch message offered for direct JSON editing</idea>
+      <idea ac="2.5.6">Verify iteration count tracked in status.yaml during feedback loop</idea>
+    </ideas>
+  </tests>
+</story-context>

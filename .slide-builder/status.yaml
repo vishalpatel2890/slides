@@ -1,54 +1,74 @@
 # Slide Builder - Workflow Status
 # This file tracks the current state of slide generation workflows
-# Human-readable for manual inspection and recovery
 
 # Current operating mode
-mode: setup
+mode: single
+
+# Single slide tracking
+current_slide: 1
+total_slides: 1
+built_count: 1
 
 # Setup workflow tracking
-phase: sample-review
+phase: complete
 workflow_version: "1.0"
 
 # Assets collected
 assets:
   website_url: https://amperity.com
-  pdf_paths:
-    - /Users/vishalpatel/Downloads/1-10.pdf
-    - /Users/vishalpatel/Downloads/11-20.pdf
-    - /Users/vishalpatel/Downloads/21-30.pdf
-    - /Users/vishalpatel/Downloads/31-40.pdf
-    - /Users/vishalpatel/Downloads/41-50.pdf
-    - /Users/vishalpatel/Downloads/51-67.pdf
+  pdf_paths: []
   image_paths: []
+  brand_description: "Bold & innovative - Tech-forward, startup energy, stands out from competition"
 
 # Extraction status
 extraction:
   website_analysis: complete
-  pdf_analysis: complete
+  pdf_analysis: skipped
   image_analysis: skipped
 
 # Theme status
 theme:
   file: .slide-builder/theme.json
-  status: generated
-  personality: bold-minimal
+  status: locked
+  personality: bold
   confidence: 0.85
+  approved: "2026-01-27"
+
+# Template files
+templates:
+  directory: .slide-builder/templates/
+  count: 6
+  files:
+    - 01-title.html
+    - 02-agenda.html
+    - 03-flow.html
+    - 04-comparison.html
+    - 05-callout.html
+    - 06-technical.html
 
 # Last action tracking
-last_action: "Sample slides generated for review"
-last_modified: "2026-01-27T04:10:00Z"
+last_action: "Built custom slide via frontend-design skill"
+last_modified: "2026-01-27T20:15:00Z"
 
 # Action history
 history:
-  - action: "Status file initialized"
-    timestamp: "2026-01-26T00:00:00Z"
-  - action: "Setup workflow started"
-    timestamp: "2026-01-26T21:25:00Z"
-  - action: "Assets collected (1 website, 6 PDFs)"
-    timestamp: "2026-01-26T21:26:00Z"
+  - action: "Setup workflow started fresh"
+    timestamp: "2026-01-27T12:00:00Z"
+  - action: "Assets collected (1 website)"
+    timestamp: "2026-01-27T12:00:00Z"
   - action: "Brand primitives extracted"
-    timestamp: "2026-01-26T21:28:00Z"
-  - action: "Theme.json generated"
-    timestamp: "2026-01-26T21:30:00Z"
-  - action: "Font updated from Roboto to Outfit"
-    timestamp: "2025-01-27T04:00:00Z"
+    timestamp: "2026-01-27T12:05:00Z"
+  - action: "Theme.json generated with Outfit font"
+    timestamp: "2026-01-27T12:10:00Z"
+  - action: "Sample slides generated for review"
+    timestamp: "2026-01-27T12:15:00Z"
+  - action: "Theme approved and locked"
+    timestamp: "2026-01-27T12:20:00Z"
+  - action: "Single slide planned"
+    timestamp: "2026-01-27T18:45:00Z"
+  - action: "Built slide using layout-title template"
+    timestamp: "2026-01-27T19:30:00Z"
+  - action: "Custom Venn diagram slide planned"
+    timestamp: "2026-01-27T20:00:00Z"
+  - action: "Built custom slide via frontend-design skill"
+    timestamp: "2026-01-27T20:15:00Z"

@@ -1,5 +1,5 @@
 # Plan One Workflow - Single Slide Planning
-# Captures intent for a single slide
+# Captures intent for a single slide through 5 phases
 name: plan-one
 description: "Plan a single slide by capturing user intent and content requirements"
 author: "Slide Builder"
@@ -11,8 +11,66 @@ installed_path: "{project-root}/.slide-builder/workflows/plan-one"
 instructions: "{installed_path}/instructions.md"
 
 # State management
+theme_file: "{project-root}/.slide-builder/theme.json"
 plan_file: "{project-root}/.slide-builder/single/plan.yaml"
 status_file: "{project-root}/.slide-builder/status.yaml"
+single_dir: "{project-root}/.slide-builder/single"
+
+# Template matching keywords (for reference)
+template_keywords:
+  layout-title:
+    - title
+    - intro
+    - opening
+    - welcome
+    - cover
+  layout-list:
+    - list
+    - bullets
+    - points
+    - agenda
+    - items
+    - features
+  layout-flow:
+    - flow
+    - process
+    - timeline
+    - steps
+    - sequence
+    - pipeline
+    - workflow
+  layout-columns-2:
+    - compare
+    - vs
+    - versus
+    - two
+    - side-by-side
+    - before
+    - after
+    - pros
+    - cons
+  layout-columns-3:
+    - three
+    - triad
+    - options
+    - pillars
+    - trio
+  layout-callout:
+    - key
+    - insight
+    - callout
+    - cta
+    - highlight
+    - quote
+    - stat
+    - metric
+  layout-code:
+    - code
+    - technical
+    - api
+    - snippet
+    - demo
+    - terminal
 
 # Variables
 variables:

@@ -1,0 +1,237 @@
+<story-context id="3-1-single-slide-planning" v="1.0">
+  <metadata>
+    <epicId>3</epicId>
+    <storyId>1</storyId>
+    <title>Single Slide Planning</title>
+    <status>drafted</status>
+    <generatedAt>2026-01-27</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>notes/sprint-artifacts/3-1-single-slide-planning.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>Solutions Consultant</asA>
+    <iWant>to describe a single slide I need in natural language</iWant>
+    <soThat>I can quickly get one slide without planning a full deck</soThat>
+    <tasks>
+      <task id="1" ac="1,5">Create plan-one Workflow Structure
+        <subtask>1.1: Create `.slide-builder/workflows/plan-one/` directory</subtask>
+        <subtask>1.2: Create `workflow.yaml` with name, description, instructions path</subtask>
+        <subtask>1.3: Create `instructions.md` skeleton with workflow phases</subtask>
+      </task>
+      <task id="2" ac="1,5">Implement Theme Verification (Phase 1)
+        <subtask>2.1: Add step to check for `.slide-builder/theme.json` existence</subtask>
+        <subtask>2.2: If theme missing, output error: "No theme found. Run /setup first."</subtask>
+        <subtask>2.3: If theme found, load theme for context and continue</subtask>
+        <subtask>2.4: Add unit test: verify error when theme.json missing</subtask>
+      </task>
+      <task id="3" ac="1,2">Implement Intent Capture (Phase 2)
+        <subtask>3.1: Add prompt: "Describe the slide you need"</subtask>
+        <subtask>3.2: Capture user's natural language description</subtask>
+        <subtask>3.3: Parse description for key elements: purpose, content type, visual elements</subtask>
+        <subtask>3.4: Add unit test: verify intent parsed from various descriptions</subtask>
+      </task>
+      <task id="4" ac="2">Implement Template Matching (Phase 3)
+        <subtask>4.1: Scan intent for template-matching keywords</subtask>
+        <subtask>4.2: Return template name if match found, "custom" if no match</subtask>
+        <subtask>4.3: Log decision in suggested_template field</subtask>
+        <subtask>4.4: Add unit test: verify keyword matching logic</subtask>
+      </task>
+      <task id="5" ac="2">Implement Confirmation (Phase 4)
+        <subtask>5.1: Display understanding summary with slide purpose</subtask>
+        <subtask>5.2: Show key content elements extracted</subtask>
+        <subtask>5.3: Show suggested template (or "custom layout")</subtask>
+        <subtask>5.4: Ask: "Is this correct? (y/n)"</subtask>
+        <subtask>5.5: If no, return to Phase 2 for clarification</subtask>
+        <subtask>5.6: If yes, continue to save</subtask>
+      </task>
+      <task id="6" ac="3,4">Implement State Persistence (Phase 5)
+        <subtask>6.1: Create `.slide-builder/single/` directory if not exists</subtask>
+        <subtask>6.2: Save plan.yaml with schema (created, intent, suggested_template, key_points, etc.)</subtask>
+        <subtask>6.3: Update status.yaml: mode: "single", last_action, history</subtask>
+        <subtask>6.4: Display: "Plan saved. Run /build-one to generate."</subtask>
+        <subtask>6.5: Add unit test: verify plan.yaml and status.yaml content</subtask>
+      </task>
+      <task id="7" ac="1">Register Slash Command
+        <subtask>7.1: Add `/sb:plan-one` command registration in BMAD skill configuration</subtask>
+        <subtask>7.2: Verify command invokes plan-one workflow</subtask>
+        <subtask>7.3: Add integration test: full /plan-one workflow</subtask>
+      </task>
+      <task id="8" ac="1-5">Testing and Validation
+        <subtask>8.1: Test with existing theme.json</subtask>
+        <subtask>8.2: Test with missing theme.json (error case)</subtask>
+        <subtask>8.3: Test various intent descriptions (architecture, list, flow, custom)</subtask>
+        <subtask>8.4: Verify plan.yaml schema matches tech spec</subtask>
+        <subtask>8.5: Verify status.yaml updates correctly</subtask>
+        <subtask>8.6: Run Frontend Test Gate checklist</subtask>
+      </task>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <ac id="3.1.1">Given a theme exists (theme.json), when the user runs `/plan-one`, then they are prompted to describe the slide they want</ac>
+    <ac id="3.1.2">Given the user describes their slide (e.g., "An architecture diagram showing our 3-tier system"), when the description is submitted, then the system confirms understanding by summarizing: slide purpose, key content elements, suggested layout template (or "custom")</ac>
+    <ac id="3.1.3">The intent is saved to `.slide-builder/single/plan.yaml` with all required fields (intent, suggested_template, key_points, created timestamp)</ac>
+    <ac id="3.1.4">status.yaml is updated with mode: "single" and last_action recorded</ac>
+    <ac id="3.1.5">Given no theme exists, when user runs `/plan-one`, then error message directs them to run `/setup` first</ac>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>notes/sprint-artifacts/tech-spec-epic-3.md</path>
+        <title>Epic 3 Technical Specification</title>
+        <section>Services and Modules - Intent Capture</section>
+        <snippet>Prompts user to describe their slide need in natural language. Parses description for key elements: purpose, content type, visual elements. Confirms understanding by summarizing back to user.</snippet>
+      </doc>
+      <doc>
+        <path>notes/sprint-artifacts/tech-spec-epic-3.md</path>
+        <title>Epic 3 Technical Specification</title>
+        <section>Workflows and Sequencing - /plan-one</section>
+        <snippet>5-phase workflow: Theme Verification → Intent Capture → Template Matching → Confirmation → State Persistence. Clear error handling for missing theme.</snippet>
+      </doc>
+      <doc>
+        <path>notes/sprint-artifacts/tech-spec-epic-3.md</path>
+        <title>Epic 3 Technical Specification</title>
+        <section>Data Models - plan.yaml (Single Slide Mode)</section>
+        <snippet>Schema includes: created, last_modified, intent, suggested_template, audience, audience_knowledge_level, context, key_points, visual_guidance, tone, technical_depth, include_elements, exclude_elements.</snippet>
+      </doc>
+      <doc>
+        <path>notes/architecture.md</path>
+        <title>Slide Builder Architecture</title>
+        <section>Pattern 2: Template-or-Custom Decision</section>
+        <snippet>Parse intent for content type keywords. Match against template patterns. If match found → use template. If no match → invoke frontend-design skill.</snippet>
+      </doc>
+      <doc>
+        <path>notes/architecture.md</path>
+        <title>Slide Builder Architecture</title>
+        <section>Pattern 4: Dual-Mode State Management</section>
+        <snippet>Mode detection based on plan.yaml existence. Single mode uses single/ directory, completely isolated from deck mode. Status.yaml tracks current mode.</snippet>
+      </doc>
+      <doc>
+        <path>notes/architecture.md</path>
+        <title>Slide Builder Architecture</title>
+        <section>State File Patterns - status.yaml</section>
+        <snippet>Tracks mode (deck|single|null), current_slide, total_slides, built_count, last_action, last_modified timestamp, and history array.</snippet>
+      </doc>
+      <doc>
+        <path>notes/prd.md</path>
+        <title>Slide Builder PRD</title>
+        <section>Planning - Single Slide (FR12-15)</section>
+        <snippet>FR12: Users can initiate single-slide planning via /plan-one. FR14: System confirms understanding and captures slide intent. FR15: Single-slide plan persists for building.</snippet>
+      </doc>
+      <doc>
+        <path>.slide-builder/CONVENTIONS.md</path>
+        <title>Slide Builder Conventions</title>
+        <section>Command-to-Workflow Mapping</section>
+        <snippet>/sb:plan-one maps to .slide-builder/workflows/plan-one/. All workflows follow BMAD pattern: Load workflow.yaml, read instructions.md, execute steps, update status.yaml.</snippet>
+      </doc>
+    </docs>
+    <code>
+      <file>
+        <path>.slide-builder/workflows/plan-one/workflow.yaml</path>
+        <kind>workflow-config</kind>
+        <symbol>plan-one workflow</symbol>
+        <lines>1-23</lines>
+        <reason>Existing workflow configuration - defines installed_path, instructions path, plan_file location (.slide-builder/single/plan.yaml), status_file. Foundation for implementation.</reason>
+      </file>
+      <file>
+        <path>.slide-builder/workflows/plan-one/instructions.md</path>
+        <kind>workflow-instructions</kind>
+        <symbol>plan-one instructions</symbol>
+        <lines>1-78</lines>
+        <reason>Existing instructions skeleton with 4-step workflow (verify theme, capture intent, confirm understanding, save plan). Needs expansion per tech spec phases.</reason>
+      </file>
+      <file>
+        <path>.slide-builder/status.yaml</path>
+        <kind>state-file</kind>
+        <symbol>status.yaml</symbol>
+        <lines>1-62</lines>
+        <reason>Existing status tracking with mode, phase, assets, extraction, theme status, templates, last_action, history. Needs mode: "single" support added.</reason>
+      </file>
+      <file>
+        <path>.slide-builder/theme.json</path>
+        <kind>config-file</kind>
+        <symbol>theme.json</symbol>
+        <lines>1-91</lines>
+        <reason>Theme primitives to verify exists before /plan-one runs. Contains colors, typography, shapes, layouts - used as context for intent matching.</reason>
+      </file>
+      <file>
+        <path>.slide-builder/templates/01-title.html</path>
+        <kind>template</kind>
+        <symbol>layout-title</symbol>
+        <lines>1-126</lines>
+        <reason>Example template showing HTML slide structure with CSS variables, 1920x1080 viewport. Reference for template matching decision.</reason>
+      </file>
+    </code>
+    <dependencies>
+      <node>
+        <package>puppeteer</package>
+        <version>^23.0.0</version>
+        <note>Not used in this story - HTML-to-image conversion for Epic 7</note>
+      </node>
+      <node>
+        <package>googleapis</package>
+        <version>^140.0.0</version>
+        <note>Not used in this story - Google Slides API for Epic 7</note>
+      </node>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint source="tech-spec">Theme.json MUST exist before /plan-one runs - check and error if missing</constraint>
+    <constraint source="tech-spec">plan.yaml saved to .slide-builder/single/plan.yaml with all required fields</constraint>
+    <constraint source="tech-spec">status.yaml updated with mode: "single", last_action, history entry</constraint>
+    <constraint source="architecture">Template matching uses keyword scan: title/intro/opening → layout-title, list/bullets/points/agenda → layout-list, flow/process/timeline/steps → layout-flow, etc.</constraint>
+    <constraint source="architecture">If no template keywords match, set suggested_template: "custom"</constraint>
+    <constraint source="architecture">All state files (YAML/JSON) must be human-readable per NFR17</constraint>
+    <constraint source="prd">NFR2: Intent parsing and plan save should complete within reasonable time (&lt;2 seconds)</constraint>
+    <constraint source="conventions">Workflow follows BMAD pattern: load workflow.yaml, read instructions.md, execute steps in order</constraint>
+    <constraint source="conventions">Command registered as /sb:plan-one in .claude/commands/sb/plan-one.md</constraint>
+  </constraints>
+
+  <interfaces>
+    <interface>
+      <name>Theme Loader</name>
+      <kind>file-read</kind>
+      <signature>Read .slide-builder/theme.json → theme object</signature>
+      <path>.slide-builder/theme.json</path>
+    </interface>
+    <interface>
+      <name>Plan Writer</name>
+      <kind>file-write</kind>
+      <signature>Write plan.yaml to .slide-builder/single/plan.yaml</signature>
+      <path>.slide-builder/single/plan.yaml</path>
+    </interface>
+    <interface>
+      <name>Status Updater</name>
+      <kind>file-update</kind>
+      <signature>Update status.yaml with mode, last_action, history</signature>
+      <path>.slide-builder/status.yaml</path>
+    </interface>
+    <interface>
+      <name>Template Matcher</name>
+      <kind>function</kind>
+      <signature>matchTemplate(intent: string) → templateName | "custom"</signature>
+      <path>inline in instructions.md</path>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>Manual verification workflow - run /sb:plan-one command, verify prompts, check output files. Unit tests embedded as subtasks (2.4, 3.4, 4.4, 6.5). Frontend Test Gate checklist provided in story with 11 test steps.</standards>
+    <locations>
+      <location>Story file contains Frontend Test Gate with test steps table</location>
+      <location>.slide-builder/single/plan.yaml - verify created with correct schema</location>
+      <location>.slide-builder/status.yaml - verify mode: "single" after run</location>
+    </locations>
+    <ideas>
+      <idea ac="3.1.1">Run /plan-one with theme.json present → verify "Describe the slide you need" prompt appears</idea>
+      <idea ac="3.1.2">Describe "An architecture diagram showing 3-tier system" → verify summary shows purpose, elements, suggested template (layout-flow)</idea>
+      <idea ac="3.1.2">Describe "A bullet list of key features" → verify suggested template is layout-list</idea>
+      <idea ac="3.1.2">Describe "A Venn diagram showing concept overlap" → verify suggested template is "custom"</idea>
+      <idea ac="3.1.3">After confirmation, verify plan.yaml created with intent, suggested_template, key_points, created timestamp</idea>
+      <idea ac="3.1.4">After save, verify status.yaml shows mode: "single" and last_action: "Single slide planned"</idea>
+      <idea ac="3.1.5">Remove theme.json, run /plan-one → verify error "No theme found. Run /setup first."</idea>
+    </ideas>
+  </tests>
+</story-context>

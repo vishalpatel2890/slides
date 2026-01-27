@@ -1,0 +1,280 @@
+<story-context id="2-4-sample-deck-generation" v="1.0">
+  <metadata>
+    <epicId>2</epicId>
+    <storyId>4</storyId>
+    <title>Sample Deck Generation</title>
+    <status>drafted</status>
+    <generatedAt>2026-01-27</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>notes/sprint-artifacts/2-4-sample-deck-generation.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>user</asA>
+    <iWant>to see a 6-slide sample deck demonstrating my theme</iWant>
+    <soThat>I can visually validate the extracted brand before building real slides</soThat>
+    <tasks>
+      <task id="1" acs="1,2">
+        <title>Implement Sample Generator Module</title>
+        <subtasks>
+          <subtask>1.1: Create logic to read theme.json from `.slide-builder/theme.json`</subtask>
+          <subtask>1.2: Define 6 sample slide specifications matching tech spec table</subtask>
+          <subtask>1.3: Create sample content appropriate for each slide type</subtask>
+        </subtasks>
+      </task>
+      <task id="2" acs="1,2,4">
+        <title>Implement frontend-design Skill Invocation</title>
+        <subtasks>
+          <subtask>2.1: Invoke frontend-design skill for each of 6 slides with theme context</subtask>
+          <subtask>2.2: Pass full theme.json to skill for CSS variable usage</subtask>
+          <subtask>2.3: Pass slide type and sample content as context</subtask>
+          <subtask>2.4: Report progress after each slide generation</subtask>
+        </subtasks>
+      </task>
+      <task id="3" acs="3,4">
+        <title>Implement HTML Slide Structure</title>
+        <subtasks>
+          <subtask>3.1: Ensure generated HTML includes viewport meta tag for 1920x1080</subtask>
+          <subtask>3.2: Ensure CSS :root block includes all theme CSS variables</subtask>
+          <subtask>3.3: Ensure slide content uses CSS variables (not hardcoded values)</subtask>
+          <subtask>3.4: Add data-slide-id attribute to slide container</subtask>
+        </subtasks>
+      </task>
+      <task id="4" acs="1,5">
+        <title>Implement File Output</title>
+        <subtasks>
+          <subtask>4.1: Create `.slide-builder/samples/` directory if not exists</subtask>
+          <subtask>4.2: Save each slide to correct filename: `sample-{n}-{type}.html`</subtask>
+          <subtask>4.3: Verify all 6 files written successfully</subtask>
+          <subtask>4.4: Output file paths in completion message</subtask>
+        </subtasks>
+      </task>
+      <task id="5" acs="1,2,3,4,5">
+        <title>Update Setup Workflow Instructions - Phase 4</title>
+        <subtasks>
+          <subtask>5.1: Expand Phase 4 placeholder in instructions.md</subtask>
+          <subtask>5.2: Add action to load theme.json</subtask>
+          <subtask>5.3: Add loop to invoke frontend-design skill 6 times</subtask>
+          <subtask>5.4: Add action to save each slide to samples/ directory</subtask>
+          <subtask>5.5: Add progress output after each slide</subtask>
+          <subtask>5.6: Add completion output with all file paths</subtask>
+          <subtask>5.7: Update status.yaml with phase: "sample-generation-complete"</subtask>
+        </subtasks>
+      </task>
+      <task id="6" acs="1,2,3,4,5">
+        <title>Testing and Validation</title>
+        <subtasks>
+          <subtask>6.1: Test with complete theme.json from Phase 3</subtask>
+          <subtask>6.2: Verify all 6 files created in samples/ directory</subtask>
+          <subtask>6.3: Open each slide in browser, verify renders correctly</subtask>
+          <subtask>6.4: Check 1920x1080 dimensions via DevTools</subtask>
+          <subtask>6.5: Inspect CSS variables in DevTools, verify theme values used</subtask>
+          <subtask>6.6: Verify each slide tests its designated primitives</subtask>
+        </subtasks>
+      </task>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <criterion id="AC2.4.1">Given a theme.json has been generated, when sample deck generation runs, then 6 HTML slides are created in `.slide-builder/samples/`</criterion>
+    <criterion id="AC2.4.2">Sample slides include: title (hero typography, primary color), list (body text, bullets), flow (arrows, boxes), columns (multiple box styles), callout (accent color, emphasis), code (mono font, alt background)</criterion>
+    <criterion id="AC2.4.3">Each slide renders at 1920x1080 (16:9)</criterion>
+    <criterion id="AC2.4.4">Each slide uses theme primitives via CSS variables</criterion>
+    <criterion id="AC2.4.5">Slides can be opened in browser for preview</criterion>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>notes/sprint-artifacts/tech-spec-epic-2.md</path>
+        <title>Epic 2 Technical Specification</title>
+        <section>Story 2.4: Sample Deck Generation</section>
+        <snippet>Invokes frontend-design skill 6 times with theme context. Each slide targets specific primitives per PRD sample deck table.</snippet>
+      </doc>
+      <doc>
+        <path>notes/architecture.md</path>
+        <title>System Architecture</title>
+        <section>HTML Slide Pattern, Project Structure</section>
+        <snippet>Slides are self-contained HTML files using CSS variables from theme.json. Output to .slide-builder/samples/ directory.</snippet>
+      </doc>
+      <doc>
+        <path>notes/epics.md</path>
+        <title>Epics and Stories</title>
+        <section>Epic 2: Theme Creation, Story 2.4</section>
+        <snippet>Generate 6-slide sample deck demonstrating all theme primitives for visual validation.</snippet>
+      </doc>
+      <doc>
+        <path>notes/prd.md</path>
+        <title>Product Requirements Document</title>
+        <section>Sample Deck Contents (FR4)</section>
+        <snippet>6 slides testing: title/hero typography, list/bullets, flow/arrows, columns/comparison, callout/accent, code/mono font.</snippet>
+      </doc>
+      <doc>
+        <path>notes/sprint-artifacts/2-3-theme-file-generation.md</path>
+        <title>Previous Story: Theme File Generation</title>
+        <section>Dev Agent Record</section>
+        <snippet>theme.json structure complete with meta, colors, typography, shapes, layouts placeholder, personality. CSS variable mapping established.</snippet>
+      </doc>
+    </docs>
+
+    <code>
+      <file>
+        <path>.slide-builder/workflows/setup/instructions.md</path>
+        <kind>workflow</kind>
+        <symbol>Phase 4 placeholder (Step n="4")</symbol>
+        <lines>1276-1293</lines>
+        <reason>Main file to modify - Phase 4 placeholder needs expansion with sample generation steps</reason>
+      </file>
+      <file>
+        <path>.slide-builder/workflows/setup/workflow.yaml</path>
+        <kind>config</kind>
+        <symbol>setup workflow definition</symbol>
+        <lines>all</lines>
+        <reason>Workflow configuration including required_skills reference</reason>
+      </file>
+      <file>
+        <path>.slide-builder/theme.json</path>
+        <kind>data</kind>
+        <symbol>theme configuration</symbol>
+        <lines>all</lines>
+        <reason>INPUT: Theme data to read for CSS variable generation. Contains colors, typography, shapes.</reason>
+      </file>
+      <file>
+        <path>.slide-builder/status.yaml</path>
+        <kind>state</kind>
+        <symbol>workflow status tracking</symbol>
+        <lines>all</lines>
+        <reason>Status file to update with phase: "sample-generation-complete"</reason>
+      </file>
+      <file>
+        <path>.slide-builder/samples/01-title.html</path>
+        <kind>template</kind>
+        <symbol>sample title slide</symbol>
+        <lines>all</lines>
+        <reason>EXISTING REFERENCE: Example implementation showing HTML structure, CSS variables pattern, 1920x1080 viewport. NOTE: Current naming uses 01-title.html, story spec uses sample-1-title.html - verify naming convention.</reason>
+      </file>
+      <file>
+        <path>.slide-builder/CONVENTIONS.md</path>
+        <kind>documentation</kind>
+        <symbol>project conventions</symbol>
+        <lines>all</lines>
+        <reason>Reference for coding patterns and file naming conventions</reason>
+      </file>
+    </code>
+
+    <dependencies>
+      <node>
+        <package>puppeteer</package>
+        <version>^23.0.0</version>
+        <usage>Browser automation for potential screenshot/preview functionality</usage>
+      </node>
+      <node>
+        <package>googleapis</package>
+        <version>^140.0.0</version>
+        <usage>Google Slides export (Epic 7 - not used in this story)</usage>
+      </node>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint category="architecture">
+      <rule>ADR-001: 100% alignment with BMAD workflow pattern. Steps must use &lt;action&gt;, &lt;check&gt;, &lt;output&gt; tags</rule>
+    </constraint>
+    <constraint category="architecture">
+      <rule>ADR-002: Hybrid approach - samples become layout templates after user approval (Story 2.5)</rule>
+    </constraint>
+    <constraint category="output">
+      <rule>Slides must be self-contained HTML files with no external dependencies except Google Fonts</rule>
+    </constraint>
+    <constraint category="output">
+      <rule>HTML must include viewport meta tag for 1920x1080 and CSS :root block with all theme variables</rule>
+    </constraint>
+    <constraint category="skill">
+      <rule>Must invoke frontend-design skill via Skill tool call for each slide generation. Skill provides design expertise.</rule>
+    </constraint>
+    <constraint category="naming">
+      <rule>NOTE: Existing samples use numeric prefix naming (01-title.html). Tech spec specifies sample-{n}-{type}.html. Verify and standardize naming convention.</rule>
+    </constraint>
+    <constraint category="performance">
+      <rule>NFR1: Sample deck generation should complete within reasonable time</rule>
+    </constraint>
+    <constraint category="compatibility">
+      <rule>NFR18: HTML slides must render correctly in Chrome, Firefox, Safari</rule>
+    </constraint>
+  </constraints>
+
+  <interfaces>
+    <interface>
+      <name>theme.json</name>
+      <kind>data contract</kind>
+      <signature>
+{
+  "meta": { "name": string, "version": string, "created": string, "sources": string[] },
+  "colors": { "primary": hex, "secondary": hex, "accent": hex, "background": {...}, "text": {...}, "semantic": {...} },
+  "typography": { "fonts": {...}, "scale": {...}, "weights": {...} },
+  "shapes": { "boxes": {...}, "arrows": {...}, "lines": {...} },
+  "layouts": { "title": {...}, "list": {...}, ... },
+  "personality": { "classification": string, "confidence": number, "notes": string }
+}
+      </signature>
+      <path>.slide-builder/theme.json</path>
+    </interface>
+    <interface>
+      <name>CSS Variables</name>
+      <kind>styling contract</kind>
+      <signature>
+--color-primary, --color-secondary, --color-accent
+--color-bg-default, --color-bg-alt
+--color-text-heading, --color-text-body
+--font-heading, --font-body, --font-mono
+--size-hero, --size-h1, --size-h2, --size-h3, --size-body, --size-small
+      </signature>
+      <path>CSS :root block in each HTML slide</path>
+    </interface>
+    <interface>
+      <name>frontend-design Skill</name>
+      <kind>skill invocation</kind>
+      <signature>Skill(skill="frontend-design")</signature>
+      <path>Claude Code skills system</path>
+    </interface>
+    <interface>
+      <name>status.yaml</name>
+      <kind>state tracking</kind>
+      <signature>
+phase: "sample-generation-complete"
+samples:
+  directory: .slide-builder/samples/
+  count: 6
+  files: [list of filenames]
+      </signature>
+      <path>.slide-builder/status.yaml</path>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>
+Per tech spec Test Strategy: Manual browser testing with Frontend Test Gate pattern. Each slide must be opened in browser and visually verified. Use DevTools to check dimensions (1920x1080), CSS variables usage, and console for errors. Cross-browser testing in Chrome, Firefox, Safari.
+    </standards>
+    <locations>
+      <location>Manual testing in browser</location>
+      <location>Browser DevTools inspection</location>
+      <location>.slide-builder/samples/*.html (output files)</location>
+    </locations>
+    <ideas>
+      <idea acRef="AC2.4.1">Verify exactly 6 HTML files exist in .slide-builder/samples/ after generation completes</idea>
+      <idea acRef="AC2.4.1">Check each file is valid HTML that parses without errors</idea>
+      <idea acRef="AC2.4.2">Visual inspection: Title slide shows hero typography and primary color</idea>
+      <idea acRef="AC2.4.2">Visual inspection: List slide shows body text with proper bullet styling</idea>
+      <idea acRef="AC2.4.2">Visual inspection: Flow slide shows arrows and boxes with connectors</idea>
+      <idea acRef="AC2.4.2">Visual inspection: Columns slide shows multiple box styles aligned</idea>
+      <idea acRef="AC2.4.2">Visual inspection: Callout slide shows accent color with emphasis styling</idea>
+      <idea acRef="AC2.4.2">Visual inspection: Code slide shows mono font with alt background</idea>
+      <idea acRef="AC2.4.3">DevTools: Check document/viewport dimensions are 1920x1080</idea>
+      <idea acRef="AC2.4.4">DevTools: Inspect computed styles, verify CSS variables (--color-primary etc.) are used</idea>
+      <idea acRef="AC2.4.4">DevTools: Verify no hardcoded color/font values in element styles</idea>
+      <idea acRef="AC2.4.5">Open each .html file directly in browser via file:// protocol - should render without server</idea>
+      <idea acRef="AC2.4.5">Check no console errors on page load</idea>
+      <idea acRef="AC2.4.5">Cross-browser: Test in Chrome, Firefox, Safari for consistent rendering</idea>
+    </ideas>
+  </tests>
+</story-context>

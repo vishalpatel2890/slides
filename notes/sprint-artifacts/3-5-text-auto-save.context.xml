@@ -1,0 +1,293 @@
+<story-context id="3-5-text-auto-save" v="1.0">
+  <metadata>
+    <epicId>3</epicId>
+    <storyId>5</storyId>
+    <title>Text Auto-Save</title>
+    <status>drafted</status>
+    <generatedAt>2026-01-27</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>notes/sprint-artifacts/3-5-text-auto-save.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>user</asA>
+    <iWant>my text edits to be automatically saved</iWant>
+    <soThat>I don't lose changes when I close the browser</soThat>
+    <tasks>
+      <task id="1" title="Implement localStorage Auto-Save Script" acs="1,5">
+        <subtask id="1.1">Verify existing auto-save script in slide HTML (from 3.2/3.3 templates)</subtask>
+        <subtask id="1.2">Ensure blur event listener attached to all contenteditable elements</subtask>
+        <subtask id="1.3">Capture all contenteditable content on blur</subtask>
+        <subtask id="1.4">Save to localStorage with key slide-edits</subtask>
+        <subtask id="1.5">Include debounced input listener for periodic saves during typing</subtask>
+      </task>
+      <task id="2" title="Implement State File Persistence" acs="2,3">
+        <subtask id="2.1">Design slide-state.json schema</subtask>
+        <subtask id="2.2">Add file sync mechanism from localStorage to slide-state.json</subtask>
+        <subtask id="2.3">Implement periodic sync (every 5 seconds or on page unload)</subtask>
+        <subtask id="2.4">Ensure selector uses [data-field='fieldName'] format</subtask>
+        <subtask id="2.5">Add lastModified ISO 8601 timestamp</subtask>
+      </task>
+      <task id="3" title="Implement Edit Restoration on Load" acs="4">
+        <subtask id="3.1">On page load, check localStorage first for immediate restore</subtask>
+        <subtask id="3.2">If localStorage empty, load from slide-state.json (fallback)</subtask>
+        <subtask id="3.3">For each edit, find element by selector and set innerHTML</subtask>
+        <subtask id="3.4">Handle case where selector doesn't match</subtask>
+        <subtask id="3.5">Log restoration success/failures to console</subtask>
+      </task>
+      <task id="4" title="Ensure Performance Requirements" acs="5">
+        <subtask id="4.1">Verify localStorage save completes within 100ms</subtask>
+        <subtask id="4.2">Ensure file sync doesn't block UI (async operation)</subtask>
+        <subtask id="4.3">Test with multiple edits in rapid succession</subtask>
+        <subtask id="4.4">Measure total save time from blur to localStorage persistence</subtask>
+      </task>
+      <task id="5" title="Cross-Browser Testing" acs="1-5">
+        <subtask id="5.1">Test auto-save in Chrome</subtask>
+        <subtask id="5.2">Test auto-save in Firefox</subtask>
+        <subtask id="5.3">Test auto-save in Safari</subtask>
+        <subtask id="5.4">Verify localStorage behavior consistent across browsers</subtask>
+        <subtask id="5.5">Run Frontend Test Gate checklist</subtask>
+      </task>
+      <task id="6" title="Edge Case Handling">
+        <subtask id="6.1">Handle localStorage disabled (warn user)</subtask>
+        <subtask id="6.2">Handle corrupted localStorage data (clear and restart)</subtask>
+        <subtask id="6.3">Handle very long text content (no truncation)</subtask>
+        <subtask id="6.4">Handle special characters in content (proper escaping)</subtask>
+      </task>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <ac id="AC3.5.1">Given a slide is open in the browser, when the user edits text via contenteditable, then changes are captured on blur event</ac>
+    <ac id="AC3.5.2">Edits are saved to .slide-builder/single/slide-state.json</ac>
+    <ac id="AC3.5.3">State file includes: selector (data-field attribute value), content (edited text), lastModified timestamp</ac>
+    <ac id="AC3.5.4">Given the user reopens the slide later, when the slide loads, then saved edits are applied from state file</ac>
+    <ac id="AC3.5.5">Text auto-save occurs within 1 second of edit completion (NFR3)</ac>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>notes/prd.md</path>
+        <title>Slide Builder PRD</title>
+        <section>Slide Output</section>
+        <snippet>FR32: All text elements in slides are editable via contenteditable. FR33: Text edits are auto-saved to slide state file.</snippet>
+      </doc>
+      <doc>
+        <path>notes/prd.md</path>
+        <title>Slide Builder PRD</title>
+        <section>Non-Functional Requirements</section>
+        <snippet>NFR3: Text auto-save occurs within 1 second of edit completion.</snippet>
+      </doc>
+      <doc>
+        <path>notes/architecture.md</path>
+        <title>Slide Builder Architecture</title>
+        <section>Pattern 3: Text Edit Persistence</section>
+        <snippet>State file tracks edits with selector (data-field) and content. On layout regeneration: read state, generate new layout, apply saved edits to matching selectors.</snippet>
+      </doc>
+      <doc>
+        <path>notes/architecture.md</path>
+        <title>Slide Builder Architecture</title>
+        <section>Project Structure</section>
+        <snippet>.slide-builder/single/slide-state.json tracks text edit state per slide with edits array containing selector and content.</snippet>
+      </doc>
+      <doc>
+        <path>notes/sprint-artifacts/tech-spec-epic-3.md</path>
+        <title>Epic 3 Tech Spec</title>
+        <section>Story 3.5: Text Auto-Save</section>
+        <snippet>Edit Tracker module: JavaScript embedded in slide HTML, listens for blur events on contenteditable elements, saves to localStorage immediately, syncs to slide-state.json periodically.</snippet>
+      </doc>
+    </docs>
+    <code>
+      <file>
+        <path>.slide-builder/single/slide.html</path>
+        <kind>slide-output</kind>
+        <symbol>saveEdits</symbol>
+        <lines>418-449</lines>
+        <reason>Existing auto-save script implementation - already captures contenteditable content on blur, saves to localStorage with slide-edits key, and restores on page load</reason>
+      </file>
+      <file>
+        <path>.slide-builder/workflows/build-one/instructions.md</path>
+        <kind>workflow</kind>
+        <symbol>auto-save-script</symbol>
+        <lines>170-206</lines>
+        <reason>Template for auto-save script that must be included in all generated slides - defines the saveEdits function, blur/input event listeners, and restore logic</reason>
+      </file>
+      <file>
+        <path>.slide-builder/templates/01-title.html</path>
+        <kind>template</kind>
+        <symbol>contenteditable</symbol>
+        <reason>Template file that should include auto-save script - verify script is present</reason>
+      </file>
+      <file>
+        <path>.slide-builder/templates/02-agenda.html</path>
+        <kind>template</kind>
+        <symbol>contenteditable</symbol>
+        <reason>Template file that should include auto-save script - verify script is present</reason>
+      </file>
+      <file>
+        <path>.slide-builder/templates/03-flow.html</path>
+        <kind>template</kind>
+        <symbol>contenteditable</symbol>
+        <reason>Template file that should include auto-save script - verify script is present</reason>
+      </file>
+      <file>
+        <path>.slide-builder/templates/04-comparison.html</path>
+        <kind>template</kind>
+        <symbol>contenteditable</symbol>
+        <reason>Template file that should include auto-save script - verify script is present</reason>
+      </file>
+      <file>
+        <path>.slide-builder/templates/05-callout.html</path>
+        <kind>template</kind>
+        <symbol>contenteditable</symbol>
+        <reason>Template file that should include auto-save script - verify script is present</reason>
+      </file>
+      <file>
+        <path>.slide-builder/templates/06-technical.html</path>
+        <kind>template</kind>
+        <symbol>contenteditable</symbol>
+        <reason>Template file that should include auto-save script - verify script is present</reason>
+      </file>
+    </code>
+    <dependencies>
+      <node>
+        <name>puppeteer</name>
+        <version>^23.0.0</version>
+        <purpose>HTML-to-image conversion for export (not directly used by this story)</purpose>
+      </node>
+      <node>
+        <name>googleapis</name>
+        <version>^140.0.0</version>
+        <purpose>Google Slides API for export (not directly used by this story)</purpose>
+      </node>
+      <browser>
+        <name>localStorage API</name>
+        <version>Web Storage API</version>
+        <purpose>Primary persistence mechanism for immediate auto-save in browser</purpose>
+      </browser>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint type="architecture">
+      <rule>localStorage is the primary persistence layer for immediate saves (browser-native, instant)</rule>
+      <source>notes/sprint-artifacts/tech-spec-epic-3.md</source>
+    </constraint>
+    <constraint type="architecture">
+      <rule>slide-state.json is the secondary persistence layer synced from localStorage</rule>
+      <source>notes/architecture.md#Pattern 3</source>
+    </constraint>
+    <constraint type="architecture">
+      <rule>File:// protocol prevents direct JavaScript file system writes - requires external sync mechanism</rule>
+      <source>notes/sprint-artifacts/3-5-text-auto-save.md#Dev Notes</source>
+    </constraint>
+    <constraint type="pattern">
+      <rule>All text elements must have contenteditable="true" and unique data-field attributes</rule>
+      <source>.slide-builder/workflows/build-one/instructions.md</source>
+    </constraint>
+    <constraint type="pattern">
+      <rule>Selector format must be [data-field='fieldName'] for state file</rule>
+      <source>notes/architecture.md#Data Architecture</source>
+    </constraint>
+    <constraint type="performance">
+      <rule>NFR3: Text auto-save must complete within 1 second of edit completion</rule>
+      <source>notes/prd.md#NFR3</source>
+    </constraint>
+    <constraint type="compatibility">
+      <rule>Must work in Chrome, Firefox, and Safari (NFR18)</rule>
+      <source>notes/prd.md#NFR18</source>
+    </constraint>
+  </constraints>
+
+  <interfaces>
+    <interface>
+      <name>localStorage.setItem</name>
+      <kind>Browser API</kind>
+      <signature>localStorage.setItem('slide-edits', JSON.stringify({ slide, edits, lastModified }))</signature>
+      <path>Built-in Web Storage API</path>
+    </interface>
+    <interface>
+      <name>localStorage.getItem</name>
+      <kind>Browser API</kind>
+      <signature>const stored = localStorage.getItem('slide-edits')</signature>
+      <path>Built-in Web Storage API</path>
+    </interface>
+    <interface>
+      <name>slide-state.json Schema</name>
+      <kind>Data Contract</kind>
+      <signature>{ "slide": "single", "edits": [{ "selector": "[data-field='title']", "content": "..." }], "lastModified": "ISO8601" }</signature>
+      <path>.slide-builder/single/slide-state.json</path>
+    </interface>
+    <interface>
+      <name>contenteditable Element</name>
+      <kind>DOM Interface</kind>
+      <signature>&lt;element contenteditable="true" data-field="fieldName"&gt;...&lt;/element&gt;</signature>
+      <path>.slide-builder/single/slide.html</path>
+    </interface>
+    <interface>
+      <name>saveEdits Function</name>
+      <kind>JavaScript Function</kind>
+      <signature>const saveEdits = () => { /* collect all contenteditable, save to localStorage */ }</signature>
+      <path>.slide-builder/single/slide.html:418</path>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>
+      <paragraph>This project uses manual browser testing via Frontend Test Gates. Each story has a test gate with prerequisites, step-by-step user actions, expected results, and success criteria checkboxes. Tests are performed in Chrome, Firefox, and Safari browsers. Performance testing measures time from blur event to localStorage persistence. Edge cases include localStorage disabled, corrupted data, and special characters.</paragraph>
+    </standards>
+    <locations>
+      <location>Manual browser testing in Chrome/Firefox/Safari</location>
+      <location>Browser DevTools > Application > Local Storage</location>
+      <location>Terminal: cat .slide-builder/single/slide-state.json</location>
+    </locations>
+    <ideas>
+      <testIdea forAC="AC3.5.1">
+        <description>Edit title text, blur, verify localStorage slide-edits key contains edited title</description>
+        <type>functional</type>
+      </testIdea>
+      <testIdea forAC="AC3.5.1">
+        <description>Edit multiple elements sequentially, verify all captured in localStorage</description>
+        <type>functional</type>
+      </testIdea>
+      <testIdea forAC="AC3.5.2">
+        <description>After editing and blurring, verify slide-state.json file exists in .slide-builder/single/</description>
+        <type>integration</type>
+        <note>Requires external sync mechanism since file:// can't write directly</note>
+      </testIdea>
+      <testIdea forAC="AC3.5.3">
+        <description>Verify slide-state.json structure: selector uses data-field format, content matches edited text, lastModified is valid ISO 8601</description>
+        <type>contract</type>
+      </testIdea>
+      <testIdea forAC="AC3.5.4">
+        <description>Edit text, close browser completely, reopen slide, verify edits restored</description>
+        <type>persistence</type>
+      </testIdea>
+      <testIdea forAC="AC3.5.4">
+        <description>Edit text, refresh page (Cmd+R), verify edits restored immediately</description>
+        <type>persistence</type>
+      </testIdea>
+      <testIdea forAC="AC3.5.5">
+        <description>Time from blur event to localStorage.setItem completion - must be &lt; 1 second</description>
+        <type>performance</type>
+      </testIdea>
+      <testIdea forAC="AC3.5.5">
+        <description>Rapid successive edits (10 edits in 5 seconds), verify all saved without loss</description>
+        <type>stress</type>
+      </testIdea>
+      <testIdea>
+        <description>Disable localStorage in browser settings, verify graceful degradation with console warning</description>
+        <type>edge-case</type>
+      </testIdea>
+      <testIdea>
+        <description>Corrupt slide-edits localStorage value manually, verify recovery on page load</description>
+        <type>edge-case</type>
+      </testIdea>
+      <testIdea>
+        <description>Edit text with special characters (&lt;script&gt;, quotes, unicode), verify proper escaping</description>
+        <type>security</type>
+      </testIdea>
+    </ideas>
+  </tests>
+</story-context>

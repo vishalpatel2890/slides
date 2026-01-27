@@ -1,0 +1,311 @@
+<story-context id="3-2-template-based-slide-building" v="1.0">
+  <metadata>
+    <epicId>3</epicId>
+    <storyId>2</storyId>
+    <title>Template-Based Slide Building</title>
+    <status>drafted</status>
+    <generatedAt>2026-01-27</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>notes/sprint-artifacts/3-2-template-based-slide-building.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>system</asA>
+    <iWant>to generate a slide using an existing layout template</iWant>
+    <soThat>brand consistency is guaranteed and generation is fast</soThat>
+    <tasks>
+      <task id="1" ac="1,7">Create build-one Workflow Structure
+        <subtask>1.1: Create .slide-builder/workflows/build-one/ directory</subtask>
+        <subtask>1.2: Create workflow.yaml with name, description, instructions path</subtask>
+        <subtask>1.3: Create instructions.md skeleton with workflow phases</subtask>
+      </task>
+      <task id="2" ac="1">Implement State Verification (Phase 1)
+        <subtask>2.1: Check status.yaml for current mode</subtask>
+        <subtask>2.2: If mode != "single" and single/plan.yaml doesn't exist: error</subtask>
+        <subtask>2.3: If single/plan.yaml exists: load plan and continue</subtask>
+      </task>
+      <task id="3" ac="1,2">Implement Template Decision (Phase 2)
+        <subtask>3.1: Read suggested_template from plan.yaml</subtask>
+        <subtask>3.2: If template name (not "custom"): check template exists</subtask>
+        <subtask>3.3: If template exists: proceed to Template Build (Phase 3A)</subtask>
+        <subtask>3.4: If template missing: log warning and fall back to Custom Build</subtask>
+        <subtask>3.5: If "custom": proceed to Custom Build (Phase 3B - Story 3.3)</subtask>
+      </task>
+      <task id="4" ac="1,2,3,5,6">Implement Template Build (Phase 3A)
+        <subtask>4.1: Load template HTML from templates/layout-{name}.html</subtask>
+        <subtask>4.2: Load theme.json for CSS variables</subtask>
+        <subtask>4.3: Inject theme CSS variables into :root section</subtask>
+        <subtask>4.4: Generate content based on plan.yaml (intent, key_points)</subtask>
+        <subtask>4.5: Ensure all text elements have contenteditable + data-field</subtask>
+        <subtask>4.6: Add auto-save JavaScript for contenteditable elements</subtask>
+        <subtask>4.7: Validate slide dimensions are 1920x1080</subtask>
+      </task>
+      <task id="5" ac="4,7">Save Slide and Update State (Phase 4)
+        <subtask>5.1: Save generated HTML to .slide-builder/single/slide.html</subtask>
+        <subtask>5.2: Update status.yaml (built_count, last_action, history)</subtask>
+        <subtask>5.3: Display slide file path to user</subtask>
+        <subtask>5.4: Offer to open in browser</subtask>
+      </task>
+      <task id="6" ac="1">Register Slash Command
+        <subtask>6.1: Verify /sb:build-one command registration exists</subtask>
+        <subtask>6.2: Verify command invokes build workflow</subtask>
+        <subtask>6.3: Ensure command works in single mode</subtask>
+      </task>
+      <task id="7" ac="1-7">Testing and Validation
+        <subtask>7.1: Test with plan.yaml having suggested_template: "layout-flow"</subtask>
+        <subtask>7.2: Test with plan.yaml having suggested_template: "layout-list"</subtask>
+        <subtask>7.3: Verify slide.html created with correct dimensions</subtask>
+        <subtask>7.4: Verify all text elements have contenteditable and data-field</subtask>
+        <subtask>7.5: Verify CSS variables injected from theme.json</subtask>
+        <subtask>7.6: Verify status.yaml shows built_count: 1</subtask>
+        <subtask>7.7: Run Frontend Test Gate checklist</subtask>
+      </task>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <criterion id="AC3.2.1">Given a single-slide plan exists with a matching template, when the user runs /build-one, then the system loads the matching template from .slide-builder/templates/</criterion>
+    <criterion id="AC3.2.2">The system injects slide content into template placeholders based on plan.yaml</criterion>
+    <criterion id="AC3.2.3">The system applies theme CSS variables from theme.json to the slide</criterion>
+    <criterion id="AC3.2.4">The slide is saved to .slide-builder/single/slide.html</criterion>
+    <criterion id="AC3.2.5">The slide renders at 1920x1080 (16:9)</criterion>
+    <criterion id="AC3.2.6">All text elements have contenteditable="true" and data-field attributes</criterion>
+    <criterion id="AC3.2.7">status.yaml is updated with built_count and last_action</criterion>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>notes/sprint-artifacts/tech-spec-epic-3.md</path>
+        <title>Epic 3 Technical Specification</title>
+        <section>Story 3.2: Template-Based Slide Building</section>
+        <snippet>Defines AC3.2.1-AC3.2.7 for template-based slide generation, including required HTML structure with contenteditable, CSS variables, and 1920x1080 dimensions.</snippet>
+      </doc>
+      <doc>
+        <path>notes/architecture.md</path>
+        <title>Slide Builder Architecture</title>
+        <section>Pattern 2: Template-or-Custom Decision</section>
+        <snippet>Hybrid Template + Skill Generation pattern - use templates for matching content, invoke frontend-design skill for novel slides. ADR-002.</snippet>
+      </doc>
+      <doc>
+        <path>notes/architecture.md</path>
+        <title>Slide Builder Architecture</title>
+        <section>HTML Slide Pattern</section>
+        <snippet>All generated slides must follow standard HTML structure with contenteditable attributes and data-field selectors. ADR-003.</snippet>
+      </doc>
+      <doc>
+        <path>notes/architecture.md</path>
+        <title>Slide Builder Architecture</title>
+        <section>State File Patterns</section>
+        <snippet>status.yaml tracks mode, current_slide, total_slides, built_count, last_action, history. plan.yaml contains intent and suggested_template.</snippet>
+      </doc>
+      <doc>
+        <path>notes/epics.md</path>
+        <title>Slide Builder Epic Breakdown</title>
+        <section>Story 3.2: Template-Based Slide Building</section>
+        <snippet>User story and acceptance criteria for template-based slide generation with theme CSS variables and contenteditable attributes.</snippet>
+      </doc>
+      <doc>
+        <path>notes/sprint-artifacts/3-1-single-slide-planning.md</path>
+        <title>Story 3.1: Single Slide Planning (predecessor)</title>
+        <section>Dev Agent Record</section>
+        <snippet>Previous story established plan-one workflow, plan.yaml schema, status.yaml patterns, and BMAD XML conventions. Test Gate PASSED.</snippet>
+      </doc>
+    </docs>
+
+    <code>
+      <file>
+        <path>.slide-builder/workflows/build/workflow.yaml</path>
+        <kind>workflow-config</kind>
+        <symbol>build workflow</symbol>
+        <reason>Existing build workflow structure to extend - defines paths, variables, and references to instructions.md</reason>
+      </file>
+      <file>
+        <path>.slide-builder/workflows/build/instructions.md</path>
+        <kind>workflow-instructions</kind>
+        <symbol>build instructions</symbol>
+        <reason>Current build workflow logic - needs enhancement for template-based generation with detailed CSS injection and content mapping</reason>
+      </file>
+      <file>
+        <path>.slide-builder/workflows/plan-one/workflow.yaml</path>
+        <kind>workflow-config</kind>
+        <symbol>plan-one workflow</symbol>
+        <reason>Reference for workflow.yaml structure and template_keywords mapping used in template matching</reason>
+      </file>
+      <file>
+        <path>.slide-builder/workflows/plan-one/instructions.md</path>
+        <kind>workflow-instructions</kind>
+        <symbol>plan-one instructions</symbol>
+        <reason>Reference for 5-phase workflow pattern and BMAD XML conventions to follow</reason>
+      </file>
+      <file>
+        <path>.slide-builder/single/plan.yaml</path>
+        <kind>data-file</kind>
+        <symbol>single slide plan</symbol>
+        <reason>INPUT - contains intent, suggested_template, key_points, audience context for content generation</reason>
+      </file>
+      <file>
+        <path>.slide-builder/theme.json</path>
+        <kind>data-file</kind>
+        <symbol>theme primitives</symbol>
+        <reason>INPUT - contains colors, typography, shapes for CSS variable injection</reason>
+      </file>
+      <file>
+        <path>.slide-builder/status.yaml</path>
+        <kind>state-file</kind>
+        <symbol>workflow status</symbol>
+        <reason>INPUT/OUTPUT - tracks mode: "single", must update built_count, last_action, history after build</reason>
+      </file>
+      <file>
+        <path>.slide-builder/templates/01-title.html</path>
+        <kind>template</kind>
+        <symbol>layout-title template</symbol>
+        <reason>Reference template showing required HTML structure with CSS variables, 1920x1080 dimensions, and styling patterns</reason>
+      </file>
+      <file>
+        <path>.slide-builder/templates/02-agenda.html</path>
+        <kind>template</kind>
+        <symbol>layout-list template</symbol>
+        <reason>List/agenda template for bullet content - one of 6 available templates</reason>
+      </file>
+      <file>
+        <path>.slide-builder/templates/03-flow.html</path>
+        <kind>template</kind>
+        <symbol>layout-flow template</symbol>
+        <reason>Process flow template for timelines, sequences - one of 6 available templates</reason>
+      </file>
+      <file>
+        <path>.claude/commands/sb/build-one.md</path>
+        <kind>command-registration</kind>
+        <symbol>/sb:build-one command</symbol>
+        <reason>Existing command registration - references build workflow, needs verification</reason>
+      </file>
+    </code>
+
+    <dependencies>
+      <npm>
+        <package name="puppeteer" version="^23.0.0">HTML-to-image conversion for export (Epic 7, not this story)</package>
+        <package name="googleapis" version="^140.0.0">Google Slides API for export (Epic 7, not this story)</package>
+      </npm>
+      <note>Story 3.2 does not require npm dependencies - all operations use Claude Code built-in capabilities and file system</note>
+    </dependencies>
+  </artifacts>
+
+  <interfaces>
+    <interface>
+      <name>plan.yaml schema</name>
+      <kind>data-contract</kind>
+      <signature>
+intent: string
+suggested_template: "layout-title" | "layout-list" | "layout-flow" | "layout-columns-2" | "layout-columns-3" | "layout-callout" | "layout-code" | "custom"
+key_points: string[]
+visual_guidance: string
+audience: string (optional)
+tone: "professional" | "bold" | "warm" | "technical"
+      </signature>
+      <path>.slide-builder/single/plan.yaml</path>
+    </interface>
+    <interface>
+      <name>theme.json CSS mapping</name>
+      <kind>data-contract</kind>
+      <signature>
+colors.primary -> --color-primary
+colors.secondary -> --color-secondary
+colors.accent -> --color-accent
+colors.background.default -> --color-bg-default
+colors.background.alt -> --color-bg-alt
+colors.text.heading -> --color-text-heading
+colors.text.body -> --color-text-body
+typography.fonts.heading -> --font-heading
+typography.fonts.body -> --font-body
+typography.fonts.mono -> --font-mono
+typography.scale.hero -> --size-hero
+typography.scale.h1 -> --size-h1
+typography.scale.body -> --size-body
+      </signature>
+      <path>.slide-builder/theme.json</path>
+    </interface>
+    <interface>
+      <name>status.yaml build tracking</name>
+      <kind>data-contract</kind>
+      <signature>
+mode: "single" | "deck"
+current_slide: number
+total_slides: number
+built_count: number  # NEW - add after build
+last_action: string
+last_modified: ISO timestamp
+history: { action: string, timestamp: string }[]
+      </signature>
+      <path>.slide-builder/status.yaml</path>
+    </interface>
+    <interface>
+      <name>HTML slide structure</name>
+      <kind>output-format</kind>
+      <signature>
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+  &lt;meta name="viewport" content="width=1920, height=1080"&gt;
+  &lt;style&gt;:root { /* CSS variables from theme.json */ }&lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;div class="slide" data-slide-id="single"&gt;
+    &lt;h1 contenteditable="true" data-field="title"&gt;...&lt;/h1&gt;
+    &lt;p contenteditable="true" data-field="body"&gt;...&lt;/p&gt;
+  &lt;/div&gt;
+  &lt;script&gt;/* auto-save for contenteditable */&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+      </signature>
+      <path>.slide-builder/single/slide.html</path>
+    </interface>
+    <interface>
+      <name>Template file mapping</name>
+      <kind>lookup-table</kind>
+      <signature>
+suggested_template -> template file path:
+- layout-title -> templates/01-title.html
+- layout-list -> templates/02-agenda.html
+- layout-flow -> templates/03-flow.html
+- layout-columns-2 -> templates/04-comparison.html
+- layout-columns-3 -> (create if needed)
+- layout-callout -> templates/05-callout.html
+- layout-code -> templates/06-technical.html
+      </signature>
+      <path>.slide-builder/templates/</path>
+    </interface>
+  </interfaces>
+
+  <constraints>
+    <constraint source="tech-spec">Slides MUST render at exactly 1920x1080 pixels (16:9 standard)</constraint>
+    <constraint source="tech-spec">All text elements MUST have contenteditable="true" and data-field attributes</constraint>
+    <constraint source="tech-spec">Slides MUST use theme CSS variables (--color-primary, --font-heading, etc.)</constraint>
+    <constraint source="tech-spec">Slides MUST be self-contained HTML (no external dependencies except Google Fonts)</constraint>
+    <constraint source="architecture">Template-based slide generation should complete in less than 5 seconds</constraint>
+    <constraint source="architecture">Auto-save JavaScript must be included for contenteditable persistence</constraint>
+    <constraint source="architecture">status.yaml must be updated after every build with built_count, last_action, history</constraint>
+    <constraint source="story-3.1">Follow BMAD XML workflow pattern with step/action/check/output tags</constraint>
+    <constraint source="story-3.1">Reuse plan-one workflow structure for build-one (same directory pattern)</constraint>
+  </constraints>
+
+  <tests>
+    <standards>
+Per architecture test strategy: Unit tests for template loading, CSS variable injection, content generation. Integration tests for full /build-one workflow from plan to saved slide. Cross-browser testing in Chrome, Firefox, Safari to verify 1920x1080 rendering and contenteditable functionality.
+    </standards>
+    <locations>
+      <location>Frontend Test Gate in story file (manual browser testing)</location>
+      <location>.slide-builder/single/slide.html (generated output to inspect)</location>
+      <location>.slide-builder/status.yaml (verify state updates)</location>
+    </locations>
+    <ideas>
+      <idea ac="AC3.2.1">Create plan.yaml with suggested_template: "layout-flow", run /build-one, verify templates/03-flow.html loaded</idea>
+      <idea ac="AC3.2.2">Verify plan.yaml key_points appear in generated slide content</idea>
+      <idea ac="AC3.2.3">Inspect :root CSS in slide.html for --color-primary matching theme.json colors.primary</idea>
+      <idea ac="AC3.2.4">Verify file exists at .slide-builder/single/slide.html after build</idea>
+      <idea ac="AC3.2.5">Open slide in browser, verify 1920x1080 viewport meta and body dimensions</idea>
+      <idea ac="AC3.2.6">Inspect DOM for all text elements having contenteditable="true" and data-field attributes</idea>
+      <idea ac="AC3.2.7">Check status.yaml has built_count: 1 and last_action contains template name</idea>
+    </ideas>
+  </tests>
+</story-context>

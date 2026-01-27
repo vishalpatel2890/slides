@@ -904,83 +904,1123 @@ Ready to proceed to theme generation...
   </step>
 
   <!-- ═══════════════════════════════════════════════════════════════════════════
-       PHASE 3: THEME GENERATION (Story 2.3 - Not implemented yet)
+       PHASE 3: THEME GENERATION (Story 2.3)
+       Synthesizes theme.json from extracted primitives
        ═══════════════════════════════════════════════════════════════════════════ -->
 
-  <step n="3" goal="Generate theme.json">
-    <action>Create complete theme.json with all primitives</action>
-    <action>Save to .slide-builder/theme.json</action>
-
-    <template-output>
-Theme file generated at .slide-builder/theme.json
-
-Please review and provide feedback.
-    </template-output>
-  </step>
-
-  <!-- ═══════════════════════════════════════════════════════════════════════════
-       PHASE 4: SAMPLE DECK GENERATION (Story 2.4 - Not implemented yet)
-       ═══════════════════════════════════════════════════════════════════════════ -->
-
-  <step n="4" goal="Generate sample deck">
-    <action>Create 6 sample slides demonstrating all theme primitives</action>
-    <action>Save samples to .slide-builder/samples/</action>
+  <step n="3" goal="Initialize theme generation">
+    <action>Update status.yaml with: phase: "theme-generation", last_action: "starting theme synthesis"</action>
 
     <output>
-**Sample Deck Generated**
+───────────────────────────────────────────────────────────────────────────────
+📦 **PHASE 3: THEME FILE GENERATION**
+───────────────────────────────────────────────────────────────────────────────
 
-Review the 6 sample slides in .slide-builder/samples/:
-1. Title slide - Hero typography, primary color
-2. Agenda/List - Body text, bullet styling
-3. Process flow - Arrows, boxes, connectors
-4. Comparison - Multiple box styles
-5. Key insight - Callout box, accent color
-6. Technical - Mono font, dark background
+Synthesizing your brand theme from extracted primitives...
+This will create a complete theme.json file for consistent slide generation.
+───────────────────────────────────────────────────────────────────────────────
+    </output>
 
-Open these files in your browser to preview.
+    <action>Verify {{extracted_primitives}} is available from Phase 2</action>
+    <check if="{{extracted_primitives}} is empty or undefined">
+      <output>❌ Error: No extracted primitives found from Phase 2.
+Please ensure brand primitive extraction completed successfully before theme generation.</output>
+      <action>HALT</action>
+    </check>
+  </step>
+
+  <step n="3.1" goal="Build meta section">
+    <output>📋 Building theme metadata...</output>
+
+    <action>Build meta section from extraction data:
+      {{theme_meta}} = {
+        "name": "Brand Theme",
+        "version": "1.0",
+        "created": "[current date in YYYY-MM-DD format]",
+        "sources": [extract source names from {{extraction_sources}}]
+      }
+
+      For sources array:
+      - If website_url was provided → add website domain
+      - If pdf_paths were provided → add PDF filenames
+      - If image_paths were provided → add image filenames
+    </action>
+
+    <output>✅ Meta section built with {{theme_meta.sources.length}} source(s)</output>
+  </step>
+
+  <step n="3.2" goal="Build colors section with CSS variable mapping">
+    <output>🎨 Mapping colors to theme structure...</output>
+
+    <action>Build colors section from {{extracted_primitives.colors}}:
+      {{theme_colors}} = {
+        "primary": "{{extracted_primitives.colors.primary}}",
+        "secondary": "{{extracted_primitives.colors.secondary}}",
+        "accent": "{{extracted_primitives.colors.accent}}",
+        "background": {
+          "default": "{{extracted_primitives.colors.background.default}}",
+          "alt": "{{extracted_primitives.colors.background.alt}}"
+        },
+        "text": {
+          "heading": "{{extracted_primitives.colors.text.heading}}",
+          "body": "{{extracted_primitives.colors.text.body}}"
+        },
+        "semantic": {
+          "success": "#22C55E",
+          "warning": "#F59E0B",
+          "error": "#EF4444"
+        }
+      }
+
+      CSS Variable Mapping (for reference):
+      - colors.primary → --color-primary
+      - colors.secondary → --color-secondary
+      - colors.accent → --color-accent
+      - colors.background.default → --color-bg-default
+      - colors.background.alt → --color-bg-alt
+      - colors.text.heading → --color-text-heading
+      - colors.text.body → --color-text-body
+    </action>
+
+    <action>Validate all color values are valid hex format (#RRGGBB or #RGB):
+      For each color in {{theme_colors}}:
+        - Check if value matches regex: ^#([0-9A-Fa-f]{6}|[0-9A-Fa-f]{3})$
+        - If invalid, log warning and use fallback:
+          - primary: "#2563EB" (blue)
+          - secondary: "#1E40AF" (dark blue)
+          - accent: "#F59E0B" (amber)
+          - background.default: "#FFFFFF"
+          - background.alt: "#F8FAFC"
+          - text.heading: "#0F172A"
+          - text.body: "#334155"
+    </action>
+
+    <output>✅ Colors section mapped (7 color values)</output>
+  </step>
+
+  <step n="3.3" goal="Build typography section with CSS variable mapping">
+    <output>🔤 Mapping typography to theme structure...</output>
+
+    <action>Build typography section from {{extracted_primitives.typography}}:
+      {{theme_typography}} = {
+        "fonts": {
+          "heading": "{{extracted_primitives.typography.fonts.heading}}",
+          "body": "{{extracted_primitives.typography.fonts.body}}",
+          "mono": "{{extracted_primitives.typography.fonts.mono}}"
+        },
+        "scale": {
+          "hero": "{{extracted_primitives.typography.scale.hero}}",
+          "h1": "{{extracted_primitives.typography.scale.h1}}",
+          "h2": "{{extracted_primitives.typography.scale.h2}}",
+          "h3": "{{extracted_primitives.typography.scale.h3}}",
+          "body": "{{extracted_primitives.typography.scale.body}}",
+          "small": "{{extracted_primitives.typography.scale.small}}"
+        },
+        "weights": {
+          "normal": 400,
+          "medium": 500,
+          "bold": 700
+        }
+      }
+
+      CSS Variable Mapping (for reference):
+      - fonts.heading → --font-heading
+      - fonts.body → --font-body
+      - fonts.mono → --font-mono
+      - scale.hero → --size-hero
+      - scale.h1 → --size-h1
+      - scale.h2 → --size-h2
+      - scale.h3 → --size-h3
+      - scale.body → --size-body
+      - scale.small → --size-small
+    </action>
+
+    <action>Validate typography values:
+      For fonts:
+        - Ensure each font family is a non-empty string
+        - If empty, use fallbacks:
+          - heading: "Inter, system-ui, sans-serif"
+          - body: "Inter, system-ui, sans-serif"
+          - mono: "'SF Mono', Consolas, monospace"
+      For scale:
+        - Ensure each size includes unit (px, rem, em)
+        - If missing unit, append "px"
+    </action>
+
+    <output>✅ Typography section mapped (3 fonts, 6 sizes, 3 weights)</output>
+  </step>
+
+  <step n="3.4" goal="Build shapes section">
+    <output>📐 Mapping shapes to theme structure...</output>
+
+    <action>Build shapes section from {{extracted_primitives.shapes}}:
+      {{theme_shapes}} = {
+        "boxes": {
+          "default": {
+            "cornerRadius": "{{extracted_primitives.shapes.boxes.default.corner_radius}}",
+            "border": "{{extracted_primitives.shapes.boxes.default.border}}",
+            "shadow": "{{extracted_primitives.shapes.boxes.default.shadow}}"
+          },
+          "callout": {
+            "cornerRadius": "{{extracted_primitives.shapes.boxes.callout.corner_radius}}",
+            "border": "{{extracted_primitives.shapes.boxes.callout.border}}",
+            "shadow": "0 4px 12px rgba(0, 0, 0, 0.15)"
+          }
+        },
+        "arrows": {
+          "default": {
+            "strokeWidth": "{{extracted_primitives.shapes.arrows.default.stroke_width}}",
+            "headType": "{{extracted_primitives.shapes.arrows.default.head_type}}",
+            "curve": "{{extracted_primitives.shapes.arrows.default.curve_style}}"
+          }
+        },
+        "lines": {
+          "default": {
+            "strokeWidth": "1px",
+            "style": "solid"
+          }
+        }
+      }
+    </action>
+
+    <action>Validate shape values:
+      For cornerRadius:
+        - Ensure includes unit (px, %, rem)
+        - If missing, append "px"
+        - Fallback: "8px"
+      For shadow:
+        - Ensure valid CSS box-shadow or "none"
+        - Fallback: "0 2px 8px rgba(0, 0, 0, 0.1)"
+      For strokeWidth:
+        - Ensure includes unit
+        - Fallback: "2px"
+      For headType:
+        - Ensure one of: "arrow", "triangle", "circle", "none"
+        - Fallback: "arrow"
+      For curve:
+        - Ensure one of: "straight", "curved", "smooth"
+        - Fallback: "smooth"
+    </action>
+
+    <output>✅ Shapes section mapped (boxes, arrows, lines)</output>
+  </step>
+
+  <step n="3.5" goal="Build layouts placeholder section">
+    <output>📑 Creating layouts placeholder...</output>
+
+    <action>Build layouts section as placeholder for Story 2.4:
+      {{theme_layouts}} = {
+        "title": { "file": "layout-title.html" },
+        "list": { "file": "layout-list.html" },
+        "flow": { "file": "layout-flow.html" },
+        "columns-2": { "file": "layout-columns-2.html" },
+        "columns-3": { "file": "layout-columns-3.html" },
+        "callout": { "file": "layout-callout.html" },
+        "code": { "file": "layout-code.html" }
+      }
+
+      Note: These layout files will be generated in Story 2.4 (Sample Deck Generation).
+      The placeholder ensures the theme structure is complete.
+    </action>
+
+    <output>✅ Layouts placeholder created (7 layout types defined)</output>
+  </step>
+
+  <step n="3.6" goal="Build personality section">
+    <output>🎭 Adding personality classification...</output>
+
+    <action>Build personality section from {{extracted_primitives.personality}}:
+      {{theme_personality}} = {
+        "classification": "{{extracted_primitives.personality.classification}}",
+        "confidence": {{extracted_primitives.personality.confidence}},
+        "notes": "{{extracted_primitives.personality.notes}}"
+      }
+    </action>
+
+    <action>Validate personality values:
+      - classification: must be one of ["bold", "minimal", "corporate", "playful"]
+        - Fallback: "corporate"
+      - confidence: must be number between 0 and 1
+        - Fallback: 0.7
+      - notes: must be non-empty string
+        - Fallback: "Inferred from brand assets"
+    </action>
+
+    <output>✅ Personality: {{theme_personality.classification}} (confidence: {{theme_personality.confidence}})</output>
+  </step>
+
+  <step n="3.7" goal="Assemble and validate complete theme.json">
+    <output>🔧 Assembling complete theme.json...</output>
+
+    <action>Assemble complete theme object:
+      {{theme_json}} = {
+        "meta": {{theme_meta}},
+        "colors": {{theme_colors}},
+        "typography": {{theme_typography}},
+        "shapes": {{theme_shapes}},
+        "layouts": {{theme_layouts}},
+        "personality": {{theme_personality}}
+      }
+    </action>
+
+    <action>Perform final validation:
+      1. Verify all required top-level sections exist:
+         - meta (required)
+         - colors (required)
+         - typography (required)
+         - shapes (required)
+         - layouts (required)
+         - personality (required)
+
+      2. Verify no null or undefined values in required fields
+
+      3. Verify JSON is valid (can be stringified without errors)
+
+      4. Log validation result
+    </action>
+
+    <check if="validation fails">
+      <output>❌ Theme validation failed: {{validation_errors}}
+Attempting to fix issues with fallback values...</output>
+      <action>Apply fallback values for any missing/invalid fields</action>
+      <action>Re-validate</action>
+      <check if="re-validation fails">
+        <output>❌ Critical error: Unable to generate valid theme.json
+Please check extraction data and try again.</output>
+        <action>HALT</action>
+      </check>
+    </check>
+
+    <output>✅ Theme validation passed - all sections complete</output>
+  </step>
+
+  <step n="3.8" goal="Write theme.json to file">
+    <output>💾 Saving theme.json...</output>
+
+    <action>Use Write tool to save theme.json:
+      - File path: {project-root}/.slide-builder/theme.json
+      - Content: JSON.stringify({{theme_json}}, null, 2) (pretty-printed with 2-space indent)
+    </action>
+
+    <check if="Write succeeds">
+      <output>✅ Theme saved to .slide-builder/theme.json</output>
+    </check>
+
+    <check if="Write fails">
+      <output>❌ Failed to save theme.json: {{error_message}}
+Please check file permissions and try again.</output>
+      <action>HALT</action>
+    </check>
+  </step>
+
+  <step n="3.9" goal="Display theme generation summary">
+    <action>Update status.yaml with: phase: "theme-generation-complete", last_action: "theme.json created"</action>
+
+    <output>
+═══════════════════════════════════════════════════════════════════════════════
+✅ **THEME FILE GENERATED**
+═══════════════════════════════════════════════════════════════════════════════
+
+📁 **File:** .slide-builder/theme.json
+
+**📋 META**
+┌─────────────┬─────────────────────────────────────────┐
+│ Name        │ {{theme_meta.name}}                      │
+│ Version     │ {{theme_meta.version}}                   │
+│ Created     │ {{theme_meta.created}}                   │
+│ Sources     │ {{theme_meta.sources.length}} asset(s)   │
+└─────────────┴─────────────────────────────────────────┘
+
+**🎨 COLORS** (CSS Variables: --color-*)
+┌─────────────┬─────────────────────────────────────────┐
+│ Primary     │ {{theme_colors.primary}}                 │
+│ Secondary   │ {{theme_colors.secondary}}               │
+│ Accent      │ {{theme_colors.accent}}                  │
+│ Background  │ {{theme_colors.background.default}} / {{theme_colors.background.alt}} │
+│ Text        │ {{theme_colors.text.heading}} / {{theme_colors.text.body}} │
+└─────────────┴─────────────────────────────────────────┘
+
+**🔤 TYPOGRAPHY** (CSS Variables: --font-*, --size-*)
+┌─────────────┬─────────────────────────────────────────┐
+│ Heading     │ {{theme_typography.fonts.heading}}       │
+│ Body        │ {{theme_typography.fonts.body}}          │
+│ Mono        │ {{theme_typography.fonts.mono}}          │
+└─────────────┴─────────────────────────────────────────┘
+
+**📐 SHAPES**
+┌─────────────┬─────────────────────────────────────────┐
+│ Corners     │ {{theme_shapes.boxes.default.cornerRadius}} │
+│ Shadows     │ {{theme_shapes.boxes.default.shadow}}    │
+│ Arrows      │ {{theme_shapes.arrows.default.strokeWidth}}, {{theme_shapes.arrows.default.headType}} │
+└─────────────┴─────────────────────────────────────────┘
+
+**📑 LAYOUTS** (7 templates defined - will be generated in Phase 4)
+title, list, flow, columns-2, columns-3, callout, code
+
+**🎭 PERSONALITY**
+┌─────────────┬─────────────────────────────────────────┐
+│ Type        │ {{theme_personality.classification}}     │
+│ Confidence  │ {{theme_personality.confidence}}         │
+│ Notes       │ {{theme_personality.notes}}              │
+└─────────────┴─────────────────────────────────────────┘
+
+Ready to proceed to sample deck generation...
+───────────────────────────────────────────────────────────────────────────────
     </output>
   </step>
 
   <!-- ═══════════════════════════════════════════════════════════════════════════
-       PHASE 5: FEEDBACK LOOP (Story 2.5 - Not implemented yet)
+       PHASE 4: SAMPLE DECK GENERATION (Story 2.4)
+       Generates 6 sample slides demonstrating all theme primitives
        ═══════════════════════════════════════════════════════════════════════════ -->
 
-  <step n="5" goal="Feedback loop">
-    <ask>
-**Theme Validation**
+  <step n="4" goal="Initialize sample deck generation">
+    <action>Update status.yaml with: phase: "sample-generation", last_action: "starting sample deck generation"</action>
 
-How do the sample slides look? Provide feedback like:
-- "Too corporate" - I'll soften colors and add warmth
-- "Not bold enough" - I'll increase contrast
-- "Colors feel off" - I'll re-examine the palette
-- "Perfect!" - Theme will be locked
+    <output>
+───────────────────────────────────────────────────────────────────────────────
+🎨 **PHASE 4: SAMPLE DECK GENERATION**
+───────────────────────────────────────────────────────────────────────────────
+
+Generating 6 sample slides to demonstrate your brand theme...
+Each slide tests specific design primitives from theme.json.
+───────────────────────────────────────────────────────────────────────────────
+    </output>
+
+    <action>Read theme.json from {project-root}/.slide-builder/theme.json</action>
+    <check if="theme.json does not exist or is invalid">
+      <output>❌ Error: theme.json not found or invalid.
+Please ensure Phase 3 (theme generation) completed successfully.</output>
+      <action>HALT</action>
+    </check>
+
+    <action>Extract theme values for CSS variable generation:
+      - colors: primary, secondary, accent, background (default/alt), text (heading/body)
+      - typography: fonts (heading, body, mono), scale (hero, h1, h2, h3, body, small)
+      - shapes: boxes (cornerRadius, shadow), arrows (strokeWidth, headType)
+      - personality: classification for tone guidance
+    </action>
+
+    <action>Create .slide-builder/samples/ directory if it does not exist</action>
+  </step>
+
+  <step n="4.1" goal="Define slide specifications">
+    <action>Define the 6 sample slide specifications:
+
+      {{slide_specs}} = [
+        {
+          number: 1,
+          filename: "01-title.html",
+          type: "Title",
+          primitives: ["hero typography", "primary color", "default background"],
+          content: {
+            title: "Hero headline with brand name",
+            subtitle: "Tagline or value proposition",
+            elements: ["logo area", "date"]
+          }
+        },
+        {
+          number: 2,
+          filename: "02-agenda.html",
+          type: "List/Agenda",
+          primitives: ["body text", "bullets", "spacing", "alt background"],
+          content: {
+            title: "Today's Agenda",
+            items: ["4-5 agenda items with descriptions"],
+            elements: ["numbered list", "section labels"]
+          }
+        },
+        {
+          number: 3,
+          filename: "03-flow.html",
+          type: "Process Flow",
+          primitives: ["arrows", "boxes", "connectors", "secondary color"],
+          content: {
+            title: "Process steps",
+            steps: ["3-4 connected steps with icons"],
+            elements: ["arrows between boxes", "step numbers"]
+          }
+        },
+        {
+          number: 4,
+          filename: "04-comparison.html",
+          type: "Comparison",
+          primitives: ["multiple box styles", "alignment", "semantic colors"],
+          content: {
+            title: "Before vs After comparison",
+            columns: ["2 columns with feature lists"],
+            elements: ["badges", "checkmarks/x marks"]
+          }
+        },
+        {
+          number: 5,
+          filename: "05-callout.html",
+          type: "Key Insight",
+          primitives: ["callout box", "accent color", "emphasis"],
+          content: {
+            statistic: "Large impact number",
+            label: "Metric description",
+            description: "Supporting context",
+            elements: ["icon", "source citation"]
+          }
+        },
+        {
+          number: 6,
+          filename: "06-technical.html",
+          type: "Technical/Code",
+          primitives: ["mono font", "alt background", "code syntax"],
+          content: {
+            title: "API or code example",
+            code: "Syntax-highlighted code block",
+            elements: ["code window chrome", "line numbers", "feature badges"]
+          }
+        }
+      ]
+    </action>
+  </step>
+
+  <step n="4.2" goal="Generate sample slides using frontend-design skill">
+    <critical>INVOKE FRONTEND-DESIGN SKILL for professional slide generation</critical>
+
+    <action n="4.2.0">Execute Skill tool call:
+      ```
+      Skill(skill="frontend-design")
+      ```
+      This loads professional design expertise for creating visually appealing slides.
+      YOU MUST MAKE THIS TOOL CALL NOW BEFORE GENERATING SLIDES.
+    </action>
+
+    <for-each item="slide_spec" in="{{slide_specs}}">
+      <output>🖼️ Generating slide {{slide_spec.number}} of 6: {{slide_spec.type}}...</output>
+
+      <action>Build CSS :root block with all theme variables:
+        ```css
+        :root {
+          --color-primary: {{theme.colors.primary}};
+          --color-secondary: {{theme.colors.secondary}};
+          --color-accent: {{theme.colors.accent}};
+          --color-bg-default: {{theme.colors.background.default}};
+          --color-bg-alt: {{theme.colors.background.alt}};
+          --color-text-heading: {{theme.colors.text.heading}};
+          --color-text-body: {{theme.colors.text.body}};
+          --font-heading: {{theme.typography.fonts.heading}};
+          --font-body: {{theme.typography.fonts.body}};
+          --font-mono: {{theme.typography.fonts.mono}};
+          --size-hero: {{theme.typography.scale.hero}};
+          --size-h1: {{theme.typography.scale.h1}};
+          --size-h2: {{theme.typography.scale.h2}};
+          --size-h3: {{theme.typography.scale.h3}};
+          --size-body: {{theme.typography.scale.body}};
+          --size-small: {{theme.typography.scale.small}};
+        }
+        ```
+      </action>
+
+      <action>Generate complete HTML slide for {{slide_spec.type}}:
+        - Include DOCTYPE, html, head with charset, viewport (1920x1080)
+        - Add Google Fonts link for {{theme.typography.fonts.heading}}
+        - Include CSS :root block with all theme variables
+        - Body and slide container set to exactly 1920x1080 pixels
+        - Use CSS variables throughout (never hardcode colors/fonts)
+        - Create content appropriate for {{slide_spec.type}} demonstrating {{slide_spec.primitives}}
+        - Apply brand personality: {{theme.personality.classification}}
+      </action>
+
+      <action>Save slide to {project-root}/.slide-builder/samples/{{slide_spec.filename}}</action>
+
+      <check if="Write fails">
+        <output>⚠️ Failed to save {{slide_spec.filename}}: {{error_message}}</output>
+      </check>
+    </for-each>
+  </step>
+
+  <step n="4.3" goal="Verify sample generation and update status">
+    <action>Verify all 6 files exist in .slide-builder/samples/:
+      - 01-title.html
+      - 02-agenda.html
+      - 03-flow.html
+      - 04-comparison.html
+      - 05-callout.html
+      - 06-technical.html
+    </action>
+
+    <check if="any files missing">
+      <output>⚠️ Warning: Some sample slides failed to generate.
+Missing: {{missing_files}}
+Attempting to regenerate...</output>
+      <action>Retry generation for missing files</action>
+    </check>
+
+    <action>Update status.yaml with:
+      phase: "sample-review"
+      samples:
+        directory: .slide-builder/samples/
+        count: 6
+        files:
+          - 01-title.html
+          - 02-agenda.html
+          - 03-flow.html
+          - 04-comparison.html
+          - 05-callout.html
+          - 06-technical.html
+      last_action: "Sample slides generated for review"
+    </action>
+
+    <output>
+═══════════════════════════════════════════════════════════════════════════════
+✅ **SAMPLE DECK GENERATED**
+═══════════════════════════════════════════════════════════════════════════════
+
+📁 **Location:** .slide-builder/samples/
+
+**Generated Slides:**
+
+| # | File | Type | Primitives Demonstrated |
+|---|------|------|-------------------------|
+| 1 | 01-title.html | Title | Hero typography, primary color, background |
+| 2 | 02-agenda.html | Agenda/List | Body text, bullets, spacing |
+| 3 | 03-flow.html | Process Flow | Arrows, boxes, connectors |
+| 4 | 04-comparison.html | Comparison | Multiple box styles, alignment |
+| 5 | 05-callout.html | Key Insight | Callout box, accent color, emphasis |
+| 6 | 06-technical.html | Technical | Mono font, code syntax, alt background |
+
+**🔍 How to Preview:**
+1. Open each .html file directly in your browser
+2. Check that brand colors and fonts are applied
+3. Verify layouts look professional and on-brand
+
+**⚠️ Note:** Each slide is 1920x1080 pixels. For best preview, view at 100% zoom or use browser developer tools to see the full slide.
+
+Ready for your feedback...
+───────────────────────────────────────────────────────────────────────────────
+    </output>
+  </step>
+
+  <!-- ═══════════════════════════════════════════════════════════════════════════
+       PHASE 5: FEEDBACK LOOP (Story 2.5)
+       Collects gestalt feedback, interprets it, adjusts theme, regenerates samples
+       ═══════════════════════════════════════════════════════════════════════════ -->
+
+  <step n="5" goal="Initialize feedback loop">
+    <action>Update status.yaml with: phase: "feedback-loop", feedback_iteration: 0</action>
+
+    <output>
+───────────────────────────────────────────────────────────────────────────────
+🔄 **PHASE 5: THEME FEEDBACK LOOP**
+───────────────────────────────────────────────────────────────────────────────
+
+Your sample slides are ready for review. I'll refine the theme based on your feedback.
+
+**How to provide feedback:**
+- Give high-level impressions ("too corporate", "not bold enough", "colors feel off")
+- Don't worry about specific values - I'll interpret and adjust
+- Say "Perfect" or "Approved" when you're happy with the results
+
+Target: 1-3 feedback rounds to get it right.
+───────────────────────────────────────────────────────────────────────────────
+    </output>
+  </step>
+
+  <step n="5.1" goal="Collect feedback from user">
+    <anchor id="feedback_prompt" />
+
+    <action>Read current feedback_iteration from status.yaml</action>
+    <action>Increment feedback_iteration by 1</action>
+    <action>Update status.yaml with new feedback_iteration value</action>
+
+    <ask>
+**Theme Validation** (Round {{feedback_iteration}})
+
+How do the sample slides look? Open .slide-builder/samples/*.html in your browser and provide feedback:
+
+- "Too corporate" - I'll soften colors, add warmth, increase corner radius
+- "Not bold enough" - I'll increase contrast, reduce corner radius, use heavier weights
+- "Colors feel off" - I'll ask what direction you'd prefer
+- "Too busy" - I'll increase whitespace, reduce shadows
+- "Too plain" - I'll add accent usage, increase shadow depth
+- "Fonts don't feel right" - I'll explore alternatives
+- **"Perfect"** or **"Approved"** - Theme will be locked and finalized
 
 Your feedback:
     </ask>
 
-    <action if="feedback is not approval">Adjust theme based on feedback and regenerate samples</action>
-    <action if="feedback indicates approval">Lock theme and copy samples to templates/</action>
+    <action>Store response as {{user_feedback}}</action>
+    <action>Convert {{user_feedback}} to lowercase for matching: {{feedback_lower}}</action>
+  </step>
+
+  <step n="5.2" goal="Check for approval">
+    <action>Check if {{feedback_lower}} contains approval keywords: "perfect", "approved", "looks good", "love it", "great", "done", "yes", "ship it"</action>
+
+    <check if="{{feedback_lower}} indicates approval">
+      <output>✅ Theme approved! Proceeding to finalization...</output>
+      <goto step="6">Finalization</goto>
+    </check>
+
+    <action>User provided feedback, not approval - proceed to interpretation</action>
+  </step>
+
+  <step n="5.3" goal="Interpret gestalt feedback">
+    <output>🔍 Interpreting your feedback: "{{user_feedback}}"...</output>
+
+    <action>Apply Feedback Interpretation Mapping to determine theme adjustments:
+
+      **FEEDBACK PATTERNS AND ADJUSTMENTS:**
+
+      Pattern: "corporate" OR "formal" OR "stiff" OR "cold"
+      → Adjustments:
+        - colors.primary: Reduce saturation by 10% (add warmth)
+        - colors.text.body: Shift toward warmer gray
+        - shapes.boxes.default.cornerRadius: Increase by 4px (max 16px)
+        - personality.notes: Append "Softened per user feedback"
+
+      Pattern: "bold" OR "stronger" OR "bolder" OR "more contrast" OR "punch"
+      → Adjustments:
+        - colors.primary: Darken by 15% (increase contrast)
+        - colors.accent: Increase saturation by 10%
+        - shapes.boxes.default.cornerRadius: Decrease by 4px (min 0px)
+        - typography.weights: Prefer semibold (600) over medium (500)
+        - shapes.boxes.default.shadow: Intensify shadow
+        - personality.notes: Append "Increased boldness per user feedback"
+
+      Pattern: "colors" OR "palette" OR "color" OR "hue"
+      → Action: ASK clarifying question
+        "What direction would you like the colors to go?
+        - Warmer (more orange/red tones)
+        - Cooler (more blue tones)
+        - More saturated (vivid)
+        - Less saturated (muted)
+        - Specific color preference?"
+      → Store clarification as {{color_direction}}
+      → Apply adjustments based on {{color_direction}}
+
+      Pattern: "busy" OR "cluttered" OR "noisy" OR "overwhelming"
+      → Adjustments:
+        - shapes.boxes.default.shadow: Reduce intensity or remove
+        - shapes.boxes.default.border: Simplify or remove
+        - shapes.arrows.default.strokeWidth: Reduce by 1px
+        - personality.notes: Append "Simplified per user feedback"
+
+      Pattern: "plain" OR "boring" OR "flat" OR "dull" OR "needs more"
+      → Adjustments:
+        - colors.accent: Increase usage prominence
+        - shapes.boxes.default.shadow: Add or intensify
+        - shapes.boxes.callout.shadow: Add accent glow
+        - personality.notes: Append "Added visual interest per user feedback"
+
+      Pattern: "font" OR "typography" OR "text" OR "typeface"
+      → Action: ASK clarifying question
+        "What feels off about the fonts?
+        - Too formal/serious
+        - Too casual/playful
+        - Hard to read
+        - Specific font you'd prefer?"
+      → Store clarification and adjust typography.fonts accordingly
+
+      Pattern: unrecognized or ambiguous
+      → Action: ASK clarifying question
+        "I want to make sure I understand your feedback: '{{user_feedback}}'
+        Could you tell me more about what you'd like to change?
+        - Colors (warmer, cooler, different palette)
+        - Typography (different fonts, weights)
+        - Shapes (rounder, sharper, more/less shadow)
+        - Overall feel (bolder, softer, more professional, more casual)"
+    </action>
+
+    <action>Build {{theme_adjustments}} object with all identified changes</action>
+    <action>Log adjustments to be applied</action>
+
+    <output>📝 **Identified Adjustments:**
+{{theme_adjustments_summary}}
+
+Applying changes to theme...</output>
+  </step>
+
+  <step n="5.4" goal="Apply theme modifications">
+    <action>Read current theme.json from {project-root}/.slide-builder/theme.json</action>
+    <action>Parse JSON into {{current_theme}} object</action>
+
+    <action>Apply each adjustment from {{theme_adjustments}}:
+      For color adjustments:
+        - Parse hex color to RGB
+        - Apply saturation/lightness/hue changes
+        - Convert back to hex
+        - Validate contrast ratios for text colors (WCAG AA: 4.5:1 minimum)
+        - If contrast fails, adjust text color to maintain readability
+
+      For cornerRadius adjustments:
+        - Parse current value (remove "px")
+        - Apply delta (+4px or -4px)
+        - Clamp to valid range (0px - 24px)
+        - Format with "px" suffix
+
+      For shadow adjustments:
+        - Intensify: Increase blur and spread, darken color
+        - Reduce: Decrease blur and spread, lighten color
+        - Remove: Set to "none"
+
+      For typography adjustments:
+        - Update font family strings
+        - Preserve fallback fonts (system-ui, sans-serif)
+        - Update weight preferences
+    </action>
+
+    <action>Preserve unaffected sections:
+      - meta (except update version)
+      - layouts
+      - Any sections not in {{theme_adjustments}}
+    </action>
+
+    <action>Update meta section:
+      - Increment version (e.g., "1.0" → "1.1")
+      - Update "modified" timestamp
+      - Keep "locked" as false (not yet approved)
+    </action>
+
+    <action>Validate complete theme structure before saving</action>
+
+    <action>Write updated theme to {project-root}/.slide-builder/theme.json using Write tool</action>
+
+    <check if="Write fails">
+      <output>❌ Failed to save theme.json: {{error_message}}
+Please check file permissions and try again.</output>
+      <action>HALT</action>
+    </check>
+
+    <output>✅ Theme updated successfully</output>
+  </step>
+
+  <step n="5.5" goal="Regenerate sample slides with updated theme">
+    <output>🎨 Regenerating sample slides with updated theme...</output>
+
+    <action>Update status.yaml with: last_action: "Regenerating samples (iteration {{feedback_iteration}})"</action>
+
+    <critical>INVOKE FRONTEND-DESIGN SKILL for slide regeneration</critical>
+
+    <action n="5.5.0">Execute Skill tool call:
+      ```
+      Skill(skill="frontend-design")
+      ```
+      This loads professional design expertise for creating visually appealing slides.
+      YOU MUST MAKE THIS TOOL CALL NOW BEFORE REGENERATING SLIDES.
+    </action>
+
+    <action>Read updated theme.json to get new CSS variable values</action>
+
+    <action>Build CSS :root block with updated theme variables:
+      ```css
+      :root {
+        --color-primary: {{theme.colors.primary}};
+        --color-secondary: {{theme.colors.secondary}};
+        --color-accent: {{theme.colors.accent}};
+        --color-bg-default: {{theme.colors.background.default}};
+        --color-bg-alt: {{theme.colors.background.alt}};
+        --color-text-heading: {{theme.colors.text.heading}};
+        --color-text-body: {{theme.colors.text.body}};
+        --font-heading: {{theme.typography.fonts.heading}};
+        --font-body: {{theme.typography.fonts.body}};
+        --font-mono: {{theme.typography.fonts.mono}};
+        --size-hero: {{theme.typography.scale.hero}};
+        --size-h1: {{theme.typography.scale.h1}};
+        --size-h2: {{theme.typography.scale.h2}};
+        --size-h3: {{theme.typography.scale.h3}};
+        --size-body: {{theme.typography.scale.body}};
+        --size-small: {{theme.typography.scale.small}};
+      }
+      ```
+    </action>
+
+    <for-each item="slide_file" in="['01-title.html', '02-agenda.html', '03-flow.html', '04-comparison.html', '05-callout.html', '06-technical.html']">
+      <output>  🖼️ Regenerating {{slide_file}}...</output>
+
+      <action>Read current slide from {project-root}/.slide-builder/samples/{{slide_file}}</action>
+
+      <action>Regenerate the slide HTML:
+        - Use the same layout structure and content as before
+        - Update the CSS :root block with new theme variables
+        - Ensure all styling uses CSS variables (no hardcoded colors/fonts)
+        - Maintain 1920x1080 dimensions
+        - Apply personality adjustments to visual weight and styling
+      </action>
+
+      <action>Write regenerated slide to {project-root}/.slide-builder/samples/{{slide_file}}</action>
+
+      <check if="Write succeeds">
+        <output>  ✅ {{slide_file}} regenerated</output>
+      </check>
+
+      <check if="Write fails">
+        <output>  ⚠️ Failed to regenerate {{slide_file}}: {{error_message}}</output>
+      </check>
+    </for-each>
+
+    <action>Update status.yaml with: last_action: "Samples regenerated (iteration {{feedback_iteration}})"</action>
+
+    <output>
+═══════════════════════════════════════════════════════════════════════════════
+✅ **SAMPLE SLIDES UPDATED**
+═══════════════════════════════════════════════════════════════════════════════
+
+**Changes Applied:**
+{{theme_adjustments_summary}}
+
+**Updated Files:**
+- .slide-builder/theme.json (v{{theme.meta.version}})
+- .slide-builder/samples/01-title.html
+- .slide-builder/samples/02-agenda.html
+- .slide-builder/samples/03-flow.html
+- .slide-builder/samples/04-comparison.html
+- .slide-builder/samples/05-callout.html
+- .slide-builder/samples/06-technical.html
+
+**🔍 Please refresh your browser to see the changes.**
+───────────────────────────────────────────────────────────────────────────────
+    </output>
+  </step>
+
+  <step n="5.6" goal="Check iteration count and offer escape hatch">
+    <action>Read feedback_iteration from status.yaml</action>
+
+    <check if="feedback_iteration >= 3">
+      <output>
+───────────────────────────────────────────────────────────────────────────────
+⚠️ **ITERATION LIMIT REACHED**
+───────────────────────────────────────────────────────────────────────────────
+
+We've gone through {{feedback_iteration}} rounds of feedback. If the theme still isn't quite right, you have options:
+
+**Option 1: Continue with feedback** (recommended if close)
+  - Provide another round of gestalt feedback
+
+**Option 2: Direct theme editing** (escape hatch)
+  - Edit .slide-builder/theme.json directly
+  - Modify specific values (colors, fonts, sizes)
+  - Run `/sb:theme-edit` when done to regenerate samples
+
+**Option 3: Approve current theme**
+  - Say "Approved" to lock the current theme
+
+What would you like to do?
+───────────────────────────────────────────────────────────────────────────────
+      </output>
+
+      <ask>Your choice (feedback / edit / approved):</ask>
+
+      <action>Store response as {{escape_choice}}</action>
+
+      <check if="{{escape_choice}} contains 'edit'">
+        <output>
+📝 **Direct Editing Mode**
+
+You can now edit .slide-builder/theme.json directly:
+
+1. Open .slide-builder/theme.json in your editor
+2. Modify values as needed (colors are hex, sizes have px suffix)
+3. Save the file
+4. Run `/sb:theme-edit` to regenerate samples with your changes
+
+Exiting setup workflow. Resume with `/sb:setup` after editing.
+        </output>
+        <action>Update status.yaml with: phase: "manual-edit", last_action: "User chose direct editing"</action>
+        <action>HALT</action>
+      </check>
+
+      <check if="{{escape_choice}} contains 'approved' OR {{escape_choice}} contains 'approve'">
+        <output>✅ Theme approved! Proceeding to finalization...</output>
+        <goto step="6">Finalization</goto>
+      </check>
+
+      <check if="{{escape_choice}} contains 'feedback' OR default">
+        <output>Continuing with feedback loop...</output>
+        <goto step="5.1">feedback_prompt</goto>
+      </check>
+    </check>
+
+    <check if="feedback_iteration < 3">
+      <action>Continue to next feedback round</action>
+      <goto step="5.1">feedback_prompt</goto>
+    </check>
   </step>
 
   <!-- ═══════════════════════════════════════════════════════════════════════════
-       PHASE 6: COMPLETION (Story 2.5 - Not implemented yet)
+       PHASE 6: FINALIZATION (Story 2.5)
+       Locks theme, copies to templates, saves version history
        ═══════════════════════════════════════════════════════════════════════════ -->
 
-  <step n="6" goal="Complete setup">
-    <action>Save final theme.json</action>
-    <action>Copy approved samples to templates/ as layout templates</action>
-    <action>Update status.yaml with completion</action>
+  <step n="6" goal="Finalize and lock theme">
+    <action>Update status.yaml with: phase: "finalization", last_action: "Locking theme"</action>
 
     <output>
-**Setup Complete!**
+───────────────────────────────────────────────────────────────────────────────
+🔒 **PHASE 6: THEME FINALIZATION**
+───────────────────────────────────────────────────────────────────────────────
 
-Your brand theme is ready:
-- Theme file: .slide-builder/theme.json
-- Templates: .slide-builder/templates/
+Locking your approved theme and creating layout templates...
+───────────────────────────────────────────────────────────────────────────────
+    </output>
 
-Next steps:
-- Run /sb:plan-one for a single slide
-- Run /sb:plan-deck for a full presentation
+    <action>Read current theme.json</action>
+
+    <action>Update theme.json meta section:
+      - Set "locked": true
+      - Set "approved": "[current date YYYY-MM-DD]"
+      - Ensure version is set (e.g., "1.0" if first approval)
+    </action>
+
+    <action>Write updated theme.json</action>
+
+    <output>✅ Theme locked (v{{theme.meta.version}})</output>
+  </step>
+
+  <step n="6.1" goal="Create templates directory and copy samples">
+    <action>Create .slide-builder/templates/ directory if it doesn't exist</action>
+
+    <output>📁 Creating layout templates...</output>
+
+    <action>Define sample-to-template filename mapping:
+      {{filename_mapping}} = {
+        "01-title.html": "layout-title.html",
+        "02-agenda.html": "layout-list.html",
+        "03-flow.html": "layout-flow.html",
+        "04-comparison.html": "layout-columns-2.html",
+        "05-callout.html": "layout-callout.html",
+        "06-technical.html": "layout-code.html"
+      }
+    </action>
+
+    <for-each item="sample_file, template_file" in="{{filename_mapping}}">
+      <action>Read {project-root}/.slide-builder/samples/{{sample_file}}</action>
+      <action>Write to {project-root}/.slide-builder/templates/{{template_file}}</action>
+
+      <check if="Write succeeds">
+        <output>  ✅ {{sample_file}} → {{template_file}}</output>
+      </check>
+
+      <check if="Write fails">
+        <output>  ⚠️ Failed to copy {{sample_file}}: {{error_message}}</output>
+      </check>
+    </for-each>
+
+    <output>✅ 6 layout templates created in .slide-builder/templates/</output>
+  </step>
+
+  <step n="6.2" goal="Update theme.json layouts section">
+    <action>Read theme.json</action>
+
+    <action>Update layouts section with template file references:
+      {{theme.layouts}} = {
+        "title": { "file": "layout-title.html" },
+        "list": { "file": "layout-list.html" },
+        "flow": { "file": "layout-flow.html" },
+        "columns-2": { "file": "layout-columns-2.html" },
+        "callout": { "file": "layout-callout.html" },
+        "code": { "file": "layout-code.html" }
+      }
+    </action>
+
+    <action>Write updated theme.json</action>
+
+    <output>✅ Theme layouts section updated with template references</output>
+  </step>
+
+  <step n="6.3" goal="Save theme version history">
+    <action>Create .slide-builder/theme-history/ directory if it doesn't exist</action>
+
+    <action>Determine version number:
+      - If first version: v1
+      - Otherwise: increment from last version in theme-history/
+    </action>
+
+    <action>Generate timestamp: [current date YYYY-MM-DD]</action>
+
+    <action>Build history filename: theme-v{{version}}-{{date}}.json</action>
+
+    <action>Read current theme.json</action>
+
+    <action>Write theme snapshot to {project-root}/.slide-builder/theme-history/{{history_filename}}</action>
+
+    <check if="Write succeeds">
+      <output>✅ Theme version saved: theme-history/{{history_filename}}</output>
+    </check>
+
+    <check if="Write fails">
+      <output>⚠️ Failed to save theme history: {{error_message}}
+Theme is still locked and functional, but version history was not saved.</output>
+    </check>
+  </step>
+
+  <step n="6.4" goal="Update status and display completion">
+    <action>Update status.yaml with:
+      mode: "ready"
+      phase: "complete"
+      theme:
+        file: .slide-builder/theme.json
+        status: locked
+        personality: {{theme.personality.classification}}
+        confidence: {{theme.personality.confidence}}
+        approved: "[current date]"
+      templates:
+        directory: .slide-builder/templates/
+        count: 6
+        files:
+          - layout-title.html
+          - layout-list.html
+          - layout-flow.html
+          - layout-columns-2.html
+          - layout-callout.html
+          - layout-code.html
+      last_action: "Setup complete - theme locked and approved"
+      last_modified: "[current timestamp]"
+    </action>
+
+    <action>Add history entry to status.yaml:
+      - action: "Theme approved and locked"
+        timestamp: "[current timestamp]"
+    </action>
+
+    <output>
+═══════════════════════════════════════════════════════════════════════════════
+🎉 **SETUP COMPLETE!**
+═══════════════════════════════════════════════════════════════════════════════
+
+Your brand theme is ready for slide generation!
+
+**📁 Files Created:**
+
+| Location | Description |
+|----------|-------------|
+| .slide-builder/theme.json | Your locked brand theme (v{{theme.meta.version}}) |
+| .slide-builder/templates/ | 6 layout templates |
+| .slide-builder/theme-history/ | Version snapshot for rollback |
+
+**📑 Available Layout Templates:**
+
+| Template | Use Case |
+|----------|----------|
+| layout-title.html | Title slides, hero text |
+| layout-list.html | Bullet lists, agendas |
+| layout-flow.html | Process flows, timelines |
+| layout-columns-2.html | Comparisons, two-column content |
+| layout-callout.html | Key insights, statistics, CTAs |
+| layout-code.html | Technical content, code blocks |
+
+**🎨 Theme Summary:**
+
+- **Personality:** {{theme.personality.classification}}
+- **Primary Color:** {{theme.colors.primary}}
+- **Heading Font:** {{theme.typography.fonts.heading}}
+- **Feedback Rounds:** {{feedback_iteration}}
+
+───────────────────────────────────────────────────────────────────────────────
+
+**🚀 Next Steps:**
+
+1. **Single slide:** Run `/sb:plan-one` to create one slide quickly
+2. **Full deck:** Run `/sb:plan-deck` to plan a complete presentation
+3. **View theme:** Run `/sb:theme` to see your theme summary anytime
+4. **Edit theme:** Run `/sb:theme-edit` to modify your theme later
+
+Happy presenting! 🎤
+═══════════════════════════════════════════════════════════════════════════════
     </output>
   </step>
 

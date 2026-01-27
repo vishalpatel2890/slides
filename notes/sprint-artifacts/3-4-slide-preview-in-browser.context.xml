@@ -1,0 +1,253 @@
+<story-context id="story-3-4-slide-preview-in-browser" v="1.0">
+  <metadata>
+    <epicId>epic-3</epicId>
+    <storyId>3-4-slide-preview-in-browser</storyId>
+    <title>Slide Preview in Browser</title>
+    <status>drafted</status>
+    <generatedAt>2026-01-27</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>notes/sprint-artifacts/3-4-slide-preview-in-browser.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>user</asA>
+    <iWant>to preview my generated slide in a web browser</iWant>
+    <soThat>I can see exactly how it looks before using it</soThat>
+    <tasks>
+      <task id="1" name="Add Preview Offer to Build Completion (Phase 4)">
+        <subtask>1.1: Update .slide-builder/workflows/build-one/instructions.md to add preview offer in Phase 4</subtask>
+        <subtask>1.2: After slide save, display clear file path message: "Slide saved to: .slide-builder/single/slide.html"</subtask>
+        <subtask>1.3: Add prompt: "Open in browser? (y/n)"</subtask>
+        <subtask>1.4: Document the path format for easy copy-paste</subtask>
+      </task>
+      <task id="2" name="Implement Browser Open Functionality">
+        <subtask>2.1: If user accepts, use `open` command (macOS) / `xdg-open` (Linux) / `start` (Windows) to launch default browser</subtask>
+        <subtask>2.2: Pass the absolute file path to the browser</subtask>
+        <subtask>2.3: Handle cross-platform command differences</subtask>
+        <subtask>2.4: Provide fallback message if open fails</subtask>
+      </task>
+      <task id="3" name="Ensure Slide Dimensions Are Correct">
+        <subtask>3.1: Verify viewport meta tag in slide HTML: width=1920, height=1080</subtask>
+        <subtask>3.2: Ensure body/slide container has explicit dimensions: width: 1920px; height: 1080px;</subtask>
+        <subtask>3.3: Add overflow: hidden to prevent scrollbars</subtask>
+        <subtask>3.4: Add viewport auto-scaling CSS for smaller screens</subtask>
+      </task>
+      <task id="4" name="Validate Self-Contained Slide Structure">
+        <subtask>4.1: Ensure all CSS is embedded in style tags (no external stylesheets except fonts)</subtask>
+        <subtask>4.2: Ensure all JavaScript is embedded in script tags (no external scripts)</subtask>
+        <subtask>4.3: Verify Google Fonts loaded via link tag with preconnect</subtask>
+        <subtask>4.4: Verify no other external resources referenced</subtask>
+        <subtask>4.5: Add comment in HTML documenting allowed external dependencies</subtask>
+      </task>
+      <task id="5" name="Verify Contenteditable Functionality">
+        <subtask>5.1: Verify all text elements have contenteditable="true"</subtask>
+        <subtask>5.2: Verify all contenteditable elements have data-field attributes</subtask>
+        <subtask>5.3-5.5: Test text selection and editing in Chrome, Firefox, Safari</subtask>
+        <subtask>5.6: Verify cursor appears on click</subtask>
+      </task>
+      <task id="6" name="Cross-Browser Testing">
+        <subtask>6.1-6.3: Open slide in Chrome, Firefox, Safari - verify identical rendering</subtask>
+        <subtask>6.4: Check for CSS property compatibility issues</subtask>
+        <subtask>6.5: Document any browser-specific workarounds needed</subtask>
+        <subtask>6.6: Run Frontend Test Gate checklist</subtask>
+      </task>
+      <task id="7" name="Update Status and Complete">
+        <subtask>7.1: After successful preview offer, update status.yaml if not already updated</subtask>
+        <subtask>7.2: Log "Slide preview offered" in history</subtask>
+        <subtask>7.3: Display completion message</subtask>
+      </task>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <criterion id="AC3.4.1">Given a slide has been built, when the build completes, then the system provides the file path and offers to open in browser</criterion>
+    <criterion id="AC3.4.2">Given the user opens the slide HTML file, when viewed in Chrome, Firefox, or Safari, then the slide renders correctly at 1920x1080</criterion>
+    <criterion id="AC3.4.3">All elements display as designed with no layout issues</criterion>
+    <criterion id="AC3.4.4">Text is editable via click (contenteditable works)</criterion>
+    <criterion id="AC3.4.5">Slides are self-contained (no external dependencies except Google Fonts)</criterion>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc path="notes/sprint-artifacts/tech-spec-epic-3.md" relevance="high">
+        Contains AC definitions, Preview Handler module spec, Phase 4 workflow details, NFRs
+      </doc>
+      <doc path="notes/architecture.md" relevance="high">
+        HTML Slide Pattern, ADR-003 (self-contained HTML slides), contenteditable requirements
+      </doc>
+      <doc path="notes/epics.md" relevance="medium">
+        Story 3.4 context, Epic 3 overview
+      </doc>
+      <doc path="notes/prd.md" relevance="medium">
+        FR31 browser compatibility requirements
+      </doc>
+    </docs>
+    <code>
+      <file path=".slide-builder/workflows/build-one/instructions.md" relevance="critical">
+        <description>MODIFY - Contains Phase 4 workflow that needs preview offer enhancement</description>
+        <currentState>
+          Phase 4 exists with basic state update and completion message.
+          Step 4 includes "Open in browser? (y/n)" ask block.
+          Currently provides instruction: "Open .slide-builder/single/slide.html in Chrome or Firefox"
+        </currentState>
+        <modification>
+          Enhance Phase 4 to:
+          1. Display clear file path after save
+          2. Use platform-specific browser open command (open/xdg-open/start)
+          3. Handle command failure with fallback message
+        </modification>
+        <keySection lines="451-516">
+          Phase 4: State Update and Completion
+          - Updates status.yaml with built_count and last_action
+          - Displays completion output with file path
+          - Asks "Open in browser? (y/n)"
+          - Currently just provides instruction to open manually
+        </keySection>
+      </file>
+      <file path=".slide-builder/templates/01-title.html" relevance="high">
+        <description>Reference template showing correct HTML structure</description>
+        <pattern>
+          - viewport meta: width=1920, height=1080
+          - CSS variables in :root
+          - .slide-wrapper with transform-origin for scaling
+          - .slide container at 1920x1080
+          - scaleSlide() JavaScript for viewport auto-scaling
+          - Google Fonts preconnect and link
+        </pattern>
+      </file>
+      <file path=".slide-builder/single/slide.html" relevance="high">
+        <description>OUTPUT - Generated slide to be previewed (does not exist until build-one runs)</description>
+      </file>
+      <file path=".slide-builder/status.yaml" relevance="medium">
+        <description>Status tracking - updated in Phase 4 with preview action</description>
+      </file>
+      <file path=".slide-builder/theme.json" relevance="medium">
+        <description>Theme configuration - referenced for verification that slide uses theme correctly</description>
+      </file>
+    </code>
+    <dependencies>
+      <dependency type="prerequisite">
+        Story 3.2 or 3.3 must be complete (build-one workflow functional)
+      </dependency>
+      <dependency type="prerequisite">
+        Theme exists at .slide-builder/theme.json (from Epic 2)
+      </dependency>
+      <dependency type="external">
+        Google Fonts CDN (only allowed external dependency)
+      </dependency>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint source="tech-spec" id="NFR4">
+      Slide preview renders immediately in browser (no loading delay)
+    </constraint>
+    <constraint source="tech-spec" id="NFR18">
+      Must work in Chrome, Firefox, Safari
+    </constraint>
+    <constraint source="architecture" id="ADR-003">
+      Slides are self-contained HTML files - no external CSS or JS except Google Fonts
+    </constraint>
+    <constraint source="architecture" id="HTML-Pattern">
+      All text elements MUST have contenteditable="true" and unique data-field attributes
+    </constraint>
+    <constraint source="architecture" id="Dimensions">
+      Slides MUST be exactly 1920x1080 pixels with viewport meta tag
+    </constraint>
+    <constraint source="platform">
+      Use platform-appropriate command: open (macOS), xdg-open (Linux), start (Windows)
+      Current environment is macOS (darwin)
+    </constraint>
+  </constraints>
+
+  <interfaces>
+    <interface name="Browser Open Command">
+      <platform name="macOS">open [file_path]</platform>
+      <platform name="Linux">xdg-open [file_path]</platform>
+      <platform name="Windows">start [file_path]</platform>
+      <note>Use absolute path for reliability</note>
+    </interface>
+    <interface name="Slide HTML Structure">
+      <element>DOCTYPE html</element>
+      <element>meta viewport width=1920, height=1080</element>
+      <element>Google Fonts link with preconnect</element>
+      <element>:root CSS variables from theme</element>
+      <element>body: width 1920px, height 1080px, overflow hidden</element>
+      <element>.slide-wrapper with transform-origin for scaling</element>
+      <element>.slide container at 1920x1080</element>
+      <element>All text with contenteditable="true" and data-field</element>
+      <element>scaleSlide() JavaScript for auto-scaling</element>
+      <element>Auto-save script for contenteditable persistence</element>
+    </interface>
+    <interface name="Status Update">
+      <field>built_count: increment or set to 1</field>
+      <field>last_action: "Built slide using [template/custom]"</field>
+      <field>last_modified: ISO timestamp</field>
+      <field>history: append with action and timestamp</field>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>
+      <standard>Cross-browser testing: Chrome, Firefox, Safari</standard>
+      <standard>Visual inspection for layout correctness</standard>
+      <standard>Functional test for contenteditable text editing</standard>
+      <standard>Dependency audit - no external resources except Google Fonts</standard>
+      <standard>Console error check - no JavaScript errors</standard>
+    </standards>
+    <locations>
+      <location>Frontend Test Gate 3-4-TG1 in story file</location>
+      <location>Manual browser testing (no automated tests for this story)</location>
+    </locations>
+    <ideas>
+      <idea>Test scaleSlide() by resizing browser window</idea>
+      <idea>Verify contenteditable cursor appears on first click</idea>
+      <idea>Check localStorage persistence of edits after refresh</idea>
+      <idea>Test with slow network to verify no external dependencies block rendering</idea>
+      <idea>Verify file:// protocol works (local file access)</idea>
+    </ideas>
+  </tests>
+
+  <implementationGuidance>
+    <approach>
+      This story primarily modifies the existing build-one workflow Phase 4.
+      No new files need to be created - only enhancement of existing functionality.
+    </approach>
+    <keyChanges>
+      <change file=".slide-builder/workflows/build-one/instructions.md" section="Phase 4">
+        1. After the existing "Slide saved to..." output, ensure absolute path is shown
+        2. Change the "Open in browser?" response handling from instruction to action
+        3. Add platform detection and browser open command execution
+        4. Add error handling with fallback message
+      </change>
+    </keyChanges>
+    <codePattern name="Browser Open">
+      <![CDATA[
+      <check if="user says yes">
+        <action>Detect platform from environment (darwin = macOS)</action>
+        <check if="platform is darwin (macOS)">
+          <action>Execute: open [absolute_path_to_slide.html]</action>
+        </check>
+        <check if="platform is linux">
+          <action>Execute: xdg-open [absolute_path_to_slide.html]</action>
+        </check>
+        <check if="platform is windows">
+          <action>Execute: start [absolute_path_to_slide.html]</action>
+        </check>
+        <check if="command fails">
+          <output>Could not open browser automatically. Open the file manually at: [absolute_path]</output>
+        </check>
+      </check>
+      ]]>
+    </codePattern>
+    <validationChecklist>
+      <item>File path shown clearly after build</item>
+      <item>Browser open prompt appears</item>
+      <item>Browser launches with slide (on macOS)</item>
+      <item>Slide renders at 1920x1080</item>
+      <item>All text is clickable and editable</item>
+      <item>No console errors</item>
+      <item>No external dependencies besides Google Fonts</item>
+    </validationChecklist>
+  </implementationGuidance>
+</story-context>
