@@ -1,0 +1,18 @@
+# Plan Workflow - Smart Router
+# Routes to plan-one or plan-deck based on user intent
+name: plan
+description: "Smart router that asks user whether they need a single slide or full deck, then routes to appropriate workflow"
+author: "Slide Builder"
+
+# Path variables
+installed_path: "{project-root}/.slide-builder/workflows/plan"
+
+# Workflow components
+instructions: "{installed_path}/instructions.md"
+
+# Variables
+variables:
+  workflow_version: "1.0"
+
+template: false
+standalone: true

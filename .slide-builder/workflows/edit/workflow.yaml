@@ -1,0 +1,23 @@
+# Edit Workflow - Slide Editing
+# Allows layout changes via natural language while preserving text edits
+name: edit
+description: "Edit slide layout via natural language prompts while preserving user text edits"
+author: "Slide Builder"
+
+# Path variables
+installed_path: "{project-root}/.slide-builder/workflows/edit"
+
+# Workflow components
+instructions: "{installed_path}/instructions.md"
+
+# State files
+status_file: "{project-root}/.slide-builder/status.yaml"
+theme_file: "{project-root}/.slide-builder/theme.json"
+
+# Variables
+variables:
+  workflow_version: "1.0"
+  # slide_number will be passed as argument (e.g., /sb-edit 3)
+
+template: false
+standalone: true

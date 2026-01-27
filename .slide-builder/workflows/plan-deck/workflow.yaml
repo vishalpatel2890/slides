@@ -1,0 +1,22 @@
+# Plan Deck Workflow - Full Deck Planning
+# Captures narrative structure for a complete presentation
+name: plan-deck
+description: "Plan a full presentation deck with narrative structure, audience context, and slide-by-slide breakdown"
+author: "Slide Builder"
+
+# Path variables
+installed_path: "{project-root}/.slide-builder/workflows/plan-deck"
+
+# Workflow components
+instructions: "{installed_path}/instructions.md"
+
+# State management
+plan_file: "{project-root}/.slide-builder/deck/plan.yaml"
+status_file: "{project-root}/.slide-builder/status.yaml"
+
+# Variables
+variables:
+  workflow_version: "1.0"
+
+template: false
+standalone: true

@@ -1,0 +1,54 @@
+# Slide Builder - Workflow Status
+# This file tracks the current state of slide generation workflows
+# Human-readable for manual inspection and recovery
+
+# Current operating mode
+mode: setup
+
+# Setup workflow tracking
+phase: sample-review
+workflow_version: "1.0"
+
+# Assets collected
+assets:
+  website_url: https://amperity.com
+  pdf_paths:
+    - /Users/vishalpatel/Downloads/1-10.pdf
+    - /Users/vishalpatel/Downloads/11-20.pdf
+    - /Users/vishalpatel/Downloads/21-30.pdf
+    - /Users/vishalpatel/Downloads/31-40.pdf
+    - /Users/vishalpatel/Downloads/41-50.pdf
+    - /Users/vishalpatel/Downloads/51-67.pdf
+  image_paths: []
+
+# Extraction status
+extraction:
+  website_analysis: complete
+  pdf_analysis: complete
+  image_analysis: skipped
+
+# Theme status
+theme:
+  file: .slide-builder/theme.json
+  status: generated
+  personality: bold-minimal
+  confidence: 0.85
+
+# Last action tracking
+last_action: "Sample slides generated for review"
+last_modified: "2026-01-27T04:10:00Z"
+
+# Action history
+history:
+  - action: "Status file initialized"
+    timestamp: "2026-01-26T00:00:00Z"
+  - action: "Setup workflow started"
+    timestamp: "2026-01-26T21:25:00Z"
+  - action: "Assets collected (1 website, 6 PDFs)"
+    timestamp: "2026-01-26T21:26:00Z"
+  - action: "Brand primitives extracted"
+    timestamp: "2026-01-26T21:28:00Z"
+  - action: "Theme.json generated"
+    timestamp: "2026-01-26T21:30:00Z"
+  - action: "Font updated from Roboto to Outfit"
+    timestamp: "2025-01-27T04:00:00Z"

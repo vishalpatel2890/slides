@@ -1,0 +1,241 @@
+<story-context id=".bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>2</epicId>
+    <storyId>1</storyId>
+    <title>Brand Asset Input Collection</title>
+    <status>drafted</status>
+    <generatedAt>2026-01-26</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>notes/sprint-artifacts/2-1-brand-asset-input-collection.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>Solutions Consultant</asA>
+    <iWant>to provide my brand assets (website URL, PDF, images) and a brief description</iWant>
+    <soThat>the system can extract my brand's visual DNA</soThat>
+    <tasks>
+      <task id="1" ac="1">
+        <title>Implement Asset Collector prompt sequence</title>
+        <subtasks>
+          <subtask>1.1: Add step in setup workflow to prompt for website URL (optional)</subtask>
+          <subtask>1.2: Add step to prompt for PDF file paths (optional, accepts comma-separated list)</subtask>
+          <subtask>1.3: Add step to prompt for image file paths (optional, accepts comma-separated list)</subtask>
+          <subtask>1.4: Add step to prompt for brand description (required, cannot be empty)</subtask>
+        </subtasks>
+      </task>
+      <task id="2" ac="2">
+        <title>Implement input validation logic</title>
+        <subtasks>
+          <subtask>2.1: Validate that at least one visual asset is provided (URL OR PDF OR image)</subtask>
+          <subtask>2.2: If all visual assets skipped, display error and re-prompt</subtask>
+          <subtask>2.3: Validate file paths exist for PDF and image inputs</subtask>
+          <subtask>2.4: Validate URL format for website input</subtask>
+        </subtasks>
+      </task>
+      <task id="3" ac="3">
+        <title>Implement input confirmation step</title>
+        <subtasks>
+          <subtask>3.1: Display summary of all collected inputs</subtask>
+          <subtask>3.2: Show which inputs were provided vs skipped</subtask>
+          <subtask>3.3: Ask user to confirm before proceeding to analysis</subtask>
+          <subtask>3.4: Allow user to go back and modify inputs if needed</subtask>
+        </subtasks>
+      </task>
+      <task id="4" ac="4">
+        <title>Implement WebFetch integration for websites</title>
+        <subtasks>
+          <subtask>4.1: Call WebFetch with provided URL to retrieve page content</subtask>
+          <subtask>4.2: Handle WebFetch errors gracefully (network failures, 404, etc.)</subtask>
+          <subtask>4.3: Store WebFetch result for CSS/style extraction in next story</subtask>
+        </subtasks>
+      </task>
+      <task id="5" ac="5">
+        <title>Implement Claude Vision integration for PDF/images</title>
+        <subtasks>
+          <subtask>5.1: Use Read tool to load PDF files and pass to Claude Vision analysis</subtask>
+          <subtask>5.2: Use Read tool to load image files and pass to Claude Vision analysis</subtask>
+          <subtask>5.3: Handle file read errors gracefully (file not found, corrupted)</subtask>
+          <subtask>5.4: Store vision analysis results for primitive extraction in next story</subtask>
+        </subtasks>
+      </task>
+      <task id="6" ac="1-5">
+        <title>Update setup workflow instructions.md</title>
+        <subtasks>
+          <subtask>6.1: Add Phase 1 steps for asset collection to instructions.md</subtask>
+          <subtask>6.2: Add validation actions for input requirements</subtask>
+          <subtask>6.3: Add confirmation checkpoint before proceeding</subtask>
+          <subtask>6.4: Add error handling actions for invalid inputs</subtask>
+          <subtask>6.5: Add WebFetch and Vision analysis actions</subtask>
+        </subtasks>
+      </task>
+      <task id="7" ac="1-5">
+        <title>Testing and validation</title>
+        <subtasks>
+          <subtask>7.1: Test with website URL only - verify WebFetch called</subtask>
+          <subtask>7.2: Test with PDF only - verify Vision analysis runs</subtask>
+          <subtask>7.3: Test with image only - verify Vision analysis runs</subtask>
+          <subtask>7.4: Test with description only - verify error and re-prompt</subtask>
+          <subtask>7.5: Test with all inputs - verify all captured and confirmed</subtask>
+          <subtask>7.6: Test confirmation step allows proceed or go back</subtask>
+        </subtasks>
+      </task>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <criterion id="AC2.1.1">Given the user runs `/setup`, when prompted for brand inputs, then they can provide: website URL (optional), PDF file paths (optional), image file paths (optional), brief brand description (required)</criterion>
+    <criterion id="AC2.1.2">At least one visual asset (URL, PDF, or image) must be provided alongside the description</criterion>
+    <criterion id="AC2.1.3">The system confirms all inputs before proceeding to analysis</criterion>
+    <criterion id="AC2.1.4">Given a website URL is provided, when processing inputs, then the system fetches and analyzes the page via WebFetch</criterion>
+    <criterion id="AC2.1.5">Given PDF or image files are provided, when processing inputs, then the system analyzes them via Claude Vision</criterion>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>notes/sprint-artifacts/tech-spec-epic-2.md</path>
+        <title>Epic Technical Specification: Theme Creation</title>
+        <section>Story 2.1: Brand Asset Input Collection</section>
+        <snippet>Asset Collector module prompts user for website URL (optional), PDF paths (optional), image paths (optional), brand description (required). Validates at least one visual asset provided. Stores source list for theme.json meta.sources.</snippet>
+      </doc>
+      <doc>
+        <path>notes/sprint-artifacts/tech-spec-epic-2.md</path>
+        <title>Epic Technical Specification: Theme Creation</title>
+        <section>Workflows and Sequencing - Phase 1</section>
+        <snippet>Phase 1 Asset Collection: Display welcome, prompt for URL/PDF/images/description, validate at least one visual asset + description, confirm inputs with user before proceeding.</snippet>
+      </doc>
+      <doc>
+        <path>notes/architecture.md</path>
+        <title>Slide Builder Architecture</title>
+        <section>Pattern 1: Theme Extraction Pipeline</section>
+        <snippet>Input Sources: Website URL via WebFetch for HTML/CSS analysis, PDF files via Claude vision for visual analysis, Image files via Claude vision for color/style extraction, User description for context interpretation.</snippet>
+      </doc>
+      <doc>
+        <path>notes/prd.md</path>
+        <title>Slide Builder PRD</title>
+        <section>Theme Setup UX Philosophy</section>
+        <snippet>AI does the work, user is creative director. User provides inputs once (URL, PDF, images, description). AI makes all decisions, extracts colors/fonts, infers brand personality.</snippet>
+      </doc>
+      <doc>
+        <path>notes/epics.md</path>
+        <title>Slide Builder Epic Breakdown</title>
+        <section>Story 2.1: Brand Asset Input Collection</section>
+        <snippet>As a Solutions Consultant, I want to provide my brand assets so that the system can extract my brand's visual DNA. At least one visual asset (URL, PDF, or image) must be provided.</snippet>
+      </doc>
+      <doc>
+        <path>.slide-builder/CONVENTIONS.md</path>
+        <title>Slide Builder Conventions</title>
+        <section>Workflow Execution Pattern</section>
+        <snippet>All workflows follow BMAD pattern: Load workflow.yaml, Read instructions.md, Execute steps in order, Pause at template-output and ask tags, Update status.yaml with progress.</snippet>
+      </doc>
+    </docs>
+    <code>
+      <file>
+        <path>.slide-builder/workflows/setup/workflow.yaml</path>
+        <kind>workflow-config</kind>
+        <symbol>setup</symbol>
+        <reason>Primary workflow configuration that will be updated to implement asset collection. Currently has basic structure with instructions path.</reason>
+      </file>
+      <file>
+        <path>.slide-builder/workflows/setup/instructions.md</path>
+        <kind>workflow-instructions</kind>
+        <symbol>step-1-collect-brand-inputs</symbol>
+        <lines>11-28</lines>
+        <reason>Step 1 needs enhancement with detailed prompt sequence, validation logic, and confirmation flow per AC requirements.</reason>
+      </file>
+      <file>
+        <path>.claude/commands/sb/setup.md</path>
+        <kind>skill-registration</kind>
+        <symbol>/sb:setup</symbol>
+        <reason>Claude Code skill that invokes the setup workflow. Already registered and working per Story 1.4.</reason>
+      </file>
+      <file>
+        <path>.slide-builder/CONVENTIONS.md</path>
+        <kind>documentation</kind>
+        <symbol>workflow-execution-pattern</symbol>
+        <reason>Documents the BMAD workflow pattern that asset collection must follow: load yaml, read instructions, execute steps, update status.</reason>
+      </file>
+    </code>
+    <dependencies>
+      <node>
+        <package>puppeteer</package>
+        <version>^23.0.0</version>
+        <note>Used for HTML-to-image conversion in Epic 7, not needed for this story</note>
+      </node>
+      <node>
+        <package>googleapis</package>
+        <version>^140.0.0</version>
+        <note>Used for Google Slides export in Epic 7, not needed for this story</note>
+      </node>
+      <claudeTools>
+        <tool>WebFetch</tool>
+        <note>Required for AC2.1.4 - fetching website content for CSS/style extraction</note>
+      </claudeTools>
+      <claudeTools>
+        <tool>Read (Claude Vision)</tool>
+        <note>Required for AC2.1.5 - analyzing PDF and image files for visual extraction</note>
+      </claudeTools>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint source="architecture">ADR-001: 100% alignment with BMAD workflow pattern - workflows use workflow.yaml + instructions.md structure</constraint>
+    <constraint source="architecture">ADR-005: Local-first architecture - all brand asset analysis performed locally via Claude, no external uploads (NFR12, NFR13)</constraint>
+    <constraint source="tech-spec">Asset Collector must validate at least one visual asset (URL OR PDF OR image) is provided alongside required description</constraint>
+    <constraint source="prd">User provides inputs once - no JSON editing, no pixel values, no micro-decisions. AI interprets inputs.</constraint>
+    <constraint source="tech-spec">Input sources will be stored in theme.json meta.sources for reference</constraint>
+    <constraint source="conventions">Workflows must update .slide-builder/status.yaml with progress at each major step</constraint>
+    <constraint source="tech-spec">WebFetch used for URLs (public, no auth), Claude Vision via Read tool for PDFs/images</constraint>
+  </constraints>
+
+  <interfaces>
+    <interface>
+      <name>/sb:setup slash command</name>
+      <kind>Claude Code skill invocation</kind>
+      <signature>/sb:setup - Triggers setup workflow execution</signature>
+      <path>.claude/commands/sb/setup.md</path>
+    </interface>
+    <interface>
+      <name>WebFetch tool</name>
+      <kind>Claude Code built-in tool</kind>
+      <signature>WebFetch(url: string, prompt: string) - Fetches URL content and processes with prompt</signature>
+      <path>Claude Code built-in</path>
+    </interface>
+    <interface>
+      <name>Read tool (Claude Vision)</name>
+      <kind>Claude Code built-in tool</kind>
+      <signature>Read(file_path: string) - Reads file, including visual analysis for PDFs/images</signature>
+      <path>Claude Code built-in</path>
+    </interface>
+    <interface>
+      <name>status.yaml state file</name>
+      <kind>YAML state persistence</kind>
+      <signature>mode, last_action, last_modified, history[] - Tracks workflow progress</signature>
+      <path>.slide-builder/status.yaml</path>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>This is a Claude Code workflow project without traditional unit tests. Testing is performed via manual CLI testing through the Frontend Test Gate defined in the story. The test approach follows the tech-spec Test Strategy: individual input type verification, full flow integration, and edge case handling for invalid inputs.</standards>
+    <locations>
+      <location>Frontend Test Gate in story file defines manual CLI test steps</location>
+      <location>No automated test files exist yet - this is an agentic workflow project</location>
+    </locations>
+    <ideas>
+      <idea ac="AC2.1.1">Test each input prompt appears in sequence (URL, PDF, images, description)</idea>
+      <idea ac="AC2.1.1">Test optional inputs can be skipped with Enter key</idea>
+      <idea ac="AC2.1.1">Test required input (description) cannot be empty</idea>
+      <idea ac="AC2.1.2">Test with only description provided - should fail with re-prompt</idea>
+      <idea ac="AC2.1.2">Test with URL only + description - should succeed</idea>
+      <idea ac="AC2.1.2">Test with PDF only + description - should succeed</idea>
+      <idea ac="AC2.1.2">Test with image only + description - should succeed</idea>
+      <idea ac="AC2.1.3">Test confirmation step displays all provided inputs accurately</idea>
+      <idea ac="AC2.1.3">Test user can go back and modify inputs from confirmation</idea>
+      <idea ac="AC2.1.4">Test WebFetch is called when URL provided</idea>
+      <idea ac="AC2.1.4">Test WebFetch error handling (network failure, 404)</idea>
+      <idea ac="AC2.1.5">Test Claude Vision analyzes PDF when path provided</idea>
+      <idea ac="AC2.1.5">Test Claude Vision analyzes images when paths provided</idea>
+      <idea ac="AC2.1.5">Test file not found error handling</idea>
+    </ideas>
+  </tests>
+</story-context>

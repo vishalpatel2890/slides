@@ -1,0 +1,20 @@
+# Test Workflow - Demonstrates BMAD Pattern for Slide Builder
+# This workflow validates Story 1.2: Workflow Definition Pattern
+name: test
+description: "Test workflow to validate BMAD pattern implementation - executes 3 steps with checkpoint approvals"
+author: "Slide Builder"
+
+# Path variables
+installed_path: "{project-root}/.slide-builder/workflows/test"
+
+# Workflow components
+instructions: "{installed_path}/instructions.md"
+
+# Variables demonstrating resolution
+variables:
+  workflow_version: "1.0"
+  test_date: "{date}"
+
+# This workflow is standalone (no template output file)
+template: false
+standalone: true

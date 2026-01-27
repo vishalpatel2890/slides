@@ -1,0 +1,22 @@
+{
+  "name": "slide-builder",
+  "version": "1.0.0",
+  "description": "Agentic framework for Claude Code that enables Solutions Consultants to create brand-perfect presentation slides",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "slides",
+    "presentations",
+    "claude-code",
+    "agentic"
+  ],
+  "author": "Vishal",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "puppeteer": "^23.0.0",
+    "googleapis": "^140.0.0"
+  }
+}

@@ -1,0 +1,222 @@
+<story-context id="bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>1</epicId>
+    <storyId>2</storyId>
+    <title>Workflow Definition Pattern</title>
+    <status>drafted</status>
+    <generatedAt>2026-01-26</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>notes/sprint-artifacts/1-2-workflow-definition-pattern.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>developer</asA>
+    <iWant>a standardized workflow pattern with workflow.yaml and instructions.md files</iWant>
+    <soThat>all commands follow the same BMAD execution model</soThat>
+    <tasks>
+      <task id="1" ac="1">
+        <title>Create workflow.yaml schema and loader</title>
+        <subtasks>
+          <subtask>1.1: Define workflow.yaml schema (name, description, instructions path, config)</subtask>
+          <subtask>1.2: Implement YAML parsing for workflow configuration</subtask>
+          <subtask>1.3: Resolve variable references ({installed_path}, {project-root})</subtask>
+          <subtask>1.4: Handle missing or malformed workflow.yaml with clear error</subtask>
+        </subtasks>
+      </task>
+      <task id="2" ac="2">
+        <title>Create instructions.md parser</title>
+        <subtasks>
+          <subtask>2.1: Load instructions.md from path specified in workflow.yaml</subtask>
+          <subtask>2.2: Parse XML step structure (&lt;step n="N" goal="..."&gt;)</subtask>
+          <subtask>2.3: Extract action, ask, template-output, and other supported tags</subtask>
+          <subtask>2.4: Handle malformed instructions with clear error</subtask>
+        </subtasks>
+      </task>
+      <task id="3" ac="3,4">
+        <title>Implement step-by-step execution</title>
+        <subtasks>
+          <subtask>3.1: Execute steps in exact numerical order</subtask>
+          <subtask>3.2: Process &lt;action&gt; tags (perform specified actions)</subtask>
+          <subtask>3.3: Ensure step N completes before step N+1 begins</subtask>
+          <subtask>3.4: Track current step in execution state</subtask>
+        </subtasks>
+      </task>
+      <task id="4" ac="5">
+        <title>Implement checkpoint handling</title>
+        <subtasks>
+          <subtask>4.1: Detect &lt;template-output&gt; tags and pause for user review</subtask>
+          <subtask>4.2: Display generated content to user</subtask>
+          <subtask>4.3: Present approval options ([c] Continue, [y] YOLO, etc.)</subtask>
+          <subtask>4.4: Wait for user response before continuing</subtask>
+          <subtask>4.5: Handle &lt;ask&gt; tags (prompt user and wait for response)</subtask>
+        </subtasks>
+      </task>
+      <task id="5" ac="1-5">
+        <title>Create test workflow</title>
+        <subtasks>
+          <subtask>5.1: Create .slide-builder/workflows/test/workflow.yaml with minimal config</subtask>
+          <subtask>5.2: Create .slide-builder/workflows/test/instructions.md with 3 test steps</subtask>
+          <subtask>5.3: Include &lt;template-output&gt; tag to test checkpoints</subtask>
+          <subtask>5.4: Verify end-to-end workflow execution</subtask>
+        </subtasks>
+      </task>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <ac id="AC1.2.1">Given a workflow directory (e.g., .slide-builder/workflows/setup/), when the workflow is invoked, then the system reads workflow.yaml for configuration</ac>
+    <ac id="AC1.2.2">The system loads instructions.md for execution logic</ac>
+    <ac id="AC1.2.3">The system follows step-by-step instructions with checkpoint approvals</ac>
+    <ac id="AC1.2.4">Given the workflow.yaml contains phase definitions, when executing the workflow, then each phase completes before the next begins</ac>
+    <ac id="AC1.2.5">User approval is requested at checkpoint tags (&lt;template-output&gt;, &lt;ask&gt;)</ac>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>notes/prd.md</path>
+        <title>Slide Builder PRD</title>
+        <section>Framework Architecture (BMAD Pattern)</section>
+        <snippet>FR48-52 define workflow requirements: Each command maps to workflow definition (workflow.yaml), workflows have instruction files (instructions.md), execute in phases with checkpoint approvals, state in YAML files, extensible for new workflows.</snippet>
+      </doc>
+      <doc>
+        <path>notes/architecture.md</path>
+        <title>Slide Builder Architecture</title>
+        <section>Implementation Patterns - Workflow File Pattern</section>
+        <snippet>Every workflow follows: workflow.yaml (name, description, instructions path) + instructions.md with &lt;workflow&gt;&lt;step n="1"&gt;&lt;action&gt;&lt;template-output&gt; structure. ADR-001 mandates 100% BMAD pattern alignment.</snippet>
+      </doc>
+      <doc>
+        <path>notes/sprint-artifacts/tech-spec-epic-1.md</path>
+        <title>Epic 1 Technical Specification</title>
+        <section>Story 1.2: Workflow Definition Pattern</section>
+        <snippet>Workflow Executor module: Reads workflow.yaml for config, loads instructions.md, parses XML step structure, executes steps in order with checkpoint pauses, handles template-output tags for file saves.</snippet>
+      </doc>
+      <doc>
+        <path>notes/sprint-artifacts/tech-spec-epic-1.md</path>
+        <title>Epic 1 Technical Specification</title>
+        <section>Data Models - workflow.yaml Schema</section>
+        <snippet>Schema: name (workflow identifier), description (what it does), instructions (path to instructions.md), additional workflow-specific config.</snippet>
+      </doc>
+      <doc>
+        <path>notes/sprint-artifacts/tech-spec-epic-1.md</path>
+        <title>Epic 1 Technical Specification</title>
+        <section>Workflows and Sequencing - Workflow Execution Sequence</section>
+        <snippet>1. User enters slash command 2. Command Router resolves path 3. Load workflow.yaml 4. Load instructions.md 5. For each step: execute actions, handle template-output, process ask tags, update state 6. Report completion.</snippet>
+      </doc>
+      <doc>
+        <path>notes/epics.md</path>
+        <title>Epic Breakdown</title>
+        <section>Story 1.2: Workflow Definition Pattern</section>
+        <snippet>Establishes standardized workflow pattern. Prerequisites: Story 1.1. Technical Notes: Reference .bmad/core/tasks/workflow.xml for execution model.</snippet>
+      </doc>
+      <doc>
+        <path>.bmad/core/tasks/workflow.xml</path>
+        <title>BMAD Workflow Execution Engine</title>
+        <section>Complete Reference Implementation</section>
+        <snippet>Core execution engine with WORKFLOW-RULES: Steps execute in numerical order, template-output tags save+show+approve, supported tags include step, action, ask, template-output, invoke-workflow, goto. This is the authoritative reference for Slide Builder workflow implementation.</snippet>
+      </doc>
+    </docs>
+    <code>
+      <file>
+        <path>.bmad/core/tasks/workflow.xml</path>
+        <kind>reference-implementation</kind>
+        <symbol>Execute Workflow task</symbol>
+        <lines>1-270</lines>
+        <reason>Primary reference for workflow execution pattern - this is the BMAD workflow engine that Slide Builder must mirror</reason>
+      </file>
+      <file>
+        <path>.slide-builder/workflows/</path>
+        <kind>directory</kind>
+        <symbol>workflows directory</symbol>
+        <reason>Target location for workflow definitions created by Story 1.1 - this story will populate with test workflow</reason>
+      </file>
+      <file>
+        <path>package.json</path>
+        <kind>config</kind>
+        <symbol>package.json</symbol>
+        <lines>1-22</lines>
+        <reason>Project dependencies (puppeteer, googleapis) - no additional deps needed for Story 1.2</reason>
+      </file>
+    </code>
+    <dependencies>
+      <node>
+        <package name="puppeteer" version="^23.0.0">HTML-to-image conversion (Epic 7)</package>
+        <package name="googleapis" version="^140.0.0">Google Slides API (Epic 7)</package>
+      </node>
+      <framework>
+        <dep name="Claude Code CLI">Runtime environment for workflow execution</dep>
+        <dep name="BMAD Pattern">Reference architecture from .bmad/</dep>
+      </framework>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint source="ADR-001">100% BMAD pattern alignment - workflow.yaml + instructions.md structure must mirror .bmad/ exactly</constraint>
+    <constraint source="workflow.xml">Steps execute in exact numerical order (rule 1)</constraint>
+    <constraint source="workflow.xml">Template-output tags require: Save content → Show user → Get approval before continuing (rule 3)</constraint>
+    <constraint source="workflow.xml">Optional steps ask user unless #yolo mode active (rule 2)</constraint>
+    <constraint source="tech-spec">State files must be human-readable YAML (NFR17)</constraint>
+    <constraint source="tech-spec">No external API calls in Epic 1 - all local file operations</constraint>
+    <constraint source="story-1.1">Directory structure exists at .slide-builder/workflows/ - use existing scaffold</constraint>
+  </constraints>
+
+  <interfaces>
+    <interface>
+      <name>workflow.yaml schema</name>
+      <kind>configuration file</kind>
+      <signature>
+name: string                    # Workflow identifier
+description: string             # What workflow does
+instructions: string            # Path to instructions.md ({installed_path}/instructions.md)
+config_source: string           # Optional external config path
+variables: object               # Optional workflow-specific variables
+default_output_file: string     # Optional output file path template
+      </signature>
+      <path>.slide-builder/workflows/{name}/workflow.yaml</path>
+    </interface>
+    <interface>
+      <name>instructions.md structure</name>
+      <kind>execution logic</kind>
+      <signature>
+&lt;workflow&gt;
+  &lt;step n="N" goal="description"&gt;
+    &lt;action&gt;What to do&lt;/action&gt;
+    &lt;template-output&gt;section_name&lt;/template-output&gt;
+    &lt;ask&gt;User prompt&lt;/ask&gt;
+  &lt;/step&gt;
+&lt;/workflow&gt;
+      </signature>
+      <path>.slide-builder/workflows/{name}/instructions.md</path>
+    </interface>
+    <interface>
+      <name>Supported XML Tags</name>
+      <kind>instruction tags</kind>
+      <signature>
+Structural: step n="X" goal="...", optional="true", if="condition", for-each, repeat
+Execution: action, ask, goto, invoke-workflow, invoke-task, invoke-protocol
+Output: template-output, critical, example
+      </signature>
+      <path>.bmad/core/tasks/workflow.xml (lines 115-138)</path>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>
+      Testing follows manual verification in Claude Code environment. Per tech-spec: Unit tests verify workflow.yaml loads correctly, Integration tests run test workflow and verify step order, Checkpoint tests verify pause at template-output tags, Edge case tests handle missing directories and malformed YAML. No automated test framework in Epic 1 - all manual verification.
+    </standards>
+    <locations>
+      <location>.slide-builder/workflows/test/</location>
+      <location>Manual CLI testing in Claude Code</location>
+    </locations>
+    <ideas>
+      <idea ac="AC1.2.1">Create test workflow with workflow.yaml, invoke it, verify YAML parsed and name/description accessible</idea>
+      <idea ac="AC1.2.2">Create instructions.md with 3 steps, verify all steps are parsed and step structure correct</idea>
+      <idea ac="AC1.2.3">Execute test workflow, verify steps 1,2,3 execute in exact order with console output</idea>
+      <idea ac="AC1.2.4">Add phase markers to steps, verify step N waits for step N-1 completion</idea>
+      <idea ac="AC1.2.5">Add template-output tag, verify execution pauses and shows approval prompt ([c] Continue, [y] YOLO)</idea>
+      <idea edge-case="missing-workflow">Invoke non-existent workflow, verify clear error message</idea>
+      <idea edge-case="malformed-yaml">Create invalid YAML, verify graceful error handling</idea>
+      <idea edge-case="missing-instructions">Create workflow.yaml pointing to missing instructions.md, verify error</idea>
+    </ideas>
+  </tests>
+</story-context>

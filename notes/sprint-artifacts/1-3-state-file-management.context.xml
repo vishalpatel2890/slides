@@ -1,0 +1,223 @@
+<story-context id="1-3-state-file-management" v="1.0">
+  <metadata>
+    <epicId>1</epicId>
+    <storyId>3</storyId>
+    <title>State File Management</title>
+    <status>drafted</status>
+    <generatedAt>2026-01-26</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>notes/sprint-artifacts/1-3-state-file-management.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>developer</asA>
+    <iWant>YAML-based state files for tracking workflow progress</iWant>
+    <soThat>builds are recoverable and progress is human-readable</soThat>
+    <tasks>
+      <task id="1" ac="1,2">
+        <title>Create status.yaml schema and initialization</title>
+        <subtasks>
+          <subtask id="1.1">Define status.yaml schema per tech spec (mode, current_slide, total_slides, built_count, last_action, last_modified, history[])</subtask>
+          <subtask id="1.2">Create initial status.yaml with default values when first workflow runs</subtask>
+          <subtask id="1.3">Implement ISO 8601 timestamp formatting for last_modified and history entries</subtask>
+          <subtask id="1.4">Store status.yaml in `.slide-builder/` root directory</subtask>
+        </subtasks>
+      </task>
+      <task id="2" ac="1,2">
+        <title>Implement state write operations</title>
+        <subtasks>
+          <subtask id="2.1">Create function to update status.yaml on state changes</subtask>
+          <subtask id="2.2">Append action to history array with timestamp</subtask>
+          <subtask id="2.3">Update last_action and last_modified fields</subtask>
+          <subtask id="2.4">Preserve existing state when adding new entries (no overwrite)</subtask>
+        </subtasks>
+      </task>
+      <task id="3" ac="3">
+        <title>Implement state read and resume</title>
+        <subtasks>
+          <subtask id="3.1">Read existing status.yaml at workflow start</subtask>
+          <subtask id="3.2">Detect interrupted workflow state (workflow started but not completed)</subtask>
+          <subtask id="3.3">Offer user option to resume from last checkpoint or restart</subtask>
+          <subtask id="3.4">Restore execution context from saved state</subtask>
+        </subtasks>
+      </task>
+      <task id="4" ac="4">
+        <title>Ensure human-readable structure</title>
+        <subtasks>
+          <subtask id="4.1">Use clear, descriptive field names (no abbreviations)</subtask>
+          <subtask id="4.2">Add inline YAML comments for complex sections</subtask>
+          <subtask id="4.3">Format history entries with readable action descriptions</subtask>
+          <subtask id="4.4">Validate YAML remains parseable after writes</subtask>
+        </subtasks>
+      </task>
+      <task id="5" ac="1,4">
+        <title>Create plan.yaml schema</title>
+        <subtasks>
+          <subtask id="5.1">Define deck mode plan.yaml schema (deck_name, created, audience, purpose, slides[])</subtask>
+          <subtask id="5.2">Define single mode plan.yaml schema (intent, suggested_template, created)</subtask>
+          <subtask id="5.3">Place deck plan at `.slide-builder/deck/plan.yaml`</subtask>
+          <subtask id="5.4">Place single plan at `.slide-builder/single/plan.yaml`</subtask>
+        </subtasks>
+      </task>
+      <task id="6" ac="1-4">
+        <title>Integration testing</title>
+        <subtasks>
+          <subtask id="6.1">Run test workflow, verify status.yaml created correctly</subtask>
+          <subtask id="6.2">Interrupt workflow, verify state preserved</subtask>
+          <subtask id="6.3">Resume workflow, verify continuation from checkpoint</subtask>
+          <subtask id="6.4">Manually inspect YAML files for readability</subtask>
+        </subtasks>
+      </task>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <criterion id="AC1.3.1">Given a workflow is executing, when state changes occur (slide built, plan created, etc.), then the state is written to appropriate YAML file (status.yaml, plan.yaml)</criterion>
+    <criterion id="AC1.3.2">State files include timestamps in ISO 8601 format and action descriptions</criterion>
+    <criterion id="AC1.3.3">Given a previous workflow was interrupted, when the user resumes, then the system reads the state file and continues from last checkpoint</criterion>
+    <criterion id="AC1.3.4">Given a user wants to inspect progress, when they open any state YAML file, then the content is human-readable with clear structure</criterion>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>notes/sprint-artifacts/tech-spec-epic-1.md</path>
+        <title>Epic 1 Technical Specification</title>
+        <section>Data Models and Contracts</section>
+        <snippet>Defines status.yaml schema (mode, current_slide, total_slides, built_count, last_action, last_modified, history[]) and plan.yaml schemas for both deck and single modes.</snippet>
+      </doc>
+      <doc>
+        <path>notes/architecture.md</path>
+        <title>Slide Builder Architecture</title>
+        <section>State File Patterns</section>
+        <snippet>Specifies YAML format for status.yaml and plan.yaml with human-readable structure. Includes logging strategy where all significant actions are logged to status.yaml history array.</snippet>
+      </doc>
+      <doc>
+        <path>notes/prd.md</path>
+        <title>Product Requirements Document</title>
+        <section>Non-Functional Requirements</section>
+        <snippet>NFR14 requires partial builds be recoverable. NFR17 requires state files be human-readable YAML for manual recovery if needed.</snippet>
+      </doc>
+      <doc>
+        <path>notes/epics.md</path>
+        <title>Epic Breakdown</title>
+        <section>Story 1.3: State File Management</section>
+        <snippet>User story definition and acceptance criteria for YAML-based state files tracking workflow progress with resume capability.</snippet>
+      </doc>
+      <doc>
+        <path>notes/sprint-artifacts/1-2-workflow-definition-pattern.md</path>
+        <title>Previous Story - Workflow Definition Pattern</title>
+        <section>Dev Agent Record</section>
+        <snippet>Test workflow created at .slide-builder/workflows/test/ - available for testing state management. Checkpoint pattern established with template-output tags.</snippet>
+      </doc>
+    </docs>
+    <code>
+      <file>
+        <path>.slide-builder/workflows/test/workflow.yaml</path>
+        <kind>workflow-config</kind>
+        <symbol>test workflow</symbol>
+        <lines>1-21</lines>
+        <reason>Test workflow available for validating state file creation and updates during execution</reason>
+      </file>
+      <file>
+        <path>.slide-builder/workflows/test/instructions.md</path>
+        <kind>workflow-instructions</kind>
+        <symbol>test workflow steps</symbol>
+        <lines>1-77</lines>
+        <reason>Contains 3 steps with checkpoint (template-output) and user input (ask) tags - ideal for testing state persistence at checkpoints</reason>
+      </file>
+    </code>
+    <dependencies>
+      <node>
+        <package name="puppeteer" version="^23.0.0">Headless browser for HTML-to-image conversion (Epic 7)</package>
+        <package name="googleapis" version="^140.0.0">Google Slides API integration (Epic 7)</package>
+      </node>
+      <note>No additional dependencies needed for state file management - YAML read/write handled by Claude Code native capabilities</note>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint source="tech-spec-epic-1.md">All timestamps must be in ISO 8601 format (YYYY-MM-DDTHH:mm:ssZ)</constraint>
+    <constraint source="architecture.md">State files must be human-readable YAML - users can manually inspect and recover from state files</constraint>
+    <constraint source="prd.md/NFR14">Partial builds must be recoverable - state saved at checkpoints enables resume</constraint>
+    <constraint source="prd.md/NFR17">State files are the audit trail - history array captures all significant actions</constraint>
+    <constraint source="architecture.md/ADR-001">100% BMAD pattern alignment - state management follows BMAD workflow.xml patterns</constraint>
+    <constraint source="story-1.2">State Manager must integrate with workflow executor - called at workflow start, after actions, at checkpoints, and at completion</constraint>
+  </constraints>
+
+  <interfaces>
+    <interface>
+      <name>status.yaml</name>
+      <kind>YAML state file</kind>
+      <signature>
+mode: deck | single | null
+current_slide: number
+total_slides: number
+built_count: number
+last_action: string
+last_modified: ISO8601 timestamp
+history:
+  - action: string
+    timestamp: ISO8601
+      </signature>
+      <path>.slide-builder/status.yaml</path>
+    </interface>
+    <interface>
+      <name>plan.yaml (deck mode)</name>
+      <kind>YAML state file</kind>
+      <signature>
+deck_name: string
+created: YYYY-MM-DD
+audience: string
+purpose: string
+slides:
+  - number: integer
+    intent: string
+    template: string
+    status: pending | built
+      </signature>
+      <path>.slide-builder/deck/plan.yaml</path>
+    </interface>
+    <interface>
+      <name>plan.yaml (single mode)</name>
+      <kind>YAML state file</kind>
+      <signature>
+intent: string
+suggested_template: string
+created: ISO8601
+      </signature>
+      <path>.slide-builder/single/plan.yaml</path>
+    </interface>
+    <interface>
+      <name>State Manager Integration Points</name>
+      <kind>workflow hook</kind>
+      <signature>
+- Workflow start: Read existing state, initialize if needed
+- After action completion: Update last_action field
+- At template-output checkpoint: Save full state for resume
+- At workflow completion: Finalize state, add completion to history
+      </signature>
+      <path>.bmad/core/tasks/workflow.xml</path>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>
+Testing follows manual verification patterns from tech spec. Unit tests verify YAML schema compliance. Integration tests execute the test workflow and verify state file creation. Resume tests interrupt mid-workflow and verify continuation from checkpoint. Readability tests involve manual inspection of generated YAML files to ensure human-readable structure.
+    </standards>
+    <locations>
+      <location>.slide-builder/workflows/test/ - Test workflow for validation</location>
+      <location>.slide-builder/status.yaml - Generated state file to inspect</location>
+      <location>.slide-builder/deck/plan.yaml - Deck mode plan state</location>
+      <location>.slide-builder/single/plan.yaml - Single mode plan state</location>
+    </locations>
+    <ideas>
+      <idea ac="AC1.3.1">Run test workflow, verify status.yaml created with correct schema fields</idea>
+      <idea ac="AC1.3.2">Check last_modified and history timestamps match ISO 8601 format</idea>
+      <idea ac="AC1.3.3">Interrupt test workflow at step 2 checkpoint, restart, verify resume option offered</idea>
+      <idea ac="AC1.3.4">Open status.yaml in text editor, verify field names are descriptive and structure is clear</idea>
+      <idea ac="AC1.3.1,AC1.3.2">Create deck plan, verify plan.yaml created at .slide-builder/deck/plan.yaml with correct schema</idea>
+      <idea ac="AC1.3.1,AC1.3.2">Create single slide plan, verify plan.yaml created at .slide-builder/single/plan.yaml with correct schema</idea>
+    </ideas>
+  </tests>
+</story-context>

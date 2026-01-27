@@ -1,0 +1,178 @@
+<story-context id="1-4-slash-command-registration" v="1.0">
+  <metadata>
+    <epicId>1</epicId>
+    <storyId>4</storyId>
+    <title>Slash Command Registration</title>
+    <status>drafted</status>
+    <generatedAt>2026-01-26</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>notes/sprint-artifacts/1-4-slash-command-registration.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>user</asA>
+    <iWant>slash commands (`/setup`, `/plan`, `/build`, etc.) to invoke workflows</iWant>
+    <soThat>I can use the framework through simple CLI commands</soThat>
+    <tasks>
+      <task id="1" name="Create workflow directory structure for all MVP commands" acs="1,2">
+        <subtask>1.1: Create `.slide-builder/workflows/setup/` directory with placeholder workflow.yaml</subtask>
+        <subtask>1.2: Create `.slide-builder/workflows/theme/` directory with placeholder workflow.yaml</subtask>
+        <subtask>1.3: Create `.slide-builder/workflows/theme-edit/` directory with placeholder workflow.yaml</subtask>
+        <subtask>1.4: Create `.slide-builder/workflows/plan/` directory with placeholder workflow.yaml (smart router)</subtask>
+        <subtask>1.5: Create `.slide-builder/workflows/plan-one/` directory with placeholder workflow.yaml</subtask>
+        <subtask>1.6: Create `.slide-builder/workflows/plan-deck/` directory with placeholder workflow.yaml</subtask>
+        <subtask>1.7: Create `.slide-builder/workflows/build/` directory with placeholder workflow.yaml</subtask>
+        <subtask>1.8: Create `.slide-builder/workflows/edit/` directory with placeholder workflow.yaml</subtask>
+        <subtask>1.9: Create `.slide-builder/workflows/export/` directory with placeholder workflow.yaml</subtask>
+      </task>
+      <task id="2" name="Create Claude Code skill registration" acs="1,2">
+        <subtask>2.1: Create skill registration for `/sb-setup` command</subtask>
+        <subtask>2.2: Create skill registration for `/sb-theme` command</subtask>
+        <subtask>2.3: Create skill registration for `/sb-theme-edit` command</subtask>
+        <subtask>2.4: Create skill registration for `/sb-plan` command (smart router)</subtask>
+        <subtask>2.5: Create skill registration for `/sb-plan-one` command</subtask>
+        <subtask>2.6: Create skill registration for `/sb-plan-deck` command</subtask>
+        <subtask>2.7: Create skill registration for `/sb-build-one` command</subtask>
+        <subtask>2.8: Create skill registration for `/sb-build-all` command</subtask>
+        <subtask>2.9: Create skill registration for `/sb-edit` command</subtask>
+        <subtask>2.10: Create skill registration for `/sb-export` command</subtask>
+      </task>
+      <task id="3" name="Implement command-to-workflow routing logic" acs="2">
+        <subtask>3.1: Document command → workflow directory mapping in CONVENTIONS.md or workflow registry</subtask>
+        <subtask>3.2: Each skill invokes BMAD workflow execution pattern with corresponding workflow.yaml path</subtask>
+        <subtask>3.3: Workflow executor loads workflow.yaml and instructions.md per Story 1.2 pattern</subtask>
+      </task>
+      <task id="4" name="Implement error handling for invalid commands" acs="3">
+        <subtask>4.1: Define error message template listing all available commands</subtask>
+        <subtask>4.2: Include brief description of each command in error output</subtask>
+        <subtask>4.3: Ensure error message is helpful and actionable</subtask>
+      </task>
+      <task id="5" name="Create placeholder workflow.yaml files with proper structure" acs="2">
+        <subtask>5.1: Each workflow.yaml follows BMAD schema: name, description, instructions path</subtask>
+        <subtask>5.2: Include placeholder instructions.md with minimal step structure</subtask>
+        <subtask>5.3: Ensure workflow files are valid YAML and can be loaded</subtask>
+      </task>
+      <task id="6" name="Integration testing" acs="1,2,3">
+        <subtask>6.1: Test each of the 10 commands invokes correct workflow</subtask>
+        <subtask>6.2: Test invalid command shows error with full command list</subtask>
+        <subtask>6.3: Verify workflow.yaml is loaded and instructions.md executed</subtask>
+        <subtask>6.4: Verify extensibility - adding new workflow/command is straightforward</subtask>
+      </task>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <criterion id="AC1.4.1">Given the Slide Builder framework is installed, when the user types `/setup` in Claude Code, then the setup workflow is invoked</criterion>
+    <criterion id="AC1.4.2">Given any registered slash command is entered, when the command is recognized, then the corresponding workflow.yaml is loaded and executed</criterion>
+    <criterion id="AC1.4.3">Unrecognized commands show helpful error with available commands list</criterion>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>notes/sprint-artifacts/tech-spec-epic-1.md</path>
+        <title>Epic 1 Technical Specification</title>
+        <section>Story 1.4: Slash Command Registration, APIs and Interfaces</section>
+        <snippet>Defines slash command interface mapping commands to workflow directories. Command Router module resolves commands to workflow.yaml paths.</snippet>
+      </doc>
+      <doc>
+        <path>notes/architecture.md</path>
+        <title>Slide Builder Architecture</title>
+        <section>Workflow File Pattern, FR Category to Architecture Mapping</section>
+        <snippet>ADR-001: 100% BMAD pattern alignment. Each command maps to workflow definition following workflow.yaml + instructions.md structure.</snippet>
+      </doc>
+      <doc>
+        <path>notes/prd.md</path>
+        <title>Product Requirements Document</title>
+        <section>Command Structure</section>
+        <snippet>Full command reference for MVP: /setup, /theme, /theme-edit, /plan, /plan-one, /plan-deck, /build-one, /build-all, /edit, /export</snippet>
+      </doc>
+      <doc>
+        <path>notes/epics.md</path>
+        <title>Epic Breakdown</title>
+        <section>Story 1.4: Slash Command Registration</section>
+        <snippet>Commands map to workflow directories. Framework extensible for new commands (FR52). Per PRD defines 10 commands for MVP.</snippet>
+      </doc>
+    </docs>
+
+    <code>
+      <artifact>
+        <path>.slide-builder/workflows/test/workflow.yaml</path>
+        <kind>workflow-config</kind>
+        <symbol>test workflow</symbol>
+        <lines>1-21</lines>
+        <reason>Reference implementation of BMAD workflow.yaml schema from Story 1.2. Use as template for new workflow registrations.</reason>
+      </artifact>
+      <artifact>
+        <path>.slide-builder/workflows/test/instructions.md</path>
+        <kind>workflow-instructions</kind>
+        <symbol>test instructions</symbol>
+        <lines>1-77</lines>
+        <reason>Reference implementation of instructions.md structure. Demonstrates step execution, checkpoints, and ask tags.</reason>
+      </artifact>
+      <artifact>
+        <path>.slide-builder/status.yaml</path>
+        <kind>state-file</kind>
+        <symbol>status.yaml schema</symbol>
+        <reason>State file that workflows read/write. Commands should update status.yaml history on invocation.</reason>
+      </artifact>
+    </code>
+
+    <dependencies>
+      <node>
+        <package name="puppeteer" version="^23.0.0">HTML-to-image conversion for export (Epic 7)</package>
+        <package name="googleapis" version="^140.0.0">Google Slides API for export (Epic 7)</package>
+      </node>
+      <frameworks>
+        <framework name="BMAD">Workflow execution pattern via .bmad/core/tasks/workflow.xml</framework>
+        <framework name="Claude Code">Runtime environment - skills/workflows executed as Claude Code extensions</framework>
+      </frameworks>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint source="ADR-001">100% alignment with BMAD workflow pattern - no custom workflow formats</constraint>
+    <constraint source="FR48">Each command maps to a workflow definition (workflow.yaml)</constraint>
+    <constraint source="FR49">Workflows have associated instruction files (instructions.md)</constraint>
+    <constraint source="FR52">Framework is extensible for new workflows/commands</constraint>
+    <constraint source="Story 1.2">workflow.yaml schema: name, description, instructions path, variables</constraint>
+    <constraint source="Story 1.3">Workflows should initialize/update status.yaml during execution</constraint>
+    <constraint source="Naming">Commands prefixed with `sb-` to avoid collision with built-in Claude Code commands</constraint>
+  </constraints>
+
+  <interfaces>
+    <interface>
+      <name>Slash Command Interface</name>
+      <kind>CLI command mapping</kind>
+      <signature>/sb-{command} → .slide-builder/workflows/{command}/workflow.yaml</signature>
+      <path>notes/sprint-artifacts/tech-spec-epic-1.md#APIs and Interfaces</path>
+    </interface>
+    <interface>
+      <name>workflow.yaml Schema</name>
+      <kind>YAML configuration</kind>
+      <signature>name: string, description: string, instructions: path, variables: object, template: bool</signature>
+      <path>.slide-builder/workflows/test/workflow.yaml</path>
+    </interface>
+    <interface>
+      <name>Workflow Execution Pattern</name>
+      <kind>BMAD workflow executor</kind>
+      <signature>load workflow.yaml → load instructions.md → execute steps in order</signature>
+      <path>.bmad/core/tasks/workflow.xml</path>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>Per tech spec Test Strategy: Unit tests verify command-to-workflow mapping. Integration tests type commands and verify workflow execution. Error handling tests verify helpful error messages for invalid commands. Extensibility tests verify adding new workflow/command is straightforward. Manual CLI testing primary method per Epic 1 scope.</standards>
+    <locations>
+      <location>Manual CLI testing in Claude Code</location>
+      <location>Test workflow at .slide-builder/workflows/test/</location>
+    </locations>
+    <ideas>
+      <idea ac="AC1.4.1">Type /sb-setup, verify setup workflow invoked and instructions begin executing</idea>
+      <idea ac="AC1.4.2">Type each of 10 registered commands, verify correct workflow.yaml loaded</idea>
+      <idea ac="AC1.4.2">Verify workflow executor parses instructions.md and executes steps in order</idea>
+      <idea ac="AC1.4.3">Type invalid command like /sb-invalid, verify error lists all available commands with descriptions</idea>
+      <idea ac="all">Add new workflow directory, verify it becomes accessible via new command</idea>
+    </ideas>
+  </tests>
+</story-context>

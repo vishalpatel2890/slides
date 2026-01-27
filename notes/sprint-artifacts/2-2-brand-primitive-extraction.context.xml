@@ -1,0 +1,228 @@
+<story-context id="2-2-brand-primitive-extraction" v="1.0">
+  <metadata>
+    <epicId>2</epicId>
+    <storyId>2</storyId>
+    <title>Brand Primitive Extraction</title>
+    <status>drafted</status>
+    <generatedAt>2026-01-26</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>notes/sprint-artifacts/2-2-brand-primitive-extraction.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>system</asA>
+    <iWant>to extract colors, typography, and visual patterns from brand assets</iWant>
+    <soThat>I can generate a complete theme file</soThat>
+    <tasks>
+      <task id="1" ac="1,2,3">Implement Website CSS/Style Analysis
+        <subtask>1.1: Parse WebFetch HTML result for inline styles and style blocks</subtask>
+        <subtask>1.2: Extract color values (hex, rgb, hsl) from CSS properties</subtask>
+        <subtask>1.3: Extract font-family declarations and categorize by usage</subtask>
+        <subtask>1.4: Extract shape-related CSS (border-radius, box-shadow, border styles)</subtask>
+        <subtask>1.5: Identify layout patterns and spacing values</subtask>
+      </task>
+      <task id="2" ac="1,2,3">Implement PDF Visual Analysis via Claude Vision
+        <subtask>2.1: Analyze PDF content for dominant color palette</subtask>
+        <subtask>2.2: Identify typography styles (font characteristics, weights, hierarchy)</subtask>
+        <subtask>2.3: Detect shape patterns (rounded vs sharp corners, shadow usage)</subtask>
+        <subtask>2.4: Extract visual weight and density signals</subtask>
+      </task>
+      <task id="3" ac="1,2,3">Implement Image Visual Analysis via Claude Vision
+        <subtask>3.1: Extract dominant color palette from images</subtask>
+        <subtask>3.2: Analyze visual style characteristics (modern, classic, bold, subtle)</subtask>
+        <subtask>3.3: Identify any typography visible in images</subtask>
+        <subtask>3.4: Capture visual mood and design language signals</subtask>
+      </task>
+      <task id="4" ac="4">Implement Brand Personality Inference
+        <subtask>4.1: Define personality classification rules (bold, minimal, corporate, playful)</subtask>
+        <subtask>4.2: Map visual signals to personality indicators</subtask>
+        <subtask>4.3: Weight signals from multiple sources</subtask>
+        <subtask>4.4: Generate personality classification with reasoning notes</subtask>
+      </task>
+      <task id="5" ac="5">Implement Multi-Source Conflict Resolution
+        <subtask>5.1: Define source priority weighting (website > PDF > images)</subtask>
+        <subtask>5.2: Detect conflicting signals across sources</subtask>
+        <subtask>5.3: Use brand description keywords to resolve ambiguity</subtask>
+        <subtask>5.4: Document reasoning for conflict resolution decisions</subtask>
+      </task>
+      <task id="6" ac="1-5">Build Extraction Data Structure
+        <subtask>6.1: Create structured output format per tech spec</subtask>
+        <subtask>6.2: Aggregate extraction data from all sources</subtask>
+        <subtask>6.3: Store extraction results for Theme Synthesizer (Story 2.3)</subtask>
+      </task>
+      <task id="7" ac="1-5">Update Setup Workflow Instructions - Phase 2
+        <subtask>7.1: Add Phase 2 Brand Analysis steps to instructions.md</subtask>
+        <subtask>7.2: Implement CSS parsing actions for website analysis</subtask>
+        <subtask>7.3: Implement Vision analysis actions for PDF/image processing</subtask>
+        <subtask>7.4: Add personality inference logic</subtask>
+        <subtask>7.5: Add conflict resolution with description context</subtask>
+        <subtask>7.6: Display extraction summary to user</subtask>
+      </task>
+      <task id="8" ac="1-5">Testing and Validation
+        <subtask>8.1: Test website extraction with known brand</subtask>
+        <subtask>8.2: Test PDF extraction with branded document</subtask>
+        <subtask>8.3: Test image extraction with logo/brand imagery</subtask>
+        <subtask>8.4: Test personality inference produces reasonable classification</subtask>
+        <subtask>8.5: Test conflict resolution with mixed source signals</subtask>
+        <subtask>8.6: Verify extraction data structure matches spec</subtask>
+      </task>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <criterion id="AC2.2.1">Given brand assets have been collected, when extraction runs, then the system identifies: primary, secondary, accent colors; background colors (default, alt); text colors (heading, body)</criterion>
+    <criterion id="AC2.2.2">The system identifies font families (heading, body, mono) and typography scale (hero, h1, h2, body sizes)</criterion>
+    <criterion id="AC2.2.3">The system identifies shape styles (corner radius, shadows, borders) and arrow styles (stroke width, head type)</criterion>
+    <criterion id="AC2.2.4">The system infers brand personality (bold, minimal, corporate, playful) from visual signals</criterion>
+    <criterion id="AC2.2.5">Given conflicting signals from multiple sources, when making decisions, then the system uses the brief description to resolve ambiguity</criterion>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>notes/sprint-artifacts/tech-spec-epic-2.md</path>
+        <title>Epic 2 Technical Specification</title>
+        <section>Story 2.2: Brand Primitive Extraction</section>
+        <snippet>Brand Analyzer module: For Website URLs uses WebFetch to analyze HTML/CSS for colors, font declarations. For PDFs/Images uses Claude Vision to extract dominant colors, typography styles, shape characteristics. Infers brand personality from visual weight and color temperature.</snippet>
+      </doc>
+      <doc>
+        <path>notes/sprint-artifacts/tech-spec-epic-2.md</path>
+        <title>Epic 2 Technical Specification</title>
+        <section>Data Models and Contracts - Extraction Data Structure</section>
+        <snippet>Extraction data structure includes: source, type (website|pdf|image), colors_found array with hex/usage/confidence, fonts_found array with family/usage/weights, shapes_observed array with element/corner_radius/shadow, personality_signals array with signal/suggests.</snippet>
+      </doc>
+      <doc>
+        <path>notes/architecture.md</path>
+        <title>Slide Builder Architecture</title>
+        <section>Pattern 1: Theme Extraction Pipeline</section>
+        <snippet>Processing pipeline: Color extraction (primary, secondary, accent, backgrounds), Typography detection (fonts, weights, scales), Shape inference (corner radius, shadows, borders), Brand personality classification (bold, minimal, corporate, playful).</snippet>
+      </doc>
+      <doc>
+        <path>notes/architecture.md</path>
+        <title>Slide Builder Architecture</title>
+        <section>theme.json Schema</section>
+        <snippet>Theme JSON schema contains: meta (name, version, created, sources), colors (primary, secondary, accent, background, text), typography (fonts, scale), shapes (boxes, arrows), layouts (template references), personality (classification, notes).</snippet>
+      </doc>
+      <doc>
+        <path>notes/prd.md</path>
+        <title>Slide Builder PRD</title>
+        <section>Theme Primitive Schema</section>
+        <snippet>Theme primitives include: Colors (primary, secondary, accent, backgrounds, text colors, semantic colors), Typography (font families, size scale, weight patterns), Shapes (box styles, arrow styles, line styles), Icons, Layout, Semantic Styles.</snippet>
+      </doc>
+      <doc>
+        <path>notes/epics.md</path>
+        <title>Slide Builder Epics</title>
+        <section>Story 2.2: Brand Primitive Extraction</section>
+        <snippet>Acceptance criteria: System identifies colors (primary, secondary, accent, backgrounds, text), font families and typography scale, shape styles and arrow styles, infers brand personality, uses brand description to resolve conflicting signals.</snippet>
+      </doc>
+      <doc>
+        <path>notes/sprint-artifacts/2-1-brand-asset-input-collection.md</path>
+        <title>Story 2.1: Brand Asset Input Collection</title>
+        <section>Dev Agent Record - Completion Notes</section>
+        <snippet>Phase 1 implemented with asset collection steps. WebFetch results and Claude Vision analysis from Phase 1 available for primitive extraction. Phase 2-6 placeholders preserved. Input sources list available for theme.json meta.sources.</snippet>
+      </doc>
+    </docs>
+
+    <code>
+      <file>
+        <path>.slide-builder/workflows/setup/instructions.md</path>
+        <kind>workflow-instructions</kind>
+        <symbol>Phase 2 placeholder</symbol>
+        <lines>358-378</lines>
+        <reason>Primary file to modify - Phase 2 Brand Primitive Extraction section needs full implementation. Currently has placeholder steps. Phase 1 outputs (website_analysis, pdf_analysis, image_analysis, brand_description) are inputs to this phase.</reason>
+      </file>
+      <file>
+        <path>.slide-builder/workflows/setup/workflow.yaml</path>
+        <kind>workflow-config</kind>
+        <symbol>setup workflow configuration</symbol>
+        <lines>1-23</lines>
+        <reason>Defines workflow structure with instructions path and state_file location. No changes needed but important context for understanding workflow execution.</reason>
+      </file>
+      <file>
+        <path>.slide-builder/status.yaml</path>
+        <kind>state-file</kind>
+        <symbol>workflow state tracking</symbol>
+        <reason>Tracks workflow progress. Phase 2 should update phase to "brand-extraction" and last_action appropriately.</reason>
+      </file>
+    </code>
+
+    <dependencies>
+      <node>
+        <package>puppeteer</package>
+        <version>^23.0.0</version>
+        <purpose>HTML-to-image conversion for export (Epic 7)</purpose>
+      </node>
+      <node>
+        <package>googleapis</package>
+        <version>^140.0.0</version>
+        <purpose>Google Slides API integration for export (Epic 7)</purpose>
+      </node>
+      <note>No npm dependencies required for Story 2.2. All operations use Claude Code built-in capabilities: WebFetch for websites, Read tool with Claude Vision for PDFs/images.</note>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint source="ADR-001">100% alignment with BMAD workflow pattern - workflow.yaml + instructions.md structure</constraint>
+    <constraint source="FR2">System extracts colors, typography, and visual patterns from provided brand assets</constraint>
+    <constraint source="NFR12">All analysis performed locally via Claude; no brand assets uploaded to external services</constraint>
+    <constraint source="NFR13">Theme files and slide content remain local to user's machine</constraint>
+    <constraint source="tech-spec">Use Claude Vision for PDF/image analysis, WebFetch + CSS parsing for websites</constraint>
+    <constraint source="tech-spec">Source priority weighting for conflicts: website > PDF > images</constraint>
+    <constraint source="architecture">Personality classification limited to: bold, minimal, corporate, playful</constraint>
+    <constraint source="architecture">Extraction data must match specified YAML structure for Theme Synthesizer input</constraint>
+  </constraints>
+
+  <interfaces>
+    <interface>
+      <name>Phase 1 Output Variables</name>
+      <kind>workflow-variables</kind>
+      <signature>{{website_analysis}}, {{pdf_analysis}}, {{image_analysis}}, {{brand_description}}, {{website_url}}, {{pdf_paths}}, {{image_paths}}</signature>
+      <path>.slide-builder/workflows/setup/instructions.md</path>
+      <note>Variables populated by Phase 1 (Story 2.1) - inputs to Phase 2 extraction</note>
+    </interface>
+    <interface>
+      <name>Extraction Data Structure</name>
+      <kind>data-contract</kind>
+      <signature>
+        source: string
+        type: website | pdf | image
+        colors_found: [{hex, usage, confidence}]
+        fonts_found: [{family, usage, weights}]
+        shapes_observed: [{element, corner_radius, shadow}]
+        personality_signals: [{signal, suggests}]
+      </signature>
+      <path>notes/sprint-artifacts/tech-spec-epic-2.md</path>
+      <note>Output structure from Phase 2 - input to Theme Synthesizer (Story 2.3)</note>
+    </interface>
+    <interface>
+      <name>theme.json Schema</name>
+      <kind>data-contract</kind>
+      <signature>
+        meta: {name, version, created, sources}
+        colors: {primary, secondary, accent, background:{default,alt}, text:{heading,body}}
+        typography: {fonts:{heading,body,mono}, scale:{hero,h1,h2,h3,body,small}}
+        shapes: {boxes:{default,callout}, arrows:{default}}
+        personality: {classification, notes}
+      </signature>
+      <path>notes/architecture.md</path>
+      <note>Target schema for extracted primitives - generated by Theme Synthesizer from extraction data</note>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>Per tech spec Test Strategy: Unit tests verify each extraction type produces expected structure. Integration tests run full extraction from all source types. Edge cases cover single source only, conflicting sources, and missing elements. Manual testing validates accuracy of extracted colors/fonts against known brands.</standards>
+    <locations>
+      <location>Manual testing via /sb:setup workflow execution</location>
+      <location>CLI verification of extraction output display</location>
+      <location>Inspection of structured extraction data variables</location>
+    </locations>
+    <ideas>
+      <idea ac="AC2.2.1">Test color extraction: Run /sb:setup with website URL (e.g., anthropic.com), verify primary/secondary/accent colors extracted match visible brand colors</idea>
+      <idea ac="AC2.2.2">Test typography extraction: Run /sb:setup with PDF brand guide, verify heading/body font families identified</idea>
+      <idea ac="AC2.2.3">Test shape extraction: Verify corner radius, shadow patterns detected from website/PDF assets</idea>
+      <idea ac="AC2.2.4">Test personality inference: Run /sb:setup with bold brand assets, verify "bold" personality classified with reasoning</idea>
+      <idea ac="AC2.2.5">Test conflict resolution: Provide conflicting website vs image colors, verify description used to resolve ambiguity</idea>
+      <idea ac="all">Test extraction data structure: Verify output matches YAML schema from tech spec exactly</idea>
+    </ideas>
+  </tests>
+</story-context>

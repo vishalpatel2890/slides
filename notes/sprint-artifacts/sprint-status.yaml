@@ -1,0 +1,93 @@
+# generated: 2026-01-26
+# project: Today
+# project_key: slide-builder
+# tracking_system: file-system
+# story_location: notes/sprint-artifacts
+
+# STATUS DEFINITIONS:
+# ==================
+# Epic Status:
+#   - backlog: Epic exists in epic file but not contexted
+#   - contexted: Next epic tech context created by *epic-tech-context (required)
+#
+# Story Status:
+#   - backlog: Story only exists in epic file
+#   - drafted: Story file created in stories folder by *create-story
+#   - ready-for-dev: Draft approved and story context created by *story-ready
+#   - in-progress: Developer actively working on implementation by *dev-story
+#   - review: Implementation complete, ready for review by *code-review
+#   - done: Story completed by *story-done
+#
+# Retrospective Status:
+#   - optional: Can be completed but not required
+#   - completed: Retrospective has been done by *retrospective
+#
+# WORKFLOW NOTES:
+# ===============
+# - Epics should be 'contexted' before stories can be 'drafted'
+# - SM typically drafts next story ONLY after previous one is 'done' to incorporate learnings
+# - Dev moves story to 'review', dev reviews, then Dev moves to 'done'
+
+generated: 2026-01-26
+project: Today
+project_key: slide-builder
+tracking_system: file-system
+story_location: notes/sprint-artifacts
+
+development_status:
+  # Epic 1: Foundation & Framework
+  epic-1: contexted
+  1-1-project-structure-scaffolding: done
+  1-2-workflow-definition-pattern: done
+  1-3-state-file-management: done
+  1-4-slash-command-registration: done
+  epic-1-retrospective: completed
+
+  # Epic 2: Theme Creation
+  epic-2: contexted
+  2-1-brand-asset-input-collection: done
+  2-2-brand-primitive-extraction: done
+  2-3-theme-file-generation: backlog
+  2-4-sample-deck-generation: backlog
+  2-5-theme-feedback-loop: backlog
+  epic-2-retrospective: optional
+
+  # Epic 3: Single Slide Workflow
+  epic-3: backlog
+  3-1-single-slide-planning: backlog
+  3-2-template-based-slide-building: backlog
+  3-3-custom-slide-building: backlog
+  3-4-slide-preview-in-browser: backlog
+  3-5-text-auto-save: backlog
+  epic-3-retrospective: optional
+
+  # Epic 4: Slide Editing
+  epic-4: backlog
+  4-1-edit-command-invocation: backlog
+  4-2-natural-language-layout-changes: backlog
+  4-3-edit-preservation-across-regenerations: backlog
+  epic-4-retrospective: optional
+
+  # Epic 5: Full Deck Mode
+  epic-5: backlog
+  5-1-deck-planning-initiation: backlog
+  5-2-plan-modification: backlog
+  5-3-incremental-slide-building: backlog
+  5-4-batch-slide-building: backlog
+  epic-5-retrospective: optional
+
+  # Epic 6: Theme Management
+  epic-6: backlog
+  6-1-theme-summary-view: backlog
+  6-2-theme-editing: backlog
+  6-3-theme-version-history: backlog
+  6-4-theme-rollback: backlog
+  epic-6-retrospective: optional
+
+  # Epic 7: Google Slides Export
+  epic-7: backlog
+  7-1-google-oauth-setup: backlog
+  7-2-html-to-image-conversion: backlog
+  7-3-google-slides-creation: backlog
+  7-4-export-progress-and-completion: backlog
+  epic-7-retrospective: optional

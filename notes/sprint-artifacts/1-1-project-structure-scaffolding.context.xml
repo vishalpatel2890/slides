@@ -1,0 +1,185 @@
+<story-context id="1-1-project-structure-scaffolding" v="1.0">
+  <metadata>
+    <epicId>1</epicId>
+    <storyId>1</storyId>
+    <title>Project Structure Scaffolding</title>
+    <status>drafted</status>
+    <generatedAt>2026-01-26</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>notes/sprint-artifacts/1-1-project-structure-scaffolding.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>developer</asA>
+    <iWant>the Slide Builder directory structure created following BMAD patterns</iWant>
+    <soThat>all workflows have a consistent home and state files have designated locations</soThat>
+    <tasks>
+      <task id="1" ac="1">
+        <title>Create directory structure</title>
+        <subtasks>
+          <subtask id="1.1">Create `.slide-builder/` root directory</subtask>
+          <subtask id="1.2">Create `workflows/` subdirectory for workflow definitions</subtask>
+          <subtask id="1.3">Create `templates/` subdirectory for HTML layout templates</subtask>
+          <subtask id="1.4">Create `samples/` subdirectory for sample deck slides</subtask>
+          <subtask id="1.5">Create `single/` subdirectory for single-slide mode</subtask>
+          <subtask id="1.6">Create `deck/slides/` nested directories for deck mode</subtask>
+          <subtask id="1.7">Create `credentials/` subdirectory (gitignored) for OAuth tokens</subtask>
+          <subtask id="1.8">Create `theme-history/` subdirectory for theme versions</subtask>
+        </subtasks>
+      </task>
+      <task id="2" ac="2">
+        <title>Initialize .gitignore</title>
+        <subtasks>
+          <subtask id="2.1">Create or update `.gitignore` file in project root</subtask>
+          <subtask id="2.2">Add `.slide-builder/credentials/` entry to protect OAuth tokens</subtask>
+          <subtask id="2.3">Add `node_modules/` entry to exclude dependencies</subtask>
+          <subtask id="2.4">Verify entries don't duplicate existing gitignore rules</subtask>
+        </subtasks>
+      </task>
+      <task id="3" ac="3">
+        <title>Initialize package.json with dependencies</title>
+        <subtasks>
+          <subtask id="3.1">Run `npm init -y` if package.json doesn't exist</subtask>
+          <subtask id="3.2">Add puppeteer to dependencies (for HTML-to-image conversion)</subtask>
+          <subtask id="3.3">Add googleapis to dependencies (for Google Slides API)</subtask>
+          <subtask id="3.4">Verify package.json has valid JSON structure</subtask>
+        </subtasks>
+      </task>
+      <task id="4" ac="1,2,3">
+        <title>Test idempotency</title>
+        <subtasks>
+          <subtask id="4.1">Run scaffolding command a second time</subtask>
+          <subtask id="4.2">Verify no errors occur on re-run</subtask>
+          <subtask id="4.3">Verify existing files/directories are preserved</subtask>
+        </subtasks>
+      </task>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <criterion id="AC1.1.1">
+      <description>Given the user runs the initialization command, when scaffolding completes, then the `.slide-builder/` directory structure exists with: `workflows/`, `templates/`, `samples/`, `single/`, `deck/slides/`, `credentials/`, `theme-history/`</description>
+      <testable>true</testable>
+      <verification>ls -la .slide-builder/ shows 7 subdirectories; ls .slide-builder/deck/ shows slides/</verification>
+    </criterion>
+    <criterion id="AC1.1.2">
+      <description>A `.gitignore` file includes `.slide-builder/credentials/` and `node_modules/`</description>
+      <testable>true</testable>
+      <verification>cat .gitignore shows both entries</verification>
+    </criterion>
+    <criterion id="AC1.1.3">
+      <description>A `package.json` exists with puppeteer and googleapis dependencies</description>
+      <testable>true</testable>
+      <verification>cat package.json shows puppeteer and googleapis in dependencies</verification>
+    </criterion>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>notes/architecture.md</path>
+        <title>Slide Builder Architecture</title>
+        <section>Project Structure</section>
+        <snippet>The `.slide-builder/` directory mirrors `.bmad/` with workflows/, templates/, samples/, single/, deck/slides/, credentials/, theme-history/</snippet>
+      </doc>
+      <doc>
+        <path>notes/architecture.md</path>
+        <title>Slide Builder Architecture</title>
+        <section>ADR-001: BMAD Pattern Alignment</section>
+        <snippet>Mirror BMAD's workflow.yaml + instructions.md architecture exactly. 100% alignment requirement from PRD.</snippet>
+      </doc>
+      <doc>
+        <path>notes/architecture.md</path>
+        <title>Slide Builder Architecture</title>
+        <section>Security Architecture</section>
+        <snippet>Credentials stored in `.slide-builder/credentials/` (gitignored). .gitignore entries: .slide-builder/credentials/, *.json.bak</snippet>
+      </doc>
+      <doc>
+        <path>notes/architecture.md</path>
+        <title>Slide Builder Architecture</title>
+        <section>Development Environment</section>
+        <snippet>mkdir -p .slide-builder/{workflows,templates,samples,single,deck/slides,credentials,theme-history}; npm init -y; npm install puppeteer googleapis</snippet>
+      </doc>
+      <doc>
+        <path>notes/sprint-artifacts/tech-spec-epic-1.md</path>
+        <title>Epic 1 Technical Specification</title>
+        <section>Story 1.1: Project Structure Scaffolding</section>
+        <snippet>AC1.1.1: Directory structure with 7 subdirectories. AC1.1.2: .gitignore with credentials and node_modules. AC1.1.3: package.json with dependencies.</snippet>
+      </doc>
+      <doc>
+        <path>notes/sprint-artifacts/tech-spec-epic-1.md</path>
+        <title>Epic 1 Technical Specification</title>
+        <section>Services and Modules - Directory Scaffolder</section>
+        <snippet>Creates all required directories in single operation. Initializes package.json with dependencies. Creates .gitignore with security entries. Idempotent (safe to run multiple times).</snippet>
+      </doc>
+      <doc>
+        <path>notes/epics.md</path>
+        <title>Epic Breakdown</title>
+        <section>Story 1.1: Project Structure Scaffolding</section>
+        <snippet>First story in Epic 1. Creates .slide-builder/ directory structure mirroring BMAD patterns. Prerequisites: None (first story).</snippet>
+      </doc>
+      <doc>
+        <path>notes/prd.md</path>
+        <title>Product Requirements Document</title>
+        <section>Framework Architecture (BMAD Pattern)</section>
+        <snippet>FR48-52: Each command maps to workflow definition. Workflows have instruction files. Phase execution with checkpoints. State in YAML. Framework extensible.</snippet>
+      </doc>
+    </docs>
+    <code>
+      <!-- Greenfield project - no existing code artifacts -->
+      <note>This is a greenfield project. No existing .slide-builder/ directory, package.json, or .gitignore exists. All files will be created new.</note>
+    </code>
+    <dependencies>
+      <ecosystem name="node">
+        <package name="puppeteer" version="latest" purpose="HTML-to-image conversion for slide export (Epic 7)" />
+        <package name="googleapis" version="latest" purpose="Google Slides API for export (Epic 7)" />
+      </ecosystem>
+      <runtimeDependencies>
+        <dependency name="Node.js" version="18+" purpose="Runtime for npm packages" />
+        <dependency name="Chrome/Chromium" version="modern" purpose="Required by puppeteer" />
+        <dependency name="Claude Code" version="current" purpose="Framework runtime environment" />
+      </runtimeDependencies>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint source="ADR-001">100% alignment with BMAD pattern - no custom directory patterns</constraint>
+    <constraint source="NFR11">credentials/ directory MUST be gitignored for security</constraint>
+    <constraint source="tech-spec">All directories must be created in a single idempotent operation</constraint>
+    <constraint source="architecture">Dependencies installed now but used in Epic 7 (forward planning)</constraint>
+    <constraint source="NFR17">State files must be human-readable YAML for manual recovery</constraint>
+  </constraints>
+
+  <interfaces>
+    <interface name="Directory Structure" kind="file-system">
+      <signature>.slide-builder/{workflows,templates,samples,single,deck/slides,credentials,theme-history}</signature>
+      <path>notes/architecture.md#Project Structure</path>
+    </interface>
+    <interface name="Bash mkdir command" kind="cli">
+      <signature>mkdir -p .slide-builder/{workflows,templates,samples,single,deck/slides,credentials,theme-history}</signature>
+      <path>notes/architecture.md#Development Environment</path>
+    </interface>
+    <interface name="npm initialization" kind="cli">
+      <signature>npm init -y &amp;&amp; npm install puppeteer googleapis</signature>
+      <path>notes/architecture.md#Development Environment</path>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>
+      Per tech-spec Test Strategy: Unit tests verify each directory exists after scaffolding. Integration tests run initialization and verify complete structure. Idempotency tests run twice and verify no errors or duplicates. Edge cases include missing Node.js (clear error) and permission denied (graceful fail). All testing is manual verification in Claude Code CLI environment.
+    </standards>
+    <locations>
+      <location>Manual CLI verification via ls, cat commands</location>
+      <location>No automated test framework in Epic 1 scope</location>
+    </locations>
+    <ideas>
+      <idea ac="AC1.1.1">Run mkdir command, then `ls -la .slide-builder/` to verify 7 directories exist</idea>
+      <idea ac="AC1.1.1">Run `ls .slide-builder/deck/` to verify slides/ subdirectory exists</idea>
+      <idea ac="AC1.1.2">Run `cat .gitignore` to verify .slide-builder/credentials/ and node_modules/ entries present</idea>
+      <idea ac="AC1.1.3">Run `cat package.json` to verify puppeteer and googleapis in dependencies</idea>
+      <idea ac="ALL">Run scaffolding twice to verify idempotency - no errors on second run</idea>
+      <idea ac="ALL">Verify existing files preserved on re-run (create test file in directory, run again, verify file still exists)</idea>
+    </ideas>
+  </tests>
+</story-context>
