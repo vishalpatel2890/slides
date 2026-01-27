@@ -1,0 +1,40 @@
+# Build One Workflow - Single Slide Generation
+# Generates a slide from plan.yaml using a matching template
+name: build-one
+description: "Build the next slide (or single planned slide) from plan using theme"
+author: "Slide Builder"
+
+# Path variables
+installed_path: "{project-root}/.slide-builder/workflows/build-one"
+
+# Workflow components
+instructions: "{installed_path}/instructions.md"
+
+# State and plan files
+status_file: "{project-root}/.slide-builder/status.yaml"
+theme_file: "{project-root}/.slide-builder/theme.json"
+single_plan: "{project-root}/.slide-builder/single/plan.yaml"
+deck_plan: "{project-root}/.slide-builder/deck/plan.yaml"
+
+# Output locations
+single_output: "{project-root}/.slide-builder/single/slide.html"
+deck_output: "{project-root}/.slide-builder/deck/slides"
+templates_dir: "{project-root}/.slide-builder/templates"
+
+# Template file mapping (suggested_template -> actual file)
+# Note: Templates are numbered files, map layout names to file names
+template_mapping:
+  layout-title: "01-title.html"
+  layout-list: "02-agenda.html"
+  layout-flow: "03-flow.html"
+  layout-columns-2: "04-comparison.html"
+  layout-columns-3: "04-comparison.html"  # Fallback to 2-column
+  layout-callout: "05-callout.html"
+  layout-code: "06-technical.html"
+
+# Variables
+variables:
+  workflow_version: "1.0"
+
+template: false
+standalone: true
