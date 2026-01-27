@@ -1,0 +1,22 @@
+# Theme Edit Workflow - Modify Existing Theme
+# Allows refinement of existing theme with visual feedback loop
+name: theme-edit
+description: "Modify existing theme via high-level feedback with visual validation loop"
+author: "Slide Builder"
+
+# Path variables
+installed_path: "{project-root}/.slide-builder/workflows/theme-edit"
+
+# Workflow components
+instructions: "{installed_path}/instructions.md"
+
+# Theme files
+theme_file: "{project-root}/.slide-builder/theme.json"
+theme_history: "{project-root}/.slide-builder/theme-history"
+
+# Variables
+variables:
+  workflow_version: "1.0"
+
+template: false
+standalone: true

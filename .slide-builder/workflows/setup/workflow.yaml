@@ -1,0 +1,30 @@
+# Setup Workflow - Theme Creation
+# Creates a new brand theme from user-provided assets
+name: setup
+description: "Create brand theme from assets (website URL, PDF, images) via extraction and sample deck validation loop"
+author: "Slide Builder"
+
+# Path variables
+installed_path: "{project-root}/.slide-builder/workflows/setup"
+
+# Workflow components
+instructions: "{installed_path}/instructions.md"
+
+# State management
+state_file: "{project-root}/.slide-builder/status.yaml"
+
+# Variables
+variables:
+  workflow_version: "1.0"
+
+# Required skills - MUST be loaded before executing relevant phases
+# The workflow engine should invoke these skills at the specified trigger points
+required_skills:
+  - skill: frontend-design
+    trigger: phase-2  # Load at start of Phase 2 (Brand Primitive Extraction)
+    reason: "Professional design expertise for color theory, typography, and visual design decisions"
+    blocking: true    # Do not proceed without this skill loaded
+
+# This workflow is standalone (creates theme.json, not a document)
+template: false
+standalone: true

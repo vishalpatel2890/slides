@@ -1,0 +1,22 @@
+# Plan One Workflow - Single Slide Planning
+# Captures intent for a single slide
+name: plan-one
+description: "Plan a single slide by capturing user intent and content requirements"
+author: "Slide Builder"
+
+# Path variables
+installed_path: "{project-root}/.slide-builder/workflows/plan-one"
+
+# Workflow components
+instructions: "{installed_path}/instructions.md"
+
+# State management
+plan_file: "{project-root}/.slide-builder/single/plan.yaml"
+status_file: "{project-root}/.slide-builder/status.yaml"
+
+# Variables
+variables:
+  workflow_version: "1.0"
+
+template: false
+standalone: true

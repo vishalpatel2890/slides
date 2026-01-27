@@ -1,0 +1,32 @@
+# Dependencies
+node_modules/
+
+# Slide Builder - User Generated Content
+# (Only .slide-builder/workflows/ is versioned - that's the framework)
+
+# Credentials (OAuth tokens - security sensitive)
+.slide-builder/credentials/
+
+# Theme configuration (user's brand)
+.slide-builder/theme.json
+.slide-builder/theme-history/
+
+# Generated templates (created from user's theme during /setup)
+.slide-builder/templates/
+
+# Sample slides (generated during theme setup)
+.slide-builder/samples/
+
+# User's slide workspaces
+.slide-builder/single/
+.slide-builder/deck/
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Editor directories
+.idea/
+.vscode/
+*.swp
+*.swo

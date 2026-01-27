@@ -1,0 +1,24 @@
+# Export Workflow - Google Slides Export
+# Converts slides to images and uploads to Google Slides
+name: export
+description: "Export slides to Google Slides - converts HTML to images and uploads via API"
+author: "Slide Builder"
+
+# Path variables
+installed_path: "{project-root}/.slide-builder/workflows/export"
+
+# Workflow components
+instructions: "{installed_path}/instructions.md"
+
+# Credentials
+credentials_dir: "{project-root}/.slide-builder/credentials"
+
+# State files
+status_file: "{project-root}/.slide-builder/status.yaml"
+
+# Variables
+variables:
+  workflow_version: "1.0"
+
+template: false
+standalone: true
