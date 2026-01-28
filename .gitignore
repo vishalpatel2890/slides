@@ -32,3 +32,6 @@ Thumbs.db
 
 # Local-only workflows (not part of framework distribution)
 .slide-builder/workflows/optimize-instructions/
+
+# Output directory
+output/
