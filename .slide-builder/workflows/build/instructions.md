@@ -25,11 +25,12 @@ You need to plan your slides first:
     </check>
 
     <check if="mode is single">
-      <action>Load .slide-builder/single/plan.yaml</action>
+      <action>Load output/singles/plan.yaml</action>
     </check>
 
     <check if="mode is deck">
-      <action>Load .slide-builder/deck/plan.yaml</action>
+      <action>Get current_deck_slug from status.yaml</action>
+      <action>Load output/{{deck_slug}}/plan.yaml</action>
       <action>Identify next unbuilt slide</action>
     </check>
   </step>
@@ -55,12 +56,12 @@ You need to plan your slides first:
     <action>Add auto-save script</action>
 
     <check if="single mode">
-      <action>Save to .slide-builder/single/slide.html</action>
+      <action>Save to output/singles/{{slide_slug}}.html</action>
     </check>
 
     <check if="deck mode">
-      <action>Save to .slide-builder/deck/slides/slide-{{n}}.html</action>
-      <action>Update plan.yaml slide status to "built"</action>
+      <action>Save to output/{{deck_slug}}/slides/slide-{{n}}.html</action>
+      <action>Update output/{{deck_slug}}/plan.yaml slide status to "built"</action>
     </check>
   </step>
 

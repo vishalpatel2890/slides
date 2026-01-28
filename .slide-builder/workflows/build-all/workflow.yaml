@@ -1,12 +1,12 @@
-# Build One Workflow - Single or Deck Slide Generation
-# Generates a slide from plan.yaml using a matching template or frontend-design skill
-name: build-one
-description: "Build the next slide (or single planned slide) from plan using theme"
+# Build All Workflow - Batch Slide Generation
+# Builds all remaining slides in a deck plan in sequence
+name: build-all
+description: "Build all remaining slides in deck plan with progress tracking and error continuation"
 author: "Slide Builder"
-version: "2.0"
+version: "1.0"
 
 # Path variables
-installed_path: "{project-root}/.slide-builder/workflows/build-one"
+installed_path: "{project-root}/.slide-builder/workflows/build-all"
 
 # Config paths (shareable brand assets)
 config_path: "{project-root}/.slide-builder/config"
@@ -19,27 +19,23 @@ instructions: "{installed_path}/instructions.md"
 
 # State and plan files
 status_file: "{project-root}/.slide-builder/status.yaml"
-single_plan: "{project-root}/output/singles/plan.yaml"
 # deck_plan is dynamic: output/{deck_slug}/plan.yaml (read deck_slug from status.yaml)
 
 # Output locations - now uses project-root/output/ for clean separation
 output_root: "{project-root}/output"
-single_output_dir: "{output_root}/singles"
 deck_output_dir: "{output_root}"  # Deck slides go to output/{slug}/slides/
 
-# Legacy paths (for deck working files only)
+# Legacy paths (for internal working files)
 deck_working_dir: "{project-root}/.slide-builder/deck"
 
-# Template file mapping (suggested_template -> actual file)
-# Maps intent-based layout names to sample files for reference
-# Note: If templates/ dir is empty, samples are used as design reference
+# Template file mapping (reused from build-one)
 template_mapping:
   layout-title: "01-title.html"
   layout-list: "02-agenda.html"
-  layout-flow: "03-flow.html"
-  layout-columns-2: "04-comparison.html"
-  layout-columns-3: "04-comparison.html"  # Fallback to 2-column
-  layout-callout: "05-callout.html"
+  layout-flow: "03-process-flow.html"
+  layout-columns-2: "05-comparison.html"
+  layout-columns-3: "05-comparison.html"  # Fallback to comparison layout
+  layout-callout: "04-key-insight.html"
   layout-code: "06-technical.html"
 
 # Intent keyword to template mapping (from Architecture Novel Pattern 2)
@@ -55,12 +51,16 @@ intent_keywords:
     - "points"
     - "agenda"
     - "steps"
+    - "installation"
+    - "setup"
+    - "authentication"
   layout-flow:
     - "flow"
     - "process"
     - "timeline"
     - "journey"
     - "workflow"
+    - "task"
   layout-columns-2:
     - "compare"
     - "vs"
@@ -71,12 +71,14 @@ intent_keywords:
     - "numbers"
     - "metrics"
     - "resources"
+    - "application"
   layout-columns-3:
     - "three"
     - "triad"
     - "options"
     - "landscape"
     - "products"
+    - "product"
   layout-callout:
     - "key"
     - "insight"
@@ -86,12 +88,17 @@ intent_keywords:
     - "highlight"
     - "exercise"
     - "hands-on"
+    - "what is"
+    - "why"
+    - "matters"
+    - "career"
   layout-code:
     - "code"
     - "technical"
     - "api"
     - "commands"
     - "CLI"
+    - "basic"
 
 # Slide status enum
 slide_status:
@@ -107,7 +114,7 @@ state_file_schema:
 
 # Variables
 variables:
-  workflow_version: "2.0"
+  workflow_version: "1.0"
 
 template: false
 standalone: true

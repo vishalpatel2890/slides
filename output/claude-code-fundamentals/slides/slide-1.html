@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=1920, height=1080">
+    <title>Slide 1: Claude Code Fundamentals</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --color-primary: #d4e94c;
+            --color-secondary: #4ecdc4;
+            --color-accent: #FF6B6B;
+            --color-bg-default: #FFFFFF;
+            --color-bg-alt: #F5F5F5;
+            --color-bg-dark: #0a0a0a;
+            --color-bg-dark-alt: #1a1a1a;
+            --color-text-heading: #0a0a0a;
+            --color-text-body: #4A4A4A;
+            --color-text-muted: #888888;
+            --color-text-on-dark: #FFFFFF;
+            --color-text-on-primary: #0a0a0a;
+            --font-heading: 'Outfit', system-ui, -apple-system, sans-serif;
+            --font-body: 'Outfit', system-ui, -apple-system, sans-serif;
+            --font-mono: 'SF Mono', 'Monaco', 'Consolas', monospace;
+            --size-hero: 72px;
+            --size-h1: 48px;
+            --size-h2: 36px;
+            --size-h3: 24px;
+            --size-body: 18px;
+            --border-radius: 0px;
+            --shadow: none;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            width: 1920px;
+            height: 1080px;
+            overflow: hidden;
+            font-family: var(--font-body);
+            background: #2a2a2a;
+        }
+
+        .slide {
+            width: 1920px;
+            height: 1080px;
+            background: var(--color-bg-dark);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Subtle grid texture */
+        .slide::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+            background-size: 40px 40px;
+            pointer-events: none;
+        }
+
+        /* Top accent bar */
+        .accent-bar {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--color-primary) 0%, var(--color-primary) 30%, transparent 30%);
+        }
+
+        /* Header */
+        .header {
+            position: absolute;
+            top: 60px;
+            left: 80px;
+            right: 80px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--color-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .logo-icon svg {
+            width: 24px;
+            height: 24px;
+        }
+
+        .logo-text {
+            font-family: var(--font-heading);
+            font-weight: 600;
+            font-size: 20px;
+            color: var(--color-text-on-dark);
+            letter-spacing: 0.5px;
+        }
+
+        .header-meta {
+            font-family: var(--font-body);
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--color-text-muted);
+        }
+
+        /* Main content */
+        .content {
+            position: absolute;
+            top: 50%;
+            left: 80px;
+            right: 80px;
+            transform: translateY(-50%);
+        }
+
+        .eyebrow {
+            font-family: var(--font-body);
+            font-size: 14px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            color: var(--color-primary);
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .eyebrow::before {
+            content: '';
+            width: 40px;
+            height: 2px;
+            background: var(--color-primary);
+        }
+
+        .title {
+            font-family: var(--font-heading);
+            font-size: var(--size-hero);
+            font-weight: 600;
+            color: var(--color-text-on-dark);
+            line-height: 1.1;
+            letter-spacing: -1px;
+            margin-bottom: 32px;
+            max-width: 1200px;
+        }
+
+        .title em {
+            font-style: normal;
+            color: var(--color-primary);
+        }
+
+        .subtitle {
+            font-family: var(--font-body);
+            font-size: var(--size-h3);
+            font-weight: 300;
+            color: var(--color-text-muted);
+            line-height: 1.5;
+            max-width: 800px;
+        }
+
+        /* Terminal visual element */
+        .terminal-accent {
+            position: absolute;
+            right: 80px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 480px;
+            opacity: 0.15;
+        }
+
+        .terminal-window {
+            background: var(--color-bg-dark-alt);
+            border: 1px solid #2a2a2a;
+            padding: 20px;
+        }
+
+        .terminal-header {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .terminal-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #3a3a3a;
+        }
+
+        .terminal-content {
+            font-family: var(--font-mono);
+            font-size: 14px;
+            color: var(--color-text-muted);
+            line-height: 1.6;
+        }
+
+        .terminal-prompt {
+            color: var(--color-primary);
+        }
+
+        /* Footer */
+        .footer {
+            position: absolute;
+            bottom: 60px;
+            left: 80px;
+            right: 80px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 20px;
+            border-top: 1px solid #2a2a2a;
+        }
+
+        .footer::before {
+            content: '';
+            position: absolute;
+            top: -1px;
+            left: 0;
+            width: 80px;
+            height: 2px;
+            background: var(--color-primary);
+        }
+
+        .footer-left {
+            font-family: var(--font-body);
+            font-size: 14px;
+            color: var(--color-text-muted);
+        }
+
+        .footer-center {
+            font-family: var(--font-body);
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--color-text-muted);
+        }
+
+        .slide-number {
+            width: 32px;
+            height: 32px;
+            background: var(--color-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--font-body);
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--color-bg-dark);
+        }
+
+        /* Contenteditable focus styles */
+        [contenteditable]:focus {
+            outline: 2px solid var(--color-primary);
+            outline-offset: 4px;
+        }
+
+        [contenteditable]:hover {
+            outline: 1px dashed var(--color-text-muted);
+            outline-offset: 2px;
+        }
+    </style>
+</head>
+<body>
+    <div class="slide" data-slide-id="1">
+        <div class="accent-bar"></div>
+
+        <header class="header">
+            <div class="logo">
+                <div class="logo-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="4 17 10 11 4 5"></polyline>
+                        <line x1="12" y1="19" x2="20" y2="19"></line>
+                    </svg>
+                </div>
+                <span class="logo-text" contenteditable="true" data-field="logo">Claude Code</span>
+            </div>
+            <div class="header-meta" contenteditable="true" data-field="header-meta">Workshop</div>
+        </header>
+
+        <main class="content">
+            <div class="eyebrow" contenteditable="true" data-field="eyebrow">From Chat to Agent</div>
+            <h1 class="title" contenteditable="true" data-field="title">Claude Code <em>Fundamentals</em></h1>
+            <p class="subtitle" contenteditable="true" data-field="subtitle">Transform how you work with AI. From asking questions to working alongside an agent that takes action in your environment.</p>
+        </main>
+
+        <div class="terminal-accent">
+            <div class="terminal-window">
+                <div class="terminal-header">
+                    <div class="terminal-dot"></div>
+                    <div class="terminal-dot"></div>
+                    <div class="terminal-dot"></div>
+                </div>
+                <div class="terminal-content">
+                    <span class="terminal-prompt">$</span> claude<br>
+                    <span style="color: var(--color-secondary);">Claude Code v1.0</span><br>
+                    <span style="color: var(--color-text-muted);">Ready to assist...</span>
+                </div>
+            </div>
+        </div>
+
+        <footer class="footer">
+            <div class="footer-left" contenteditable="true" data-field="footer-left">Solutions Engineering</div>
+            <div class="footer-center" contenteditable="true" data-field="footer-center">Training Workshop</div>
+            <div class="slide-number">1</div>
+        </footer>
+    </div>
+
+    <script>
+        // Auto-save script for contenteditable elements
+        const isLocalStorageAvailable = () => {
+            try {
+                const test = '__localStorage_test__';
+                localStorage.setItem(test, test);
+                localStorage.removeItem(test);
+                return true;
+            } catch (e) {
+                return false;
+            }
+        };
+
+        const localStorageEnabled = isLocalStorageAvailable();
+        if (!localStorageEnabled) {
+            console.warn('[Slide Auto-Save] localStorage is disabled.');
+        }
+
+        const saveEdits = () => {
+            if (!localStorageEnabled) return;
+            try {
+                const edits = [];
+                document.querySelectorAll('[contenteditable]').forEach(el => {
+                    const field = el.getAttribute('data-field');
+                    if (field) {
+                        edits.push({ selector: `[data-field='${field}']`, content: el.innerHTML });
+                    }
+                });
+                localStorage.setItem('slide-1-edits', JSON.stringify({
+                    slide: 1,
+                    edits: edits,
+                    lastModified: new Date().toISOString()
+                }));
+            } catch (e) {
+                console.error('[Slide Auto-Save] Failed to save:', e.message);
+            }
+        };
+
+        document.querySelectorAll('[contenteditable]').forEach(el => {
+            el.addEventListener('blur', saveEdits);
+            el.addEventListener('input', () => setTimeout(saveEdits, 1000));
+        });
+
+        // Restore edits on load
+        const restoreEdits = () => {
+            if (!localStorageEnabled) return;
+            try {
+                const stored = localStorage.getItem('slide-1-edits');
+                if (stored) {
+                    const data = JSON.parse(stored);
+                    if (data.slide === 1 && Array.isArray(data.edits)) {
+                        data.edits.forEach(edit => {
+                            const el = document.querySelector(edit.selector);
+                            if (el) el.innerHTML = edit.content;
+                        });
+                    }
+                }
+            } catch (e) {
+                localStorage.removeItem('slide-1-edits');
+            }
+        };
+
+        restoreEdits();
+    </script>
+</body>
+</html>

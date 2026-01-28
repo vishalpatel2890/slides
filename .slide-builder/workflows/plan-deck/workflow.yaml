@@ -1,8 +1,10 @@
 # Plan Deck Workflow - Full Deck Planning
 # Captures narrative structure for a complete presentation
+# Version 2.0 - Enhanced for Story 5.1 ACs
 name: plan-deck
 description: "Plan a full presentation deck with narrative structure, audience context, and slide-by-slide breakdown"
 author: "Slide Builder"
+version: "2.0"
 
 # Path variables
 installed_path: "{project-root}/.slide-builder/workflows/plan-deck"
@@ -10,13 +12,43 @@ installed_path: "{project-root}/.slide-builder/workflows/plan-deck"
 # Workflow components
 instructions: "{installed_path}/instructions.md"
 
+# Config paths (shareable brand assets)
+config_path: "{project-root}/.slide-builder/config"
+theme_file: "{config_path}/theme.json"
+
 # State management
-plan_file: "{project-root}/.slide-builder/deck/plan.yaml"
 status_file: "{project-root}/.slide-builder/status.yaml"
 
-# Variables
-variables:
-  workflow_version: "1.0"
+# Output locations - plans live with their output, not in working directory
+output_root: "{project-root}/output"
+# plan_file and slides_dir are dynamic based on deck_slug:
+#   plan_file: output/{deck_slug}/plan.yaml
+#   slides_dir: output/{deck_slug}/slides/
 
+# Input variables (collected from user)
+variables:
+  workflow_version: "2.0"
+  # Collected during workflow
+  purpose: ""
+  audience: ""
+  audience_knowledge_level: "intermediate"
+  key_points: []
+  desired_length: "6-10"
+  deck_name: ""
+  # Generated
+  storyline: {}
+  slides: []
+
+# Template matching patterns (from Architecture Novel Pattern 2)
+template_mapping:
+  title: ["title", "intro", "opening", "welcome"]
+  list: ["list", "bullets", "points", "agenda"]
+  flow: ["flow", "process", "timeline", "steps", "journey"]
+  columns-2: ["compare", "vs", "versus", "two", "split"]
+  columns-3: ["three", "triad", "options", "trio"]
+  callout: ["key", "insight", "callout", "cta", "highlight", "quote"]
+  code: ["code", "technical", "api", "demo"]
+
+# Output configuration
 template: false
 standalone: true

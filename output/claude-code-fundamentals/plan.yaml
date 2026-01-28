@@ -1,0 +1,207 @@
+# Deck Metadata
+deck_name: "Claude Code Fundamentals"
+created: "2026-01-27"
+last_modified: "2026-01-27T23:30:00Z"
+
+# Audience Context
+audience: "Solutions Engineers - intermediate to advanced technical level, beginner on CLI and Claude"
+audience_knowledge_level: intermediate
+audience_priorities:
+  - "Understanding the paradigm shift from chat to agent"
+  - "Practical demo capabilities for client calls"
+  - "Quick installation and hands-on experience"
+  - "Decision framework for Claude Code vs Claude.ai vs API"
+
+# Purpose & Outcome
+purpose: "Educational workshop to understand what Claude Code is, installation, and first interactions"
+desired_outcome: "SEs can install, use, and demo Claude Code to customers"
+key_message: "Claude Code transforms how you work with AI - from asking questions to working alongside an agent that takes action in your environment"
+
+# Narrative Structure
+storyline:
+  opening_hook: "You already know how to explain AI to customers. But what if you could show them AI working with them in real-time?"
+  tension: "There's a gap between 'chat with AI' and 'AI that does work.' Customers don't grasp the paradigm shift - and most SEs haven't experienced it either."
+  resolution: "Claude Code bridges that gap. It's an agent that works in your environment, with your code, taking real action while you guide it."
+  call_to_action: "Install it today, build your first demo script, and transform how you demonstrate AI value to customers."
+
+recurring_themes:
+  - "Paradigm shift"
+  - "Agent vs chatbot"
+  - "Practical SE workflows"
+  - "Hands-on learning"
+
+# Slide Breakdown with Rich Context
+slides:
+  - number: 1
+    intent: "Title - Claude Code Fundamentals"
+    template: "layout-title"
+    status: built
+    storyline_role: "opening"
+    key_points:
+      - "Workshop title: Claude Code Fundamentals"
+      - "Subtitle: From Chat to Agent"
+      - "Presenter/date information"
+    visual_guidance: "Bold dark background with lime accent, centered title treatment"
+    tone: "bold"
+
+  - number: 2
+    intent: "The AI Evolution - From Chatbot to Agent"
+    template: "layout-flow"
+    status: built
+    storyline_role: "tension"
+    key_points:
+      - "Chat AI: Ask questions, get answers"
+      - "Assistants: Context-aware, multi-turn"
+      - "Agents: Take action, iterate, work alongside you"
+    visual_guidance: "Horizontal flow diagram showing progression, highlight the agent stage"
+    tone: "professional"
+
+  - number: 3
+    intent: "What is Claude Code?"
+    template: "layout-callout"
+    status: built
+    storyline_role: "tension"
+    key_points:
+      - "CLI-based AI agent from Anthropic"
+      - "Works directly in your terminal"
+      - "Reads, writes, and executes in your environment"
+    visual_guidance: "Strong callout box with definition, terminal icon or visual"
+    tone: "professional"
+
+  - number: 4
+    intent: "Claude Code vs Claude.ai vs API - When to Use Each"
+    template: "layout-columns-3"
+    status: built
+    storyline_role: "evidence"
+    key_points:
+      - "Claude.ai: Quick questions, document analysis, creative work"
+      - "API: Production integrations, custom applications"
+      - "Claude Code: Development workflows, codebase work, agentic tasks"
+    visual_guidance: "Three equal columns with clear headers, use cases listed below each"
+    tone: "professional"
+
+  - number: 5
+    intent: "The Capability Model - What Claude Code Can Do"
+    template: "layout-list"
+    status: built
+    storyline_role: "evidence"
+    key_points:
+      - "Read your entire codebase with context"
+      - "Write and edit code across files"
+      - "Run shell commands and see results"
+      - "Iterate based on errors and feedback"
+      - "Use tools: search, web fetch, file operations"
+    visual_guidance: "Clean bullet list with icons, emphasize the action verbs"
+    tone: "technical"
+
+  - number: 6
+    intent: "Installation & Setup - 2 Minutes to Start"
+    template: "layout-code"
+    status: built
+    storyline_role: "evidence"
+    key_points:
+      - "npm install -g @anthropic-ai/claude-code"
+      - "brew install anthropic/tap/claude-code (macOS)"
+      - "System requirements: Node 18+, macOS/Linux/WSL"
+    visual_guidance: "Code block styling, terminal appearance, copy-friendly"
+    tone: "technical"
+
+  - number: 7
+    intent: "Authentication - Connecting Your Account"
+    template: "layout-code"
+    status: built
+    storyline_role: "evidence"
+    key_points:
+      - "claude login - browser-based auth flow"
+      - "API key setup for CI/automation"
+      - "Team vs individual account considerations"
+    visual_guidance: "Code snippets with explanatory text, auth flow diagram optional"
+    tone: "technical"
+
+  - number: 8
+    intent: "CLI Navigation Basics - Essential Commands"
+    template: "layout-list"
+    status: built
+    storyline_role: "evidence"
+    key_points:
+      - "claude - start interactive session"
+      - "/help - see all commands"
+      - "/clear - reset context"
+      - "Slash commands for common operations"
+      - "Context management and conversation flow"
+    visual_guidance: "Command reference style, monospace for commands"
+    tone: "technical"
+
+  - number: 9
+    intent: "The Interaction Pattern - Outcomes, Not Steps"
+    template: "layout-columns-2"
+    status: built
+    storyline_role: "evidence"
+    key_points:
+      - "DO: Describe what you want to achieve"
+      - "DON'T: Micromanage each step"
+      - "Think collaborator, not command-line tool"
+    visual_guidance: "Two columns: Do vs Don't with examples, green/red or check/x indicators"
+    tone: "professional"
+
+  - number: 10
+    intent: "Your First Agentic Task - File Creation Demo"
+    template: "layout-code"
+    status: built
+    storyline_role: "evidence"
+    key_points:
+      - "Example prompt: 'Create a README for this project'"
+      - "Watch the agent read, plan, and write"
+      - "Review and iterate on the result"
+    visual_guidance: "Terminal-style showing prompt and agent response, step visualization"
+    tone: "technical"
+
+  - number: 11
+    intent: "Trust & Control - When to Guide vs Let It Run"
+    template: "layout-columns-2"
+    status: built
+    storyline_role: "resolution"
+    key_points:
+      - "High trust: Refactoring, documentation, tests"
+      - "Review needed: Deletions, external APIs, deployments"
+      - "Intervention patterns: When and how to course-correct"
+    visual_guidance: "Two columns showing trust spectrum, practical guidance"
+    tone: "professional"
+
+  - number: 12
+    intent: "SE Application - Demo Script Generation"
+    template: "layout-content"
+    status: built
+    storyline_role: "resolution"
+    key_points:
+      - "Real workflow: Generate client-ready demo scripts"
+      - "Time savings: Minutes instead of hours"
+      - "Customization: Adapt to specific customer context"
+    visual_guidance: "Workflow example, before/after or time comparison"
+    tone: "warm"
+
+  - number: 13
+    intent: "Hands-On Exercise"
+    template: "layout-callout"
+    status: built
+    storyline_role: "cta"
+    key_points:
+      - "Step 1: Install Claude Code"
+      - "Step 2: Authenticate with claude login"
+      - "Step 3: Create a project README from scratch"
+      - "Time: ~10 minutes"
+    visual_guidance: "Strong callout box, numbered steps, action-oriented"
+    tone: "bold"
+
+  - number: 14
+    intent: "Resources & Next Steps"
+    template: "layout-list"
+    status: built
+    storyline_role: "cta"
+    key_points:
+      - "docs.anthropic.com/claude-code"
+      - "GitHub: anthropics/claude-code"
+      - "Internal resources and Slack channels"
+      - "Advanced topics: hooks, MCP servers, custom workflows"
+    visual_guidance: "Clean resource list with links, QR code optional"
+    tone: "professional"

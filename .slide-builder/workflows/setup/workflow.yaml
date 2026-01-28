@@ -7,6 +7,13 @@ author: "Slide Builder"
 # Path variables
 installed_path: "{project-root}/.slide-builder/workflows/setup"
 
+# Config paths (shareable brand assets)
+config_path: "{project-root}/.slide-builder/config"
+theme_file: "{config_path}/theme.json"
+theme_history_dir: "{config_path}/theme-history"
+samples_dir: "{config_path}/samples"
+templates_dir: "{config_path}/templates"
+
 # Workflow components
 instructions: "{installed_path}/instructions.md"
 

@@ -1,0 +1,909 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Claude Code Fundamentals - Slide Viewer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --amp-black: #0a0a0a;
+            --amp-dark-alt: #1a1a1a;
+            --amp-mid-gray: #2a2a2a;
+            --amp-light-gray: #888888;
+            --amp-lime: #d4e94c;
+            --amp-teal: #4ecdc4;
+            --amp-white: #ffffff;
+            --font-heading: 'Outfit', system-ui, sans-serif;
+            --font-body: 'Outfit', system-ui, sans-serif;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-body);
+            background: var(--amp-black);
+            min-height: 100vh;
+            color: var(--amp-white);
+        }
+
+        /* ═══════════════════════════════════════════════════════════════════════ */
+        /* GALLERY VIEW                                                             */
+        /* ═══════════════════════════════════════════════════════════════════════ */
+        #gallery-view {
+            padding: 60px;
+        }
+
+        #gallery-view.hidden {
+            display: none;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 60px;
+            padding-bottom: 40px;
+            border-bottom: 1px solid var(--amp-mid-gray);
+            position: relative;
+        }
+
+        .header::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 120px;
+            height: 2px;
+            background: var(--amp-lime);
+        }
+
+        .deck-badge {
+            display: inline-block;
+            font-family: var(--font-body);
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--amp-lime);
+            background: rgba(212, 233, 76, 0.1);
+            padding: 6px 16px;
+            margin-bottom: 16px;
+        }
+
+        .title {
+            font-family: var(--font-heading);
+            font-size: 36px;
+            font-weight: 400;
+            color: var(--amp-white);
+            margin-bottom: 12px;
+        }
+
+        .subtitle {
+            font-family: var(--font-body);
+            font-size: 16px;
+            color: var(--amp-light-gray);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 32px;
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background: var(--amp-dark-alt);
+            border: 1px solid var(--amp-mid-gray);
+            overflow: hidden;
+            transition: transform 0.3s ease, border-color 0.3s ease;
+            cursor: pointer;
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+            border-color: var(--amp-lime);
+        }
+
+        .card-preview {
+            width: 100%;
+            aspect-ratio: 16/9;
+            background: var(--amp-black);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .card-preview iframe {
+            width: 480%;
+            height: 480%;
+            border: none;
+            pointer-events: none;
+            transform: scale(0.208);
+            transform-origin: top left;
+        }
+
+        .card-info {
+            padding: 24px;
+            border-top: 1px solid var(--amp-mid-gray);
+        }
+
+        .card-number {
+            font-family: var(--font-body);
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--amp-lime);
+            margin-bottom: 8px;
+        }
+
+        .card-title {
+            font-family: var(--font-heading);
+            font-size: 18px;
+            font-weight: 400;
+            color: var(--amp-white);
+        }
+
+        /* ═══════════════════════════════════════════════════════════════════════ */
+        /* PRESENTATION VIEW                                                        */
+        /* ═══════════════════════════════════════════════════════════════════════ */
+        #presentation-view {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: var(--amp-black);
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #presentation-view.hidden {
+            display: none;
+        }
+
+        .presentation-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 24px;
+            background: var(--amp-dark-alt);
+            border-bottom: 1px solid var(--amp-mid-gray);
+        }
+
+        .presentation-title {
+            font-family: var(--font-heading);
+            font-size: 18px;
+            font-weight: 400;
+            color: var(--amp-white);
+        }
+
+        .presentation-controls {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .slide-counter {
+            font-family: var(--font-body);
+            font-size: 14px;
+            color: var(--amp-light-gray);
+            min-width: 80px;
+            text-align: center;
+        }
+
+        .nav-btn {
+            background: transparent;
+            border: 1px solid var(--amp-mid-gray);
+            color: var(--amp-white);
+            padding: 8px 16px;
+            font-family: var(--font-body);
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .nav-btn:hover:not(:disabled) {
+            border-color: var(--amp-lime);
+            color: var(--amp-lime);
+        }
+
+        .nav-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .close-btn {
+            background: transparent;
+            border: 1px solid var(--amp-mid-gray);
+            color: var(--amp-white);
+            width: 36px;
+            height: 36px;
+            font-size: 20px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .close-btn:hover {
+            border-color: var(--amp-lime);
+            color: var(--amp-lime);
+        }
+
+        .presentation-content {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            overflow: hidden;
+        }
+
+        .slide-container {
+            position: relative;
+            background: var(--amp-black);
+            border: 1px solid var(--amp-mid-gray);
+            overflow: hidden;
+            /* Dimensions set by JavaScript based on available space */
+        }
+
+        .slide-container iframe {
+            width: 1920px;
+            height: 1080px;
+            border: none;
+            transform-origin: top left;
+            /* Scale set by JavaScript */
+        }
+
+        /* Keyboard hint */
+        .keyboard-hint {
+            position: fixed;
+            bottom: 20px;
+            left: calc(200px + 50%);
+            transform: translateX(-50%);
+            font-family: var(--font-body);
+            font-size: 12px;
+            color: var(--amp-light-gray);
+            background: var(--amp-dark-alt);
+            padding: 8px 16px;
+            border: 1px solid var(--amp-mid-gray);
+            opacity: 0.7;
+            z-index: 1001;
+        }
+
+        .keyboard-hint kbd {
+            background: var(--amp-mid-gray);
+            padding: 2px 6px;
+            margin: 0 4px;
+            font-family: var(--font-body);
+        }
+
+        /* ═══════════════════════════════════════════════════════════════════════ */
+        /* PRESENTATION SIDEBAR                                                     */
+        /* ═══════════════════════════════════════════════════════════════════════ */
+        .presentation-sidebar {
+            position: fixed;
+            left: 0;
+            top: 57px;
+            width: 200px;
+            height: calc(100vh - 57px);
+            background: var(--amp-dark-alt);
+            border-right: 1px solid var(--amp-mid-gray);
+            overflow-y: auto;
+            padding: 16px;
+            z-index: 1001;
+        }
+
+        .presentation-sidebar::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .presentation-sidebar::-webkit-scrollbar-track {
+            background: var(--amp-dark-alt);
+        }
+
+        .presentation-sidebar::-webkit-scrollbar-thumb {
+            background: var(--amp-mid-gray);
+        }
+
+        .presentation-sidebar::-webkit-scrollbar-thumb:hover {
+            background: var(--amp-light-gray);
+        }
+
+        .sidebar-item {
+            width: 100%;
+            aspect-ratio: 16/9;
+            margin-bottom: 12px;
+            border: 2px solid transparent;
+            cursor: pointer;
+            overflow: hidden;
+            position: relative;
+            background: var(--amp-black);
+            transition: border-color 0.2s ease;
+        }
+
+        .sidebar-item:hover {
+            border-color: var(--amp-mid-gray);
+        }
+
+        .sidebar-item.active {
+            border-color: var(--amp-lime);
+        }
+
+        .sidebar-item iframe {
+            width: 1000%;
+            height: 1000%;
+            transform: scale(0.1);
+            transform-origin: top left;
+            pointer-events: none;
+            border: none;
+        }
+
+        .sidebar-number {
+            position: absolute;
+            bottom: 4px;
+            right: 4px;
+            background: rgba(10, 10, 10, 0.8);
+            color: var(--amp-white);
+            font-family: var(--font-body);
+            font-size: 10px;
+            font-weight: 600;
+            padding: 2px 6px;
+        }
+
+        /* Adjust presentation content for sidebar */
+        .presentation-body {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .presentation-main {
+            flex: 1;
+            margin-left: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            overflow: hidden;
+        }
+
+        /* Slide transition effect */
+        .slide-container iframe {
+            width: 1920px;
+            height: 1080px;
+            border: none;
+            transform-origin: top left;
+            transition: opacity 0.3s ease;
+        }
+
+        .slide-container iframe.transitioning {
+            opacity: 0;
+        }
+
+        /* ═══════════════════════════════════════════════════════════════════════ */
+        /* FULLSCREEN MODE - Hide sidebar for distraction-free presentation        */
+        /* ═══════════════════════════════════════════════════════════════════════ */
+        #presentation-view:fullscreen .presentation-sidebar,
+        #presentation-view:-webkit-full-screen .presentation-sidebar {
+            display: none;
+        }
+
+        #presentation-view:fullscreen .presentation-main,
+        #presentation-view:-webkit-full-screen .presentation-main {
+            margin-left: 0;
+        }
+
+        #presentation-view:fullscreen .keyboard-hint,
+        #presentation-view:-webkit-full-screen .keyboard-hint {
+            left: 50%;
+        }
+
+        #presentation-view:fullscreen .presentation-header,
+        #presentation-view:-webkit-full-screen .presentation-header {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- ═══════════════════════════════════════════════════════════════════════ -->
+    <!-- GALLERY VIEW                                                             -->
+    <!-- ═══════════════════════════════════════════════════════════════════════ -->
+    <div id="gallery-view">
+        <header class="header">
+            <div class="deck-badge">14 Slides</div>
+            <h1 class="title">Claude Code Fundamentals</h1>
+            <p class="subtitle">Click any slide to enter presentation mode</p>
+        </header>
+
+        <div class="grid" id="slide-grid">
+            <!-- Slides will be inserted here by JavaScript -->
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════════════════ -->
+    <!-- PRESENTATION VIEW                                                        -->
+    <!-- ═══════════════════════════════════════════════════════════════════════ -->
+    <div id="presentation-view" class="hidden">
+        <div class="presentation-header">
+            <span class="presentation-title">Claude Code Fundamentals</span>
+            <div class="presentation-controls">
+                <button class="nav-btn" id="prev-btn" onclick="prevSlide()">← Previous</button>
+                <span class="slide-counter" id="slide-counter">1 / 14</span>
+                <button class="nav-btn" id="next-btn" onclick="nextSlide()">Next →</button>
+                <button class="close-btn" onclick="exitToGallery()" title="Close (Esc)">×</button>
+            </div>
+        </div>
+        <div class="presentation-body">
+            <!-- Thumbnail Sidebar -->
+            <div class="presentation-sidebar" id="sidebar">
+                <!-- Sidebar items will be rendered by JavaScript -->
+            </div>
+            <!-- Main Content Area -->
+            <div class="presentation-main">
+                <div class="slide-container">
+                    <iframe id="presentation-iframe" src=""></iframe>
+                </div>
+            </div>
+        </div>
+        <div class="keyboard-hint">
+            <kbd>←</kbd><kbd>→</kbd> Navigate
+            <kbd>1-9</kbd> Jump
+            <kbd>Home</kbd><kbd>End</kbd> First/Last
+            <kbd>F</kbd> Fullscreen
+            <kbd>Esc</kbd> Exit
+        </div>
+    </div>
+
+    <script>
+        // ═══════════════════════════════════════════════════════════════════════
+        // SLIDE DATA
+        // Fallback data injected at build time (works with file:// protocol)
+        // Dynamic manifest loading attempted for server deployments
+        // ═══════════════════════════════════════════════════════════════════════
+        const FALLBACK_SLIDES = [
+  {
+    "number": 1,
+    "filename": "slide-1.html",
+    "title": "Claude Code Fundamentals"
+  },
+  {
+    "number": 2,
+    "filename": "slide-2.html",
+    "title": "The AI Evolution - From Chatbot to Agent"
+  },
+  {
+    "number": 3,
+    "filename": "slide-3.html",
+    "title": "What is Claude Code?"
+  },
+  {
+    "number": 4,
+    "filename": "slide-4.html",
+    "title": "Claude Code vs Claude.ai vs API — When to Use Each"
+  },
+  {
+    "number": 5,
+    "filename": "slide-5.html",
+    "title": "The Capability Model"
+  },
+  {
+    "number": 6,
+    "filename": "slide-6.html",
+    "title": "Installation & Setup"
+  },
+  {
+    "number": 7,
+    "filename": "slide-7.html",
+    "title": "Authentication"
+  },
+  {
+    "number": 8,
+    "filename": "slide-8.html",
+    "title": "CLI Navigation Basics"
+  },
+  {
+    "number": 9,
+    "filename": "slide-9.html",
+    "title": "The Interaction Pattern"
+  },
+  {
+    "number": 10,
+    "filename": "slide-10.html",
+    "title": "Your First Agentic Task"
+  },
+  {
+    "number": 11,
+    "filename": "slide-11.html",
+    "title": "Trust & Control — When to Guide vs Let It Run"
+  },
+  {
+    "number": 12,
+    "filename": "slide-12.html",
+    "title": "SE Application - Demo Script Generation"
+  },
+  {
+    "number": 13,
+    "filename": "slide-13.html",
+    "title": "Your Turn"
+  },
+  {
+    "number": 14,
+    "filename": "slide-14.html",
+    "title": "Resources & Next Steps"
+  }
+];
+        let slides = FALLBACK_SLIDES;
+        let deckName = 'Claude Code Fundamentals';
+        let totalSlides = 14;
+
+        // ═══════════════════════════════════════════════════════════════════════
+        // STATE
+        // ═══════════════════════════════════════════════════════════════════════
+        let currentSlide = 1;
+
+        // ═══════════════════════════════════════════════════════════════════════
+        // DYNAMIC MANIFEST LOADING
+        // Attempts to load fresh data from manifest.json (for server deployments)
+        // Falls back to injected data if fetch fails (file:// protocol)
+        // ═══════════════════════════════════════════════════════════════════════
+        async function loadManifest() {
+            try {
+                const cacheBuster = `?t=${Date.now()}`;
+                const response = await fetch(`slides/manifest.json${cacheBuster}`);
+                if (!response.ok) throw new Error('Manifest not found');
+                const manifest = await response.json();
+
+                // Update global state from manifest
+                slides = manifest.slides;
+                deckName = manifest.deckName;
+                totalSlides = manifest.slides.length;
+
+                // Update UI elements
+                document.querySelector('.title').textContent = deckName;
+                document.querySelector('.deck-badge').textContent = `${totalSlides} Slides`;
+                document.querySelector('.presentation-title').textContent = deckName;
+
+                console.log('Loaded slides from manifest.json');
+                return true;
+            } catch (error) {
+                // fetch() fails with file:// protocol - use fallback data
+                if (FALLBACK_SLIDES && FALLBACK_SLIDES.length > 0) {
+                    console.log('Using fallback slide data (file:// protocol or manifest unavailable)');
+                    return true;
+                }
+                // No fallback data available - show error
+                showError('Unable to load slides. Please ensure slides/manifest.json exists.');
+                return false;
+            }
+        }
+
+        function showError(message) {
+            const grid = document.getElementById('slide-grid');
+            grid.innerHTML = `
+                <div style="grid-column: 1 / -1; text-align: center; padding: 60px;">
+                    <div style="font-size: 48px; margin-bottom: 24px;">⚠️</div>
+                    <h2 style="color: var(--amp-lime); margin-bottom: 16px;">Error Loading Slides</h2>
+                    <p style="color: var(--amp-light-gray);">${message}</p>
+                    <p style="color: var(--amp-light-gray); margin-top: 16px; font-size: 14px;">
+                        Run <code style="background: var(--amp-mid-gray); padding: 2px 8px;">node scripts/generate-manifest.js [deck-slug]</code> to generate the manifest.
+                    </p>
+                </div>
+            `;
+            // Update header to show error state
+            document.querySelector('.deck-badge').textContent = 'Error';
+        }
+
+        // ═══════════════════════════════════════════════════════════════════════
+        // GALLERY RENDERING
+        // ═══════════════════════════════════════════════════════════════════════
+        function renderGallery() {
+            const grid = document.getElementById('slide-grid');
+            grid.innerHTML = '';
+
+            const cacheBuster = `?t=${Date.now()}`;
+
+            slides.forEach((slide, index) => {
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.onclick = () => enterPresentation(index + 1);
+                card.innerHTML = `
+                    <div class="card-preview">
+                        <iframe src="slides/${slide.filename}${cacheBuster}" loading="lazy"></iframe>
+                    </div>
+                    <div class="card-info">
+                        <div class="card-number">Slide ${slide.number}</div>
+                        <div class="card-title">${slide.title || 'Slide ' + slide.number}</div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        // ═══════════════════════════════════════════════════════════════════════
+        // PRESENTATION MODE
+        // ═══════════════════════════════════════════════════════════════════════
+        const SLIDE_WIDTH = 1920;
+        const SLIDE_HEIGHT = 1080;
+        const TRANSITION_DURATION = 150; // Half of 300ms total transition
+
+        function calculateScale() {
+            const content = document.querySelector('.presentation-main');
+            const container = document.querySelector('.slide-container');
+            const iframe = document.getElementById('presentation-iframe');
+
+            if (!content || !container || !iframe) return;
+
+            // Get available space (subtract padding)
+            const availableWidth = content.clientWidth - 48;
+            const availableHeight = content.clientHeight - 48;
+
+            // Calculate scale to fit while maintaining aspect ratio
+            const scaleX = availableWidth / SLIDE_WIDTH;
+            const scaleY = availableHeight / SLIDE_HEIGHT;
+            const scale = Math.min(scaleX, scaleY);
+
+            // Apply scale to iframe (preserve transition class if present)
+            const currentTransform = iframe.classList.contains('transitioning') ? 'transitioning' : '';
+            iframe.style.transform = `scale(${scale})`;
+
+            // Size container to match scaled dimensions
+            container.style.width = `${SLIDE_WIDTH * scale}px`;
+            container.style.height = `${SLIDE_HEIGHT * scale}px`;
+        }
+
+        // ═══════════════════════════════════════════════════════════════════════
+        // SIDEBAR RENDERING
+        // ═══════════════════════════════════════════════════════════════════════
+        function renderSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.innerHTML = '';
+
+            const cacheBuster = `?t=${Date.now()}`;
+
+            slides.forEach((slide, index) => {
+                const item = document.createElement('div');
+                item.className = 'sidebar-item' + (index + 1 === currentSlide ? ' active' : '');
+                item.onclick = () => goToSlide(index + 1);
+                item.innerHTML = `
+                    <iframe src="slides/${slide.filename}${cacheBuster}" loading="lazy"></iframe>
+                    <span class="sidebar-number">${slide.number}</span>
+                `;
+                item.id = `sidebar-item-${index + 1}`;
+                sidebar.appendChild(item);
+            });
+        }
+
+        function updateSidebarHighlight() {
+            // Remove active from all items
+            document.querySelectorAll('.sidebar-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            // Add active to current slide
+            const activeItem = document.getElementById(`sidebar-item-${currentSlide}`);
+            if (activeItem) {
+                activeItem.classList.add('active');
+                // Auto-scroll sidebar to keep current slide visible
+                activeItem.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+        }
+
+        // ═══════════════════════════════════════════════════════════════════════
+        // SLIDE TRANSITIONS
+        // ═══════════════════════════════════════════════════════════════════════
+        function updatePresentationSlideWithTransition() {
+            const slide = slides[currentSlide - 1];
+            if (!slide) return;
+
+            const iframe = document.getElementById('presentation-iframe');
+            const cacheBuster = `?t=${Date.now()}`;
+
+            // Fade out
+            iframe.classList.add('transitioning');
+
+            setTimeout(() => {
+                // Update source while invisible (with cache-busting)
+                iframe.src = `slides/${slide.filename}${cacheBuster}`;
+
+                // Fade in after src is set (onload for smoother transition)
+                iframe.onload = () => {
+                    iframe.classList.remove('transitioning');
+                };
+            }, TRANSITION_DURATION);
+
+            // Update counter and button states
+            document.getElementById('slide-counter').textContent = `${currentSlide} / ${totalSlides}`;
+            document.getElementById('prev-btn').disabled = currentSlide <= 1;
+            document.getElementById('next-btn').disabled = currentSlide >= totalSlides;
+
+            // Update sidebar highlight
+            updateSidebarHighlight();
+        }
+
+        function enterPresentation(slideNumber) {
+            currentSlide = slideNumber;
+            document.getElementById('gallery-view').classList.add('hidden');
+            document.getElementById('presentation-view').classList.remove('hidden');
+
+            // Render sidebar
+            renderSidebar();
+
+            // Initial slide load (no transition needed for first load)
+            const slide = slides[currentSlide - 1];
+            if (slide) {
+                const cacheBuster = `?t=${Date.now()}`;
+                document.getElementById('presentation-iframe').src = `slides/${slide.filename}${cacheBuster}`;
+                document.getElementById('slide-counter').textContent = `${currentSlide} / ${totalSlides}`;
+                document.getElementById('prev-btn').disabled = currentSlide <= 1;
+                document.getElementById('next-btn').disabled = currentSlide >= totalSlides;
+            }
+
+            // Recalculate scale after showing presentation view
+            setTimeout(calculateScale, 10);
+        }
+
+        function exitToGallery() {
+            // Exit fullscreen first if active
+            if (document.fullscreenElement || document.webkitFullscreenElement) {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                } else if (document.webkitExitFullscreen) {
+                    document.webkitExitFullscreen();
+                }
+            }
+            document.getElementById('presentation-view').classList.add('hidden');
+            document.getElementById('gallery-view').classList.remove('hidden');
+        }
+
+        function updatePresentationSlide() {
+            // Use transition version
+            updatePresentationSlideWithTransition();
+        }
+
+        // Recalculate scale on window resize
+        window.addEventListener('resize', () => {
+            if (!document.getElementById('presentation-view').classList.contains('hidden')) {
+                calculateScale();
+            }
+        });
+
+        // ═══════════════════════════════════════════════════════════════════════
+        // NAVIGATION FUNCTIONS
+        // ═══════════════════════════════════════════════════════════════════════
+        function nextSlide() {
+            if (currentSlide < totalSlides) {
+                currentSlide++;
+                updatePresentationSlide();
+            }
+        }
+
+        function prevSlide() {
+            if (currentSlide > 1) {
+                currentSlide--;
+                updatePresentationSlide();
+            }
+        }
+
+        function goToSlide(n) {
+            if (n >= 1 && n <= totalSlides && n !== currentSlide) {
+                currentSlide = n;
+                updatePresentationSlide();
+            }
+        }
+
+        // ═══════════════════════════════════════════════════════════════════════
+        // FULLSCREEN SUPPORT
+        // ═══════════════════════════════════════════════════════════════════════
+        function toggleFullscreen() {
+            const viewer = document.getElementById('presentation-view');
+
+            if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+                // Enter fullscreen
+                if (viewer.requestFullscreen) {
+                    viewer.requestFullscreen();
+                } else if (viewer.webkitRequestFullscreen) {
+                    viewer.webkitRequestFullscreen();
+                } else if (viewer.msRequestFullscreen) {
+                    viewer.msRequestFullscreen();
+                }
+            } else {
+                // Exit fullscreen
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                } else if (document.webkitExitFullscreen) {
+                    document.webkitExitFullscreen();
+                } else if (document.msExitFullscreen) {
+                    document.msExitFullscreen();
+                }
+            }
+        }
+
+        // Recalculate scale when fullscreen changes
+        document.addEventListener('fullscreenchange', () => {
+            setTimeout(calculateScale, 50);
+        });
+        document.addEventListener('webkitfullscreenchange', () => {
+            setTimeout(calculateScale, 50);
+        });
+
+        // ═══════════════════════════════════════════════════════════════════════
+        // KEYBOARD NAVIGATION
+        // ═══════════════════════════════════════════════════════════════════════
+        document.addEventListener('keydown', (e) => {
+            // Only handle keys in presentation mode
+            if (document.getElementById('presentation-view').classList.contains('hidden')) {
+                return;
+            }
+
+            switch(e.key) {
+                case 'ArrowRight':
+                case 'ArrowDown':
+                case ' ':
+                    e.preventDefault();
+                    nextSlide();
+                    break;
+                case 'ArrowLeft':
+                case 'ArrowUp':
+                    e.preventDefault();
+                    prevSlide();
+                    break;
+                case 'Escape':
+                    e.preventDefault();
+                    // If in fullscreen, exit fullscreen first (stay in presentation)
+                    if (document.fullscreenElement || document.webkitFullscreenElement) {
+                        if (document.exitFullscreen) {
+                            document.exitFullscreen();
+                        } else if (document.webkitExitFullscreen) {
+                            document.webkitExitFullscreen();
+                        }
+                    } else {
+                        // Not in fullscreen, exit to gallery
+                        exitToGallery();
+                    }
+                    break;
+                case 'f':
+                case 'F':
+                    e.preventDefault();
+                    toggleFullscreen();
+                    break;
+                case 'Home':
+                    e.preventDefault();
+                    goToSlide(1);
+                    break;
+                case 'End':
+                    e.preventDefault();
+                    goToSlide(totalSlides);
+                    break;
+                default:
+                    // Number keys 1-9 jump to that slide
+                    if (e.key >= '1' && e.key <= '9') {
+                        e.preventDefault();
+                        const num = parseInt(e.key);
+                        if (num <= totalSlides) {
+                            goToSlide(num);
+                        }
+                    }
+            }
+        });
+
+        // ═══════════════════════════════════════════════════════════════════════
+        // INITIALIZATION
+        // ═══════════════════════════════════════════════════════════════════════
+        document.addEventListener('DOMContentLoaded', async () => {
+            const loaded = await loadManifest();
+            if (loaded) {
+                renderGallery();
+            }
+        });
+    </script>
+</body>
+</html>

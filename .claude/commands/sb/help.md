@@ -30,6 +30,7 @@ description: 'List all available Slide Builder commands with descriptions'
 | Command | Description |
 |---------|-------------|
 | `/sb:edit [n]` | Edit slide layout (optionally specify slide number) |
+| `/sb:refresh` | Regenerate viewer and manifest for current deck |
 | `/sb:export` | Export slides to Google Slides |
 
 ## Quick Start

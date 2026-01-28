@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=1920, height=1080">
+    <title>Slide 11: Trust & Control</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --color-primary: #d4e94c;
+            --color-secondary: #4ecdc4;
+            --color-accent: #FF6B6B;
+            --color-warning: #ffd93d;
+            --color-bg-dark: #0a0a0a;
+            --color-bg-dark-alt: #1a1a1a;
+            --color-mid-gray: #2a2a2a;
+            --color-text-on-dark: #FFFFFF;
+            --color-text-muted: #888888;
+            --font-heading: 'Outfit', system-ui, sans-serif;
+            --font-body: 'Outfit', system-ui, sans-serif;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            width: 1920px;
+            height: 1080px;
+            overflow: hidden;
+            font-family: var(--font-body);
+        }
+
+        .slide {
+            width: 1920px;
+            height: 1080px;
+            background: var(--color-bg-dark);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .slide::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+            background-size: 40px 40px;
+            pointer-events: none;
+        }
+
+        .header {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            padding: 20px 80px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--color-mid-gray);
+        }
+
+        .header::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 80px;
+            width: 120px;
+            height: 2px;
+            background: var(--color-primary);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-icon {
+            width: 36px;
+            height: 36px;
+            background: var(--color-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .logo-text {
+            font-weight: 600;
+            font-size: 18px;
+            color: var(--color-text-on-dark);
+        }
+
+        .header-meta {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--color-text-muted);
+        }
+
+        .content {
+            position: absolute;
+            top: 100px;
+            left: 80px;
+            right: 80px;
+            bottom: 100px;
+        }
+
+        .section-header {
+            margin-bottom: 48px;
+        }
+
+        .section-label {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--color-text-muted);
+            margin-bottom: 12px;
+        }
+
+        .page-title {
+            font-family: var(--font-heading);
+            font-size: 48px;
+            font-weight: 600;
+            color: var(--color-text-on-dark);
+        }
+
+        .trust-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 48px;
+        }
+
+        .trust-column {
+            background: var(--color-bg-dark-alt);
+            border: 1px solid var(--color-mid-gray);
+            overflow: hidden;
+        }
+
+        .column-header {
+            padding: 24px 32px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            border-bottom: 1px solid var(--color-mid-gray);
+        }
+
+        .high-trust .column-header {
+            border-top: 3px solid var(--color-primary);
+        }
+
+        .review-needed .column-header {
+            border-top: 3px solid var(--color-warning);
+        }
+
+        .column-icon {
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .high-trust .column-icon {
+            background: rgba(212, 233, 76, 0.1);
+            color: var(--color-primary);
+        }
+
+        .review-needed .column-icon {
+            background: rgba(255, 217, 61, 0.1);
+            color: var(--color-warning);
+        }
+
+        .column-icon svg {
+            width: 24px;
+            height: 24px;
+        }
+
+        .column-title {
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        .high-trust .column-title { color: var(--color-primary); }
+        .review-needed .column-title { color: var(--color-warning); }
+
+        .column-subtitle {
+            font-size: 14px;
+            color: var(--color-text-muted);
+        }
+
+        .column-body {
+            padding: 32px;
+        }
+
+        .task-list {
+            list-style: none;
+        }
+
+        .task-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+            padding: 16px 0;
+            border-bottom: 1px solid var(--color-mid-gray);
+        }
+
+        .task-item:last-child {
+            border-bottom: none;
+        }
+
+        .task-bullet {
+            width: 8px;
+            height: 8px;
+            margin-top: 8px;
+            flex-shrink: 0;
+        }
+
+        .high-trust .task-bullet { background: var(--color-primary); }
+        .review-needed .task-bullet { background: var(--color-warning); }
+
+        .task-text {
+            font-size: 17px;
+            color: var(--color-text-on-dark);
+            line-height: 1.5;
+        }
+
+        .intervention-box {
+            margin-top: 40px;
+            background: var(--color-bg-dark-alt);
+            border: 1px solid var(--color-mid-gray);
+            padding: 32px;
+        }
+
+        .intervention-title {
+            font-size: 14px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--color-secondary);
+            margin-bottom: 16px;
+        }
+
+        .intervention-content {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+        }
+
+        .intervention-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .intervention-icon {
+            width: 24px;
+            height: 24px;
+            color: var(--color-secondary);
+            flex-shrink: 0;
+        }
+
+        .intervention-text {
+            font-size: 15px;
+            color: var(--color-text-muted);
+            line-height: 1.4;
+        }
+
+        .footer {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 20px 80px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid var(--color-mid-gray);
+        }
+
+        .footer::before {
+            content: '';
+            position: absolute;
+            top: -1px;
+            left: 80px;
+            width: 60px;
+            height: 2px;
+            background: var(--color-primary);
+        }
+
+        .footer-left { font-size: 14px; color: var(--color-text-muted); }
+        .footer-center { font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--color-text-muted); }
+
+        .slide-number {
+            width: 32px;
+            height: 32px;
+            background: var(--color-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--color-bg-dark);
+        }
+
+        [contenteditable]:focus { outline: 2px solid var(--color-primary); outline-offset: 4px; }
+        [contenteditable]:hover { outline: 1px dashed var(--color-text-muted); outline-offset: 2px; }
+    </style>
+</head>
+<body>
+    <div class="slide" data-slide-id="11">
+        <header class="header">
+            <div class="logo">
+                <div class="logo-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="4 17 10 11 4 5"></polyline>
+                        <line x1="12" y1="19" x2="20" y2="19"></line>
+                    </svg>
+                </div>
+                <span class="logo-text" contenteditable="true" data-field="logo">Claude Code</span>
+            </div>
+            <div class="header-meta" contenteditable="true" data-field="header-meta">Workshop</div>
+        </header>
+
+        <main class="content">
+            <div class="section-header">
+                <div class="section-label" contenteditable="true" data-field="section-label">Guidance</div>
+                <h1 class="page-title" contenteditable="true" data-field="title">Trust & Control — When to Guide vs Let It Run</h1>
+            </div>
+
+            <div class="trust-grid">
+                <div class="trust-column high-trust">
+                    <div class="column-header">
+                        <div class="column-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                                <path d="M9 12l2 2 4-4"></path>
+                            </svg>
+                        </div>
+                        <div>
+                            <span class="column-title" contenteditable="true" data-field="high-title">High Trust</span>
+                            <p class="column-subtitle" contenteditable="true" data-field="high-subtitle">Let it run with minimal oversight</p>
+                        </div>
+                    </div>
+                    <div class="column-body">
+                        <ul class="task-list">
+                            <li class="task-item">
+                                <div class="task-bullet"></div>
+                                <span class="task-text" contenteditable="true" data-field="high-1">Refactoring existing code patterns</span>
+                            </li>
+                            <li class="task-item">
+                                <div class="task-bullet"></div>
+                                <span class="task-text" contenteditable="true" data-field="high-2">Writing documentation and comments</span>
+                            </li>
+                            <li class="task-item">
+                                <div class="task-bullet"></div>
+                                <span class="task-text" contenteditable="true" data-field="high-3">Generating unit tests for existing code</span>
+                            </li>
+                            <li class="task-item">
+                                <div class="task-bullet"></div>
+                                <span class="task-text" contenteditable="true" data-field="high-4">Exploring and explaining codebases</span>
+                            </li>
+                            <li class="task-item">
+                                <div class="task-bullet"></div>
+                                <span class="task-text" contenteditable="true" data-field="high-5">Creating boilerplate and scaffolding</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="trust-column review-needed">
+                    <div class="column-header">
+                        <div class="column-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <line x1="12" y1="8" x2="12" y2="12"></line>
+                                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                            </svg>
+                        </div>
+                        <div>
+                            <span class="column-title" contenteditable="true" data-field="review-title">Review Needed</span>
+                            <p class="column-subtitle" contenteditable="true" data-field="review-subtitle">Check before approving</p>
+                        </div>
+                    </div>
+                    <div class="column-body">
+                        <ul class="task-list">
+                            <li class="task-item">
+                                <div class="task-bullet"></div>
+                                <span class="task-text" contenteditable="true" data-field="review-1">Deleting files or directories</span>
+                            </li>
+                            <li class="task-item">
+                                <div class="task-bullet"></div>
+                                <span class="task-text" contenteditable="true" data-field="review-2">Calling external APIs or services</span>
+                            </li>
+                            <li class="task-item">
+                                <div class="task-bullet"></div>
+                                <span class="task-text" contenteditable="true" data-field="review-3">Modifying deployment configurations</span>
+                            </li>
+                            <li class="task-item">
+                                <div class="task-bullet"></div>
+                                <span class="task-text" contenteditable="true" data-field="review-4">Installing or removing dependencies</span>
+                            </li>
+                            <li class="task-item">
+                                <div class="task-bullet"></div>
+                                <span class="task-text" contenteditable="true" data-field="review-5">Git operations (push, merge, rebase)</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="intervention-box">
+                <div class="intervention-title" contenteditable="true" data-field="intervention-title">Intervention Patterns — How to Course-Correct</div>
+                <div class="intervention-content">
+                    <div class="intervention-item">
+                        <svg class="intervention-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line>
+                        </svg>
+                        <span class="intervention-text" contenteditable="true" data-field="int-1"><strong>Ctrl+C</strong> to cancel operations mid-stream</span>
+                    </div>
+                    <div class="intervention-item">
+                        <svg class="intervention-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                        </svg>
+                        <span class="intervention-text" contenteditable="true" data-field="int-2">"Stop and try a different approach" — redirect mid-task</span>
+                    </div>
+                    <div class="intervention-item">
+                        <svg class="intervention-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="1 4 1 10 7 10"></polyline>
+                            <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
+                        </svg>
+                        <span class="intervention-text" contenteditable="true" data-field="int-3">"Undo that last change" — revert specific actions</span>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer class="footer">
+            <div class="footer-left" contenteditable="true" data-field="footer-left">Claude Code Fundamentals</div>
+            <div class="footer-center" contenteditable="true" data-field="footer-center">Training Workshop</div>
+            <div class="slide-number">11</div>
+        </footer>
+    </div>
+
+    <script>
+        const isLocalStorageAvailable = () => { try { const t = '__test__'; localStorage.setItem(t, t); localStorage.removeItem(t); return true; } catch (e) { return false; } };
+        const localStorageEnabled = isLocalStorageAvailable();
+        const saveEdits = () => { if (!localStorageEnabled) return; const edits = []; document.querySelectorAll('[contenteditable]').forEach(el => { const field = el.getAttribute('data-field'); if (field) edits.push({ selector: `[data-field='${field}']`, content: el.innerHTML }); }); localStorage.setItem('slide-11-edits', JSON.stringify({ slide: 11, edits, lastModified: new Date().toISOString() })); };
+        document.querySelectorAll('[contenteditable]').forEach(el => { el.addEventListener('blur', saveEdits); el.addEventListener('input', () => setTimeout(saveEdits, 1000)); });
+        const restoreEdits = () => { if (!localStorageEnabled) return; try { const stored = localStorage.getItem('slide-11-edits'); if (stored) { const data = JSON.parse(stored); if (data.slide === 11 && Array.isArray(data.edits)) { data.edits.forEach(edit => { const el = document.querySelector(edit.selector); if (el) el.innerHTML = edit.content; }); } } } catch (e) { localStorage.removeItem('slide-11-edits'); } };
+        restoreEdits();
+    </script>
+</body>
+</html>

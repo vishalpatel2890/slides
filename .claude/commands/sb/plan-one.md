@@ -21,7 +21,7 @@ This command plans a single slide through a 5-phase workflow:
    - Phase 3: Match intent keywords to templates (or "custom")
    - Phase 4: Display understanding summary and confirm with user
    - Phase 5: Save plan.yaml and update status.yaml
-4. Save plan to .slide-builder/single/plan.yaml
+4. Save plan to output/singles/plan.yaml
 5. Update .slide-builder/status.yaml with mode: "single"
 </steps>
 
