@@ -1,0 +1,259 @@
+<story-context id="6-2-theme-editing" v="1.0">
+  <metadata>
+    <epicId>6</epicId>
+    <storyId>2</storyId>
+    <title>Theme Editing</title>
+    <status>drafted</status>
+    <generatedAt>2026-01-27</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>notes/sprint-artifacts/6-2-theme-editing.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>user</asA>
+    <iWant>to modify my theme via `/theme-edit` with the same gestalt feedback loop used during setup</iWant>
+    <soThat>I can refine my brand settings without running full re-setup and see validated samples before committing changes</soThat>
+    <tasks>
+      <task id="1" ac="2,3">Implement Theme Editor Module - feedback interpretation logic and primitive updates</task>
+      <task id="2" ac="9">Implement Version Manager Module - theme-history backup before edits</task>
+      <task id="3" ac="4,5">Implement Sample Regenerator - 6 sample slides with updated theme</task>
+      <task id="4" ac="8">Implement Template Updater - regenerate templates if shape/layout primitives changed</task>
+      <task id="5" ac="1,6,7,10">Implement Theme Edit Workflow - 6-phase workflow.yaml and instructions.md</task>
+      <task id="6" ac="1">Register /theme-edit Slash Command - .claude/commands/sb/theme-edit.md</task>
+      <task id="7" ac="7">Implement Status Logger for Theme Edit - status.yaml history updates</task>
+      <task id="8" ac="1-10">Testing - Theme Edit Verification - all acceptance criteria</task>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <criterion id="AC6.2.1">Given a theme exists, when the user runs `/theme-edit`, then they can describe desired changes in natural language</criterion>
+    <criterion id="AC6.2.2">The system interprets gestalt feedback (e.g., "warmer colors", "bolder fonts", "more minimal")</criterion>
+    <criterion id="AC6.2.3">The system applies interpreted changes to theme primitives</criterion>
+    <criterion id="AC6.2.4">Sample slides are regenerated with the updated theme for visual validation</criterion>
+    <criterion id="AC6.2.5">The 6 sample slides demonstrate all theme primitives (title, list, flow, columns, callout, code)</criterion>
+    <criterion id="AC6.2.6">User can approve changes or provide additional feedback</criterion>
+    <criterion id="AC6.2.7">When user approves, theme.json is updated with changes</criterion>
+    <criterion id="AC6.2.8">Templates are regenerated if shape/layout primitives changed</criterion>
+    <criterion id="AC6.2.9">A version entry is created in theme-history before changes are applied</criterion>
+    <criterion id="AC6.2.10">User can cancel editing to discard all changes</criterion>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>notes/sprint-artifacts/tech-spec-epic-6.md</path>
+        <title>Epic 6 Technical Specification</title>
+        <section>Story 6.2: Theme Editing</section>
+        <snippet>Defines Theme Editor module (interprets gestalt feedback), Sample Regenerator (6 slides), Version Manager (save before edit), and 6-phase workflow. Feedback interpretation logic maps "warmer colors" → shift hues, "bolder" → increase weights, etc.</snippet>
+      </doc>
+      <doc>
+        <path>notes/architecture.md</path>
+        <title>Project Architecture</title>
+        <section>State File Patterns, Project Structure</section>
+        <snippet>Theme at .slide-builder/theme.json, versions in theme-history/, samples in samples/, templates in templates/. status.yaml tracks last_action and history array. All timestamps ISO 8601.</snippet>
+      </doc>
+      <doc>
+        <path>notes/prd.md</path>
+        <title>Product Requirements Document</title>
+        <section>Theme Setup UX Philosophy, FR9</section>
+        <snippet>FR9: "modify existing theme via /theme-edit with same feedback loop". UX philosophy: "AI does work, user is creative director" with gestalt feedback, not micro-configuration. Target 1-3 feedback rounds.</snippet>
+      </doc>
+      <doc>
+        <path>notes/epics.md</path>
+        <title>Epics and Stories</title>
+        <section>Story 6.2: Theme Editing</section>
+        <snippet>User story and 10 acceptance criteria. Depends on Story 6.1 (Theme Loader, Theme Formatter patterns).</snippet>
+      </doc>
+      <doc>
+        <path>notes/sprint-artifacts/6-1-theme-summary-view.md</path>
+        <title>Story 6.1: Theme Summary View</title>
+        <section>Dev Agent Record, Completion Notes</section>
+        <snippet>Previous story established Theme Loader module, Theme Formatter with ANSI colors, 3-phase workflow pattern, status.yaml logging. Theme.json uses meta.extractedFrom (not sources). Layouts in theme.slides.layouts.</snippet>
+      </doc>
+      <doc>
+        <path>.slide-builder/CONVENTIONS.md</path>
+        <title>Slide Builder Conventions</title>
+        <section>File Patterns</section>
+        <snippet>Workflows in .slide-builder/workflows/{name}/ with workflow.yaml and instructions.md. Slash commands in .claude/commands/sb/. Theme at .slide-builder/theme.json.</snippet>
+      </doc>
+    </docs>
+
+    <code>
+      <file>
+        <path>.slide-builder/theme.json</path>
+        <kind>data</kind>
+        <symbol>ThemeJson</symbol>
+        <lines>1-230</lines>
+        <reason>Active theme file to read, modify, and save. Contains colors, typography, shapes, components, slides.layouts, personality, and meta (with extractedFrom).</reason>
+      </file>
+      <file>
+        <path>.slide-builder/workflows/theme-edit/workflow.yaml</path>
+        <kind>workflow-config</kind>
+        <symbol>theme-edit workflow</symbol>
+        <lines>1-23</lines>
+        <reason>Existing workflow stub. References theme_file, theme_history paths. template: false (action-workflow). Needs expansion to 6-phase workflow per tech spec.</reason>
+      </file>
+      <file>
+        <path>.slide-builder/workflows/theme-edit/instructions.md</path>
+        <kind>workflow-instructions</kind>
+        <symbol>theme-edit instructions</symbol>
+        <lines>1-91</lines>
+        <reason>Existing basic instructions with 5 steps. Needs rewrite to 6-phase workflow: Load/Backup, Collect Feedback, Apply Changes, Regenerate Samples, Validation Loop, Save/Update Templates.</reason>
+      </file>
+      <file>
+        <path>.slide-builder/workflows/theme/instructions.md</path>
+        <kind>workflow-instructions</kind>
+        <symbol>theme view workflow</symbol>
+        <lines>1-180</lines>
+        <reason>Story 6.1 reference for Theme Loader and Theme Formatter patterns. Reuse Phase 1 (Load Theme) and ANSI swatch generation for displaying current theme before edit.</reason>
+      </file>
+      <file>
+        <path>.slide-builder/workflows/setup/instructions.md</path>
+        <kind>workflow-instructions</kind>
+        <symbol>setup workflow</symbol>
+        <lines>1-2029</lines>
+        <reason>Reference for sample deck generation (Phase 4), feedback loop (Phase 5), and frontend-design skill usage. Reuse sample slide specs and regeneration logic.</reason>
+      </file>
+      <file>
+        <path>.slide-builder/status.yaml</path>
+        <kind>state</kind>
+        <symbol>status tracking</symbol>
+        <lines>1-95</lines>
+        <reason>Track theme edit actions in history array. Update last_action and last_modified. Log "Theme edit started", "Theme v{N} saved", "Theme edited: {feedback}".</reason>
+      </file>
+      <file>
+        <path>.claude/commands/sb/theme-edit.md</path>
+        <kind>slash-command</kind>
+        <symbol>/sb:theme-edit</symbol>
+        <lines>1-15</lines>
+        <reason>Existing command stub. Needs expansion with prerequisites, example usage, feedback examples, approval commands.</reason>
+      </file>
+      <file>
+        <path>.claude/commands/sb/theme.md</path>
+        <kind>slash-command</kind>
+        <symbol>/sb:theme</symbol>
+        <lines>1-60</lines>
+        <reason>Story 6.1 reference for command documentation pattern. Footer suggests "/sb:theme-edit" for modifications.</reason>
+      </file>
+      <file>
+        <path>.slide-builder/theme-history/</path>
+        <kind>directory</kind>
+        <symbol>theme-history</symbol>
+        <reason>Version storage directory. Save current theme.json before edits as theme-v{N}-{YYYY-MM-DD}.json. Create if doesn't exist.</reason>
+      </file>
+      <file>
+        <path>.slide-builder/samples/</path>
+        <kind>directory</kind>
+        <symbol>samples</symbol>
+        <reason>Sample slides directory. Regenerate 6 samples (01-title.html through 06-technical.html) with updated theme for validation.</reason>
+      </file>
+      <file>
+        <path>.slide-builder/templates/</path>
+        <kind>directory</kind>
+        <symbol>templates</symbol>
+        <reason>Layout templates directory. Regenerate if shape/layout primitives changed during edit.</reason>
+      </file>
+    </code>
+
+    <dependencies>
+      <ecosystem name="claude-code">
+        <package name="frontend-design" version="skill">Generate/regenerate sample slides with professional design</package>
+        <package name="File System (Read)" version="builtin">Load theme.json, versions, status.yaml</package>
+        <package name="File System (Write)" version="builtin">Save theme.json, versions, samples, templates, status.yaml</package>
+        <package name="Bash" version="builtin">Open browser for sample preview</package>
+      </ecosystem>
+      <ecosystem name="browser">
+        <package name="Chrome/Firefox/Safari" version="modern">Preview sample slides in browser (optional)</package>
+        <package name="Google Fonts" version="cdn">Font rendering in sample slides</package>
+      </ecosystem>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint source="Architecture ADR-001">Workflow.yaml + instructions.md structure following BMAD pattern</constraint>
+    <constraint source="Architecture State File Patterns">status.yaml tracks mode, last_action, history with ISO 8601 timestamps</constraint>
+    <constraint source="Architecture Project Structure">Theme at .slide-builder/theme.json, history in theme-history/, samples in samples/, templates in templates/</constraint>
+    <constraint source="Tech Spec">Version saved BEFORE changes applied - always have rollback option</constraint>
+    <constraint source="Tech Spec">Cancel during edit discards changes, restores from version</constraint>
+    <constraint source="Tech Spec">Templates regenerated ONLY if shape/layout primitives change</constraint>
+    <constraint source="PRD FR9">Modify existing theme via /theme-edit with same gestalt feedback loop</constraint>
+    <constraint source="PRD NFR5">Theme feedback loop iteration should feel responsive (&lt;30s sample regeneration)</constraint>
+    <constraint source="PRD NFR12, NFR13">All operations local - no brand assets transmitted externally</constraint>
+    <constraint source="Tech Spec Open Question Q2">After 3 feedback rounds, offer direct theme.json editing as escape hatch</constraint>
+    <constraint source="Story 6.1">Theme.json uses meta.extractedFrom structure (not meta.sources)</constraint>
+    <constraint source="Story 6.1">Layouts are in theme.slides.layouts (title, content, split, data)</constraint>
+  </constraints>
+
+  <interfaces>
+    <interface>
+      <name>/theme-edit command</name>
+      <kind>slash-command</kind>
+      <signature>/sb:theme-edit [optional initial feedback]</signature>
+      <path>.claude/commands/sb/theme-edit.md</path>
+    </interface>
+    <interface>
+      <name>Theme Editor Module</name>
+      <kind>internal-module</kind>
+      <signature>Input: currentTheme (ThemeJson), feedback (string) → Output: updatedTheme (ThemeJson), changes (string[])</signature>
+      <path>.slide-builder/workflows/theme-edit/instructions.md</path>
+    </interface>
+    <interface>
+      <name>Version Manager Module</name>
+      <kind>internal-module</kind>
+      <signature>Save: theme → versionFile, newVersionNumber. Restore: versionNumber → restoredTheme, error</signature>
+      <path>.slide-builder/workflows/theme-edit/instructions.md</path>
+    </interface>
+    <interface>
+      <name>Sample Regenerator Module</name>
+      <kind>internal-module</kind>
+      <signature>Input: ThemeJson → Output: 6 sample HTML files in .slide-builder/samples/</signature>
+      <path>.slide-builder/workflows/theme-edit/instructions.md</path>
+    </interface>
+    <interface>
+      <name>Template Updater Module</name>
+      <kind>internal-module</kind>
+      <signature>Input: oldTheme, newTheme → Output: updated template files if shapes changed</signature>
+      <path>.slide-builder/workflows/theme-edit/instructions.md</path>
+    </interface>
+    <interface>
+      <name>status.yaml History</name>
+      <kind>state-update</kind>
+      <signature>Append: { action: string, timestamp: ISO8601 }. Update: last_action, last_modified</signature>
+      <path>.slide-builder/status.yaml</path>
+    </interface>
+    <interface>
+      <name>frontend-design Skill</name>
+      <kind>skill-invocation</kind>
+      <signature>Skill(skill="frontend-design") - for sample slide generation with professional design</signature>
+      <path>builtin</path>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>
+      Per Epic 6 Tech Spec Test Strategy: Manual verification per module for unit tests, end-to-end testing for full workflows, manual AC verification for acceptance. Regression tests ensure Epic 2 /setup still works. Key test approach: run /theme-edit, provide gestalt feedback, verify changes applied, samples regenerated, approval flow works, cancel restores original.
+    </standards>
+    <locations>
+      <location>.slide-builder/samples/ - verify 6 sample slides regenerated with updated theme</location>
+      <location>.slide-builder/theme-history/ - verify version saved before edit</location>
+      <location>.slide-builder/theme.json - verify meta.version incremented, primitives updated</location>
+      <location>.slide-builder/templates/ - verify regenerated if shapes changed</location>
+      <location>.slide-builder/status.yaml - verify history entries logged</location>
+    </locations>
+    <ideas>
+      <idea ac="AC6.2.1">Run /theme-edit with valid theme, verify prompt for feedback appears</idea>
+      <idea ac="AC6.2.2">Provide "warmer colors" feedback, verify hue changes described in output</idea>
+      <idea ac="AC6.2.3">After feedback, verify theme primitives changed (colors shifted)</idea>
+      <idea ac="AC6.2.4">After feedback, verify 6 samples regenerated in .slide-builder/samples/</idea>
+      <idea ac="AC6.2.5">Check samples cover: title, list, flow, columns, callout, code</idea>
+      <idea ac="AC6.2.6">After samples, verify approval prompt with options: feedback/approved/cancel</idea>
+      <idea ac="AC6.2.7">Type "approved", verify theme.json updated with changes</idea>
+      <idea ac="AC6.2.8">Change shape primitives (corner radius), verify templates regenerated</idea>
+      <idea ac="AC6.2.9">Before edit starts, verify current theme saved to theme-history/theme-v{N}-{date}.json</idea>
+      <idea ac="AC6.2.10">Type "cancel", verify theme unchanged from pre-edit state</idea>
+      <idea ac="edge">No theme exists: verify error "No theme found. Run /setup first"</idea>
+      <idea ac="edge">Feedback exceeds 3 rounds: verify escape hatch offered for direct JSON editing</idea>
+      <idea ac="edge">ANSI not supported: verify fallback to plain text display</idea>
+    </ideas>
+  </tests>
+</story-context>

@@ -1,0 +1,209 @@
+<story-context id="4-3-edit-preservation-across-regenerations" v="1.0">
+  <metadata>
+    <epicId>4</epicId>
+    <storyId>3</storyId>
+    <title>Edit Preservation Across Regenerations</title>
+    <status>drafted</status>
+    <generatedAt>2026-01-27</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>notes/sprint-artifacts/4-3-edit-preservation-across-regenerations.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>user</asA>
+    <iWant>my text edits to survive layout regenerations</iWant>
+    <soThat>I don't have to re-enter content when I change the layout</soThat>
+    <tasks>
+      <task id="1" subject="Implement Edit State Manager Module" acs="AC4.3.1, AC4.3.5, AC4.3.6, AC4.3.9">
+        <subtask id="1.1">Create function to read complete slide-state.json edits array</subtask>
+        <subtask id="1.2">Create function to identify orphaned edits (selector not in new HTML)</subtask>
+        <subtask id="1.3">Implement orphanedEdits array management with orphanedAt timestamp and reason field</subtask>
+        <subtask id="1.4">Implement regenerationCount increment on successful save</subtask>
+        <subtask id="1.5">Ensure state file write preserves all existing data (edits + orphanedEdits)</subtask>
+      </task>
+      <task id="2" subject="Enhance Edit Reapplicator Logic" acs="AC4.3.3, AC4.3.4">
+        <subtask id="2.1">Implement data-field selector matching algorithm with lookup map</subtask>
+        <subtask id="2.2">Extract field name from selector and look up in new HTML field map</subtask>
+        <subtask id="2.3">If match found: replace innerHTML, mark applied, preserve in edits array</subtask>
+        <subtask id="2.4">If match not found: call Edit State Manager to move to orphanedEdits</subtask>
+      </task>
+      <task id="3" subject="Implement Orphan Warning System" acs="AC4.3.7">
+        <subtask id="3.1">After edit reapplication, collect all orphaned edits</subtask>
+        <subtask id="3.2">Display warning with count and content preview if orphanedEdits count > 0</subtask>
+        <subtask id="3.3">Log orphan details to status.yaml history entry</subtask>
+        <subtask id="3.4">Console output should be informative but not alarming (warning, not error)</subtask>
+      </task>
+      <task id="4" subject="Handle New Fields in Layout" acs="AC4.3.8">
+        <subtask id="4.1">After regeneration, identify new data-field values not in original</subtask>
+        <subtask id="4.2">Ensure new fields have frontend-design skill's generated default content</subtask>
+        <subtask id="4.3">Do NOT add empty entries to state file for new fields</subtask>
+        <subtask id="4.4">Log new fields in status.yaml history entry for transparency</subtask>
+      </task>
+      <task id="5" subject="Update Edit Workflow Instructions" acs="AC4.3.1-AC4.3.9">
+        <subtask id="5.1">Extend Phase 5B (Edit Reapplication) with orphan detection logic</subtask>
+        <subtask id="5.2">Extend Phase 5C (Save and Report) for orphan warnings</subtask>
+        <subtask id="5.3">Ensure state file schema matches tech spec with orphanedEdits and regenerationCount</subtask>
+      </task>
+      <task id="6" subject="Testing - Edit Preservation Verification" acs="AC4.3.1-AC4.3.9">
+        <subtask id="6.1">Test: Create slide with 5 text edits, regenerate, verify all preserved</subtask>
+        <subtask id="6.2">Test: Layout change removes field, verify orphaned edit in state file</subtask>
+        <subtask id="6.3">Test: Verify warning displayed when edit is orphaned</subtask>
+        <subtask id="6.4">Test: Verify orphaned edit has orphanedAt timestamp and reason</subtask>
+        <subtask id="6.5">Test: Layout adds new field, verify default content used</subtask>
+        <subtask id="6.6">Test: Multiple /edit operations, verify regenerationCount increments</subtask>
+        <subtask id="6.7">Test: Verify state file never loses edits (even orphaned)</subtask>
+        <subtask id="6.8">Run Frontend Test Gate checklist</subtask>
+      </task>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <criterion id="AC4.3.1">Given a slide has user text edits in state file, when a layout regeneration occurs via /edit, then the system reads all edits from slide-state.json</criterion>
+    <criterion id="AC4.3.2">The system generates new layout HTML based on the edit instruction</criterion>
+    <criterion id="AC4.3.3">The system matches data-field selectors from saved edits to elements in new HTML</criterion>
+    <criterion id="AC4.3.4">For matching selectors, the saved content is injected into the new HTML elements</criterion>
+    <criterion id="AC4.3.5">The updated HTML is saved, and the state file is preserved</criterion>
+    <criterion id="AC4.3.6">Given a field is removed in the new layout, when no matching selector exists, then the orphaned edit is preserved in slide-state.json (not deleted)</criterion>
+    <criterion id="AC4.3.7">A warning is logged when edits are orphaned</criterion>
+    <criterion id="AC4.3.8">Given new fields are added in the new layout, when they have no saved edits, then they use default generated content</criterion>
+    <criterion id="AC4.3.9">The regenerationCount in slide-state.json is incremented after each successful edit</criterion>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>notes/sprint-artifacts/tech-spec-epic-4.md</path>
+        <title>Epic 4 Technical Specification</title>
+        <section>Story 4.3: Edit Preservation Across Regenerations</section>
+        <snippet>Implements Edit State Manager module for slide-state.json read/write, orphaned edit handling, and regenerationCount tracking. Enhanced Edit Reapplicator iterates saved edits, matches data-field selectors, and handles orphans.</snippet>
+      </doc>
+      <doc>
+        <path>notes/architecture.md</path>
+        <title>Slide Builder Architecture</title>
+        <section>Pattern 3: Text Edit Persistence</section>
+        <snippet>State file pattern for preserving user edits: Read state -> generate -> reapply edits -> save. Uses data-field selectors. Never delete state entries, only add/update.</snippet>
+      </doc>
+      <doc>
+        <path>notes/architecture.md</path>
+        <title>Slide Builder Architecture</title>
+        <section>State File Patterns - slide-state.json</section>
+        <snippet>Schema: { slide: number, edits: [{selector, content}], lastModified: timestamp }. Story 4.3 extends with orphanedEdits array and regenerationCount field.</snippet>
+      </doc>
+      <doc>
+        <path>notes/sprint-artifacts/4-2-natural-language-layout-changes.md</path>
+        <title>Story 4.2: Natural Language Layout Changes</title>
+        <section>Dev Agent Record</section>
+        <snippet>Previous story implemented Phase 5A (Layout Regenerator), 5B (Edit Reapplicator), 5C (Slide Persister). Story 4.3 enhances 5B with orphan detection and 5C with orphan warnings.</snippet>
+      </doc>
+    </docs>
+
+    <code>
+      <file>
+        <path>.slide-builder/workflows/edit/instructions.md</path>
+        <kind>workflow-instructions</kind>
+        <symbol>Phase 5B: Edit Reapplication</symbol>
+        <lines>298-348</lines>
+        <reason>Primary file to modify - extend edit reapplication with orphan detection, orphanedEdits management, and regenerationCount tracking</reason>
+      </file>
+      <file>
+        <path>.slide-builder/workflows/edit/instructions.md</path>
+        <kind>workflow-instructions</kind>
+        <symbol>Phase 5C: Save and Report</symbol>
+        <lines>350-393</lines>
+        <reason>Extend save phase with orphan warnings in console output and status.yaml history entries</reason>
+      </file>
+      <file>
+        <path>.slide-builder/workflows/edit/workflow.yaml</path>
+        <kind>workflow-config</kind>
+        <symbol>edit workflow</symbol>
+        <lines>all</lines>
+        <reason>Update workflow version and document new Story 4.3 variables (orphanedEdits, regenerationCount)</reason>
+      </file>
+      <file>
+        <path>.slide-builder/single/slide-state.json</path>
+        <kind>state-file</kind>
+        <symbol>slide-state.json</symbol>
+        <lines>all</lines>
+        <reason>Example of current state file schema - needs orphanedEdits array and regenerationCount field added by workflow</reason>
+      </file>
+      <file>
+        <path>.slide-builder/status.yaml</path>
+        <kind>state-file</kind>
+        <symbol>status.yaml</symbol>
+        <lines>all</lines>
+        <reason>Log orphan warnings in history entries with orphaned_edits count and field names</reason>
+      </file>
+    </code>
+
+    <dependencies>
+      <node>
+        <package>None required</package>
+        <version>N/A</version>
+        <note>Story 4.3 uses only Claude Code built-in capabilities - no npm dependencies needed</note>
+      </node>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint source="Architecture Pattern 3">Never delete state entries, only add/update. Orphaned edits preserved indefinitely.</constraint>
+    <constraint source="Tech Spec NFR">State file edits MUST be preserved even if no matching selector exists.</constraint>
+    <constraint source="Tech Spec Reliability">Orphaned edits exist -> Preserve in state file; warn user; don't delete.</constraint>
+    <constraint source="Architecture ADR-003">HTML slides use contenteditable on text elements with data-field attributes for selector matching.</constraint>
+    <constraint source="Tech Spec Data Models">Enhanced slide-state.json schema must include: slide, edits[], orphanedEdits[], lastModified, regenerationCount.</constraint>
+    <constraint source="Tech Spec Phase 5">regenerationCount MUST increment after each successful /edit operation.</constraint>
+    <constraint source="Previous Story 4.2">Build on existing Phase 5A, 5B, 5C implementation - enhance, don't replace.</constraint>
+  </constraints>
+
+  <interfaces>
+    <interface>
+      <name>slide-state.json Enhanced Schema</name>
+      <kind>data-model</kind>
+      <signature>{ "slide": "single|{n}", "edits": [{selector, content, lastModified?}], "orphanedEdits": [{selector, content, orphanedAt, reason}], "lastModified": "ISO-8601", "regenerationCount": number }</signature>
+      <path>.slide-builder/single/slide-state.json or .slide-builder/deck/slides/slide-{n}-state.json</path>
+    </interface>
+    <interface>
+      <name>Edit Reapplication Algorithm</name>
+      <kind>function-signature</kind>
+      <signature>For each edit: match selector -> FOUND: inject content, mark applied -> NOT FOUND: move to orphanedEdits with timestamp and reason</signature>
+      <path>.slide-builder/workflows/edit/instructions.md (Phase 5B)</path>
+    </interface>
+    <interface>
+      <name>Orphan Warning Format</name>
+      <kind>output-format</kind>
+      <signature>Warning: {N} edit(s) couldn't be matched to the new layout. - {field}: "Content preview..." (orphaned). See slide-state.json for full orphaned content.</signature>
+      <path>.slide-builder/workflows/edit/instructions.md (Phase 5C)</path>
+    </interface>
+    <interface>
+      <name>status.yaml History Entry</name>
+      <kind>data-model</kind>
+      <signature>{ action: string, timestamp: ISO-8601, preserved_edits: number, orphaned_edits: number, orphaned_fields?: string[] }</signature>
+      <path>.slide-builder/status.yaml</path>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>
+      Per Tech Spec and Architecture: Manual verification using Frontend Test Gate checklist. Test scenarios cover edit preservation through regeneration, orphan detection and warning, state file schema validation, and multiple regeneration cycles. No automated unit tests - Claude Code workflows are tested via manual end-to-end verification.
+    </standards>
+    <locations>
+      <location>Frontend Test Gate in story file (notes/sprint-artifacts/4-3-edit-preservation-across-regenerations.md)</location>
+      <location>Manual browser testing with slide preview</location>
+      <location>File inspection of .slide-builder/single/slide-state.json</location>
+      <location>CLI output verification for orphan warnings</location>
+    </locations>
+    <ideas>
+      <idea ac="AC4.3.1">Create slide with 5 text edits, run /sb:edit, verify all edits loaded from slide-state.json before regeneration</idea>
+      <idea ac="AC4.3.2">Run /sb:edit with "remove the subtitle", verify new HTML generated without subtitle element</idea>
+      <idea ac="AC4.3.3">Verify matching logic: edit with selector [data-field='title'] matches element with data-field='title' in new HTML</idea>
+      <idea ac="AC4.3.4">After regeneration, inspect HTML to verify edited content injected into matching elements</idea>
+      <idea ac="AC4.3.5">After edit, verify both slide.html and slide-state.json written successfully</idea>
+      <idea ac="AC4.3.6">Request layout change that removes a field (e.g., "remove subtitle"), verify edit moved to orphanedEdits array with orphanedAt timestamp and reason</idea>
+      <idea ac="AC4.3.7">When edit is orphaned, verify warning displayed in CLI output with field name and content preview</idea>
+      <idea ac="AC4.3.8">Request layout change that adds new element (e.g., "add callout box"), verify new element has default generated content</idea>
+      <idea ac="AC4.3.9">Run multiple /edit operations, verify regenerationCount increments from 0 to 1 to 2</idea>
+      <idea ac="edge-case">Test all edits orphaned: regenerate to completely different layout, verify warning and all edits preserved</idea>
+      <idea ac="edge-case">Test state file missing: delete slide-state.json, run /edit, verify fresh state created</idea>
+      <idea ac="regression">After edits, verify contenteditable and data-field attributes still present in regenerated HTML</idea>
+    </ideas>
+  </tests>
+</story-context>

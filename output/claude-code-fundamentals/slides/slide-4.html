@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=1920, height=1080">
+    <title>Slide 4: Claude Code vs Claude.ai vs API</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --color-primary: #d4e94c;
+            --color-secondary: #4ecdc4;
+            --color-accent: #FF6B6B;
+            --color-bg-dark: #0a0a0a;
+            --color-bg-dark-alt: #1a1a1a;
+            --color-mid-gray: #2a2a2a;
+            --color-text-on-dark: #FFFFFF;
+            --color-text-muted: #888888;
+            --font-heading: 'Outfit', system-ui, sans-serif;
+            --font-body: 'Outfit', system-ui, sans-serif;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            width: 1920px;
+            height: 1080px;
+            overflow: hidden;
+            font-family: var(--font-body);
+        }
+
+        .slide {
+            width: 1920px;
+            height: 1080px;
+            background: var(--color-bg-dark);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .slide::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+            background-size: 40px 40px;
+            pointer-events: none;
+        }
+
+        .header {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            padding: 20px 80px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--color-mid-gray);
+        }
+
+        .header::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 80px;
+            width: 120px;
+            height: 2px;
+            background: var(--color-primary);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-icon {
+            width: 36px;
+            height: 36px;
+            background: var(--color-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .logo-text {
+            font-weight: 600;
+            font-size: 18px;
+            color: var(--color-text-on-dark);
+        }
+
+        .header-meta {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--color-text-muted);
+        }
+
+        .content {
+            position: absolute;
+            top: 100px;
+            left: 80px;
+            right: 80px;
+            bottom: 100px;
+        }
+
+        .section-header {
+            margin-bottom: 48px;
+        }
+
+        .section-label {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--color-text-muted);
+            margin-bottom: 12px;
+        }
+
+        .page-title {
+            font-family: var(--font-heading);
+            font-size: 42px;
+            font-weight: 600;
+            color: var(--color-text-on-dark);
+        }
+
+        .columns-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 32px;
+        }
+
+        .column-card {
+            background: var(--color-bg-dark-alt);
+            border: 1px solid var(--color-mid-gray);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .column-card:nth-child(3) {
+            border-color: var(--color-primary);
+        }
+
+        .column-header {
+            padding: 28px;
+            border-bottom: 1px solid var(--color-mid-gray);
+            position: relative;
+        }
+
+        .column-card:nth-child(1) .column-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--color-accent);
+        }
+
+        .column-card:nth-child(2) .column-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--color-secondary);
+        }
+
+        .column-card:nth-child(3) .column-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--color-primary);
+        }
+
+        .column-icon {
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 16px;
+        }
+
+        .column-card:nth-child(1) .column-icon {
+            background: rgba(255, 107, 107, 0.1);
+            color: var(--color-accent);
+        }
+
+        .column-card:nth-child(2) .column-icon {
+            background: rgba(78, 205, 196, 0.1);
+            color: var(--color-secondary);
+        }
+
+        .column-card:nth-child(3) .column-icon {
+            background: rgba(212, 233, 76, 0.1);
+            color: var(--color-primary);
+        }
+
+        .column-icon svg {
+            width: 24px;
+            height: 24px;
+        }
+
+        .column-title {
+            font-family: var(--font-heading);
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--color-text-on-dark);
+            margin-bottom: 8px;
+        }
+
+        .column-subtitle {
+            font-size: 14px;
+            color: var(--color-text-muted);
+        }
+
+        .column-body {
+            padding: 28px;
+            flex: 1;
+        }
+
+        .use-cases {
+            list-style: none;
+        }
+
+        .use-case {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 14px 0;
+            border-bottom: 1px solid var(--color-mid-gray);
+        }
+
+        .use-case:last-child {
+            border-bottom: none;
+        }
+
+        .use-case-bullet {
+            width: 6px;
+            height: 6px;
+            margin-top: 8px;
+            flex-shrink: 0;
+        }
+
+        .column-card:nth-child(1) .use-case-bullet {
+            background: var(--color-accent);
+        }
+
+        .column-card:nth-child(2) .use-case-bullet {
+            background: var(--color-secondary);
+        }
+
+        .column-card:nth-child(3) .use-case-bullet {
+            background: var(--color-primary);
+        }
+
+        .use-case-text {
+            font-size: 16px;
+            color: var(--color-text-muted);
+            line-height: 1.4;
+        }
+
+        .column-footer {
+            padding: 20px 28px;
+            background: var(--color-bg-dark);
+            border-top: 1px solid var(--color-mid-gray);
+        }
+
+        .best-for {
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .column-card:nth-child(1) .best-for { color: var(--color-accent); }
+        .column-card:nth-child(2) .best-for { color: var(--color-secondary); }
+        .column-card:nth-child(3) .best-for { color: var(--color-primary); }
+
+        .footer {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 20px 80px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid var(--color-mid-gray);
+        }
+
+        .footer::before {
+            content: '';
+            position: absolute;
+            top: -1px;
+            left: 80px;
+            width: 60px;
+            height: 2px;
+            background: var(--color-primary);
+        }
+
+        .footer-left { font-size: 14px; color: var(--color-text-muted); }
+        .footer-center { font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--color-text-muted); }
+
+        .slide-number {
+            width: 32px;
+            height: 32px;
+            background: var(--color-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--color-bg-dark);
+        }
+
+        [contenteditable]:focus { outline: 2px solid var(--color-primary); outline-offset: 4px; }
+        [contenteditable]:hover { outline: 1px dashed var(--color-text-muted); outline-offset: 2px; }
+    </style>
+</head>
+<body>
+    <div class="slide" data-slide-id="4">
+        <header class="header">
+            <div class="logo">
+                <div class="logo-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="4 17 10 11 4 5"></polyline>
+                        <line x1="12" y1="19" x2="20" y2="19"></line>
+                    </svg>
+                </div>
+                <span class="logo-text" contenteditable="true" data-field="logo">Claude Code</span>
+            </div>
+            <div class="header-meta" contenteditable="true" data-field="header-meta">Workshop</div>
+        </header>
+
+        <main class="content">
+            <div class="section-header">
+                <div class="section-label" contenteditable="true" data-field="section-label">Decision Framework</div>
+                <h1 class="page-title" contenteditable="true" data-field="title">Claude Code vs Claude.ai vs API — When to Use Each</h1>
+            </div>
+
+            <div class="columns-grid">
+                <div class="column-card">
+                    <div class="column-header">
+                        <div class="column-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <path d="M8 14s1.5 2 4 2 4-2 4-2"></path>
+                                <line x1="9" y1="9" x2="9.01" y2="9"></line>
+                                <line x1="15" y1="9" x2="15.01" y2="9"></line>
+                            </svg>
+                        </div>
+                        <h3 class="column-title" contenteditable="true" data-field="col-1-title">Claude.ai</h3>
+                        <p class="column-subtitle" contenteditable="true" data-field="col-1-subtitle">Web-based chat interface</p>
+                    </div>
+                    <div class="column-body">
+                        <ul class="use-cases">
+                            <li class="use-case">
+                                <div class="use-case-bullet"></div>
+                                <span class="use-case-text" contenteditable="true" data-field="col-1-use-1">Quick questions and brainstorming</span>
+                            </li>
+                            <li class="use-case">
+                                <div class="use-case-bullet"></div>
+                                <span class="use-case-text" contenteditable="true" data-field="col-1-use-2">Document analysis and summarization</span>
+                            </li>
+                            <li class="use-case">
+                                <div class="use-case-bullet"></div>
+                                <span class="use-case-text" contenteditable="true" data-field="col-1-use-3">Creative writing and content generation</span>
+                            </li>
+                            <li class="use-case">
+                                <div class="use-case-bullet"></div>
+                                <span class="use-case-text" contenteditable="true" data-field="col-1-use-4">One-off research and exploration</span>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="column-footer">
+                        <span class="best-for" contenteditable="true" data-field="col-1-best">Best for: General knowledge work</span>
+                    </div>
+                </div>
+
+                <div class="column-card">
+                    <div class="column-header">
+                        <div class="column-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                            </svg>
+                        </div>
+                        <h3 class="column-title" contenteditable="true" data-field="col-2-title">API</h3>
+                        <p class="column-subtitle" contenteditable="true" data-field="col-2-subtitle">Programmatic access</p>
+                    </div>
+                    <div class="column-body">
+                        <ul class="use-cases">
+                            <li class="use-case">
+                                <div class="use-case-bullet"></div>
+                                <span class="use-case-text" contenteditable="true" data-field="col-2-use-1">Production integrations at scale</span>
+                            </li>
+                            <li class="use-case">
+                                <div class="use-case-bullet"></div>
+                                <span class="use-case-text" contenteditable="true" data-field="col-2-use-2">Custom application development</span>
+                            </li>
+                            <li class="use-case">
+                                <div class="use-case-bullet"></div>
+                                <span class="use-case-text" contenteditable="true" data-field="col-2-use-3">Automated workflows and pipelines</span>
+                            </li>
+                            <li class="use-case">
+                                <div class="use-case-bullet"></div>
+                                <span class="use-case-text" contenteditable="true" data-field="col-2-use-4">Fine-grained control over prompts</span>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="column-footer">
+                        <span class="best-for" contenteditable="true" data-field="col-2-best">Best for: Production applications</span>
+                    </div>
+                </div>
+
+                <div class="column-card">
+                    <div class="column-header">
+                        <div class="column-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="4 17 10 11 4 5"></polyline>
+                                <line x1="12" y1="19" x2="20" y2="19"></line>
+                            </svg>
+                        </div>
+                        <h3 class="column-title" contenteditable="true" data-field="col-3-title">Claude Code</h3>
+                        <p class="column-subtitle" contenteditable="true" data-field="col-3-subtitle">CLI-based AI agent</p>
+                    </div>
+                    <div class="column-body">
+                        <ul class="use-cases">
+                            <li class="use-case">
+                                <div class="use-case-bullet"></div>
+                                <span class="use-case-text" contenteditable="true" data-field="col-3-use-1">Development workflows in your codebase</span>
+                            </li>
+                            <li class="use-case">
+                                <div class="use-case-bullet"></div>
+                                <span class="use-case-text" contenteditable="true" data-field="col-3-use-2">Agentic tasks: file creation, editing</span>
+                            </li>
+                            <li class="use-case">
+                                <div class="use-case-bullet"></div>
+                                <span class="use-case-text" contenteditable="true" data-field="col-3-use-3">Refactoring and code generation</span>
+                            </li>
+                            <li class="use-case">
+                                <div class="use-case-bullet"></div>
+                                <span class="use-case-text" contenteditable="true" data-field="col-3-use-4">Interactive debugging and exploration</span>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="column-footer">
+                        <span class="best-for" contenteditable="true" data-field="col-3-best">Best for: Development & demos ✓</span>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer class="footer">
+            <div class="footer-left" contenteditable="true" data-field="footer-left">Claude Code Fundamentals</div>
+            <div class="footer-center" contenteditable="true" data-field="footer-center">Training Workshop</div>
+            <div class="slide-number">4</div>
+        </footer>
+    </div>
+
+    <script>
+        const isLocalStorageAvailable = () => {
+            try { const t = '__test__'; localStorage.setItem(t, t); localStorage.removeItem(t); return true; } catch (e) { return false; }
+        };
+        const localStorageEnabled = isLocalStorageAvailable();
+        const saveEdits = () => {
+            if (!localStorageEnabled) return;
+            const edits = [];
+            document.querySelectorAll('[contenteditable]').forEach(el => {
+                const field = el.getAttribute('data-field');
+                if (field) edits.push({ selector: `[data-field='${field}']`, content: el.innerHTML });
+            });
+            localStorage.setItem('slide-4-edits', JSON.stringify({ slide: 4, edits, lastModified: new Date().toISOString() }));
+        };
+        document.querySelectorAll('[contenteditable]').forEach(el => {
+            el.addEventListener('blur', saveEdits);
+            el.addEventListener('input', () => setTimeout(saveEdits, 1000));
+        });
+        const restoreEdits = () => {
+            if (!localStorageEnabled) return;
+            try {
+                const stored = localStorage.getItem('slide-4-edits');
+                if (stored) {
+                    const data = JSON.parse(stored);
+                    if (data.slide === 4 && Array.isArray(data.edits)) {
+                        data.edits.forEach(edit => { const el = document.querySelector(edit.selector); if (el) el.innerHTML = edit.content; });
+                    }
+                }
+            } catch (e) { localStorage.removeItem('slide-4-edits'); }
+        };
+        restoreEdits();
+    </script>
+</body>
+</html>

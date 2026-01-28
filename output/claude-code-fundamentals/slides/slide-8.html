@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=1920, height=1080">
+    <title>Slide 8: CLI Navigation Basics</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --color-primary: #d4e94c;
+            --color-secondary: #4ecdc4;
+            --color-bg-dark: #0a0a0a;
+            --color-bg-dark-alt: #1a1a1a;
+            --color-mid-gray: #2a2a2a;
+            --color-text-on-dark: #FFFFFF;
+            --color-text-muted: #888888;
+            --font-heading: 'Outfit', system-ui, sans-serif;
+            --font-body: 'Outfit', system-ui, sans-serif;
+            --font-mono: 'SF Mono', Monaco, Consolas, monospace;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            width: 1920px;
+            height: 1080px;
+            overflow: hidden;
+            font-family: var(--font-body);
+        }
+
+        .slide {
+            width: 1920px;
+            height: 1080px;
+            background: var(--color-bg-dark);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .slide::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+            background-size: 40px 40px;
+            pointer-events: none;
+        }
+
+        .header {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            padding: 20px 80px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--color-mid-gray);
+        }
+
+        .header::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 80px;
+            width: 120px;
+            height: 2px;
+            background: var(--color-primary);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-icon {
+            width: 36px;
+            height: 36px;
+            background: var(--color-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .logo-text {
+            font-weight: 600;
+            font-size: 18px;
+            color: var(--color-text-on-dark);
+        }
+
+        .header-meta {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--color-text-muted);
+        }
+
+        .content {
+            position: absolute;
+            top: 120px;
+            left: 80px;
+            right: 80px;
+            bottom: 100px;
+            display: grid;
+            grid-template-columns: 1fr 1.4fr;
+            gap: 80px;
+        }
+
+        .left-section {
+            padding-top: 20px;
+        }
+
+        .section-label {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--color-text-muted);
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--color-mid-gray);
+        }
+
+        .page-title {
+            font-family: var(--font-heading);
+            font-size: 48px;
+            font-weight: 600;
+            color: var(--color-text-on-dark);
+            line-height: 1.15;
+            margin-bottom: 24px;
+        }
+
+        .page-description {
+            font-size: 18px;
+            font-weight: 300;
+            color: var(--color-text-muted);
+            line-height: 1.6;
+        }
+
+        .commands-list {
+            list-style: none;
+            padding-top: 20px;
+        }
+
+        .command-item {
+            display: grid;
+            grid-template-columns: 160px 1fr;
+            gap: 24px;
+            align-items: start;
+            padding: 20px 0;
+            border-bottom: 1px solid var(--color-mid-gray);
+        }
+
+        .command-item:first-child {
+            border-top: 1px solid var(--color-mid-gray);
+        }
+
+        .command-code {
+            font-family: var(--font-mono);
+            font-size: 16px;
+            font-weight: 500;
+            color: var(--color-primary);
+            background: var(--color-bg-dark-alt);
+            padding: 8px 12px;
+            border: 1px solid var(--color-mid-gray);
+        }
+
+        .command-desc {
+            font-size: 16px;
+            color: var(--color-text-muted);
+            line-height: 1.5;
+            padding-top: 6px;
+        }
+
+        .footer {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 20px 80px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid var(--color-mid-gray);
+        }
+
+        .footer::before {
+            content: '';
+            position: absolute;
+            top: -1px;
+            left: 80px;
+            width: 60px;
+            height: 2px;
+            background: var(--color-primary);
+        }
+
+        .footer-left { font-size: 14px; color: var(--color-text-muted); }
+        .footer-center { font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--color-text-muted); }
+
+        .slide-number {
+            width: 32px;
+            height: 32px;
+            background: var(--color-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--color-bg-dark);
+        }
+
+        [contenteditable]:focus { outline: 2px solid var(--color-primary); outline-offset: 4px; }
+        [contenteditable]:hover { outline: 1px dashed var(--color-text-muted); outline-offset: 2px; }
+    </style>
+</head>
+<body>
+    <div class="slide" data-slide-id="8">
+        <header class="header">
+            <div class="logo">
+                <div class="logo-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="4 17 10 11 4 5"></polyline>
+                        <line x1="12" y1="19" x2="20" y2="19"></line>
+                    </svg>
+                </div>
+                <span class="logo-text" contenteditable="true" data-field="logo">Claude Code</span>
+            </div>
+            <div class="header-meta" contenteditable="true" data-field="header-meta">Workshop</div>
+        </header>
+
+        <main class="content">
+            <div class="left-section">
+                <div class="section-label" contenteditable="true" data-field="section-label">Reference</div>
+                <h1 class="page-title" contenteditable="true" data-field="title">CLI Navigation Basics</h1>
+                <p class="page-description" contenteditable="true" data-field="description">Essential commands to navigate and control your Claude Code sessions.</p>
+            </div>
+
+            <ul class="commands-list">
+                <li class="command-item">
+                    <code class="command-code" contenteditable="true" data-field="cmd-1">claude</code>
+                    <span class="command-desc" contenteditable="true" data-field="cmd-1-desc">Start an interactive session in the current directory</span>
+                </li>
+                <li class="command-item">
+                    <code class="command-code" contenteditable="true" data-field="cmd-2">/help</code>
+                    <span class="command-desc" contenteditable="true" data-field="cmd-2-desc">Display all available commands and keyboard shortcuts</span>
+                </li>
+                <li class="command-item">
+                    <code class="command-code" contenteditable="true" data-field="cmd-3">/clear</code>
+                    <span class="command-desc" contenteditable="true" data-field="cmd-3-desc">Reset conversation context and start fresh</span>
+                </li>
+                <li class="command-item">
+                    <code class="command-code" contenteditable="true" data-field="cmd-4">/compact</code>
+                    <span class="command-desc" contenteditable="true" data-field="cmd-4-desc">Summarize conversation to reduce context length</span>
+                </li>
+                <li class="command-item">
+                    <code class="command-code" contenteditable="true" data-field="cmd-5">/cost</code>
+                    <span class="command-desc" contenteditable="true" data-field="cmd-5-desc">Show current session token usage and cost</span>
+                </li>
+                <li class="command-item">
+                    <code class="command-code" contenteditable="true" data-field="cmd-6">Ctrl+C</code>
+                    <span class="command-desc" contenteditable="true" data-field="cmd-6-desc">Cancel current operation or exit the session</span>
+                </li>
+            </ul>
+        </main>
+
+        <footer class="footer">
+            <div class="footer-left" contenteditable="true" data-field="footer-left">Claude Code Fundamentals</div>
+            <div class="footer-center" contenteditable="true" data-field="footer-center">Training Workshop</div>
+            <div class="slide-number">8</div>
+        </footer>
+    </div>
+
+    <script>
+        const isLocalStorageAvailable = () => { try { const t = '__test__'; localStorage.setItem(t, t); localStorage.removeItem(t); return true; } catch (e) { return false; } };
+        const localStorageEnabled = isLocalStorageAvailable();
+        const saveEdits = () => { if (!localStorageEnabled) return; const edits = []; document.querySelectorAll('[contenteditable]').forEach(el => { const field = el.getAttribute('data-field'); if (field) edits.push({ selector: `[data-field='${field}']`, content: el.innerHTML }); }); localStorage.setItem('slide-8-edits', JSON.stringify({ slide: 8, edits, lastModified: new Date().toISOString() })); };
+        document.querySelectorAll('[contenteditable]').forEach(el => { el.addEventListener('blur', saveEdits); el.addEventListener('input', () => setTimeout(saveEdits, 1000)); });
+        const restoreEdits = () => { if (!localStorageEnabled) return; try { const stored = localStorage.getItem('slide-8-edits'); if (stored) { const data = JSON.parse(stored); if (data.slide === 8 && Array.isArray(data.edits)) { data.edits.forEach(edit => { const el = document.querySelector(edit.selector); if (el) el.innerHTML = edit.content; }); } } } catch (e) { localStorage.removeItem('slide-8-edits'); } };
+        restoreEdits();
+    </script>
+</body>
+</html>

@@ -1292,4 +1292,214 @@ _For implementation: Use the `create-story` workflow to generate individual stor
 
 _This document will be updated after UX Design workflow to incorporate interaction details if needed._
 
+---
+
+## Epic 8: Slide Viewer & Output Architecture
+
+**Goal:** Enable users to view all deck slides in a unified viewer with gallery and presentation modes, while restructuring output to a clean `output/` directory at project root.
+
+**User Value:** User can see all slides at a glance, present them sequentially, and have organized output separate from working files.
+
+**FRs Covered:** New feature (extends FR31 slide viewing capabilities)
+
+### Story 8.1: Output Folder Architecture
+
+As a **slide builder user**,
+I want **slides to be saved to a clean output folder structure**,
+So that **viewable content is separate from working files and organized by deck**.
+
+**Acceptance Criteria:**
+
+**Given** a deck with deck_name "Claude Code Fundamentals"
+**When** I run /sb:build-one or /sb:build-all
+**Then** slides are saved to `output/claude-code-fundamentals/slides/slide-N.html`
+
+**And** plan.yaml is copied to `output/claude-code-fundamentals/`
+**And** single slides are saved to `output/singles/{slide-name}.html`
+**And** the slug is generated correctly (lowercase, hyphens, no special chars)
+
+**Prerequisites:** None (foundation story for Epic 8)
+
+**Technical Notes:**
+- Modify build-one and build-all workflow.yaml and instructions.md
+- Add slug generation: lowercase, replace spaces with hyphens, remove special chars
+- Create output directories if they don't exist
+- Update status.yaml to track output_folder
+
+**Files to Modify:**
+- `.slide-builder/workflows/build-one/workflow.yaml`
+- `.slide-builder/workflows/build-one/instructions.md`
+- `.slide-builder/workflows/build-all/workflow.yaml`
+- `.slide-builder/workflows/build-all/instructions.md`
+- `.slide-builder/status.yaml`
+
+---
+
+### Story 8.2: Core Viewer Component
+
+As a **slide builder user**,
+I want **an auto-generated viewer that shows all slides in gallery and presentation modes**,
+So that **I can see all slides at a glance and present them sequentially**.
+
+**Acceptance Criteria:**
+
+**Given** slides exist in `output/{deck-slug}/slides/`
+**When** I open `output/{deck-slug}/index.html`
+**Then** I see a gallery grid of all slide thumbnails
+
+**And** clicking a thumbnail enters presentation mode showing that slide
+**And** prev/next buttons navigate between slides
+**And** a close button returns to gallery view
+**And** the viewer is auto-regenerated after each slide build
+
+**Prerequisites:** Story 8.1 (Output Folder Architecture)
+
+**Technical Notes:**
+- Create viewer-template.html in `.slide-builder/templates/`
+- Use iframe + CSS transform scale(0.208) for thumbnails (per samples/index.html pattern)
+- Add viewer generation step to build-one and build-all instructions
+- Scan for slide-*.html files, sort numerically, generate viewer
+
+**Files to Create:**
+- `.slide-builder/templates/viewer-template.html`
+
+**Files to Modify:**
+- `.slide-builder/workflows/build-one/instructions.md`
+- `.slide-builder/workflows/build-all/instructions.md`
+
+**Reference Code:**
+- `.slide-builder/samples/index.html:106-147` - Gallery CSS and iframe thumbnail pattern
+
+---
+
+### Story 8.3: Presentation Mode Polish
+
+As a **slide builder user**,
+I want **enhanced presentation mode with sidebar, keyboard nav, and smooth transitions**,
+So that **I have a polished, professional presentation experience**.
+
+**Acceptance Criteria:**
+
+**Given** I am in presentation mode
+**When** I press ArrowRight
+**Then** the next slide displays with a smooth transition
+
+**And** a thumbnail sidebar shows all slides with the current one highlighted
+**And** clicking a sidebar thumbnail jumps to that slide
+**And** Escape returns to gallery
+**And** F toggles fullscreen
+**And** number keys 1-9 jump to that slide
+**And** Home/End go to first/last slide
+
+**Prerequisites:** Story 8.2 (Core Viewer Component)
+
+**Technical Notes:**
+- Add CSS transitions on iframe opacity for smooth slide changes
+- Implement thumbnail sidebar (200px fixed left)
+- Use Fullscreen API with graceful fallback
+- Match theme.json colors (dark background #0a0a0a, lime accent #d4e94c)
+- Keyboard handling: ArrowLeft/Right, Escape, F, Home, End, 1-9
+
+**Files to Modify:**
+- `.slide-builder/templates/viewer-template.html`
+
+---
+
+## Epic 8 Story Map
+
+```
+Epic 8: Slide Viewer & Output Architecture
+│
+├── Story 8.1: Output Folder Architecture [Foundation]
+│   └── Restructure where slides are saved
+│       ├── Deck → output/{deck-slug}/slides/
+│       ├── Single → output/singles/
+│       └── Modify build workflows
+│
+├── Story 8.2: Core Viewer Component [Depends on 8.1]
+│   └── Gallery + basic presentation
+│       ├── Viewer template
+│       ├── Gallery view (thumbnails)
+│       ├── Presentation view (single slide)
+│       └── Auto-generation on build
+│
+└── Story 8.3: Presentation Mode Polish [Depends on 8.2]
+    └── Enhanced navigation & UX
+        ├── Thumbnail sidebar
+        ├── Keyboard navigation
+        ├── Transitions
+        └── Fullscreen support
+```
+
+**Dependencies:** Story 8.1 → Story 8.2 → Story 8.3 (sequential)
+
+---
+
+## Epic 9: Dynamic Viewer Loading
+
+**Goal:** Enable the slide viewer to dynamically load slide data from a manifest file instead of static embedded data, eliminating the need for manual viewer regeneration.
+
+**User Value:** User sees new or updated slides immediately upon page refresh without running regeneration scripts.
+
+**FRs Covered:** Enhancement to FR31 (slide viewing), extends Epic 8
+
+### Story 9.1: Dynamic Manifest-Based Viewer
+
+As a **slide builder user**,
+I want **the viewer to dynamically load slides from a manifest.json file on page load**,
+So that **I don't need to manually regenerate the viewer when slides are added or modified**.
+
+**Acceptance Criteria:**
+
+**Given** a valid `slides/manifest.json` exists
+**When** I open `index.html` via `file://` protocol
+**Then** all slides from manifest are displayed in gallery
+
+**And** the slide counter shows correct total from manifest
+**And** presentation mode works with dynamically loaded slides
+**And** cache-busting ensures modified slide content appears immediately on refresh
+
+**Given** no manifest exists
+**When** I open `index.html`
+**Then** a user-friendly error message is displayed
+
+**Given** `regenerate-viewer.js` is run
+**When** it completes
+**Then** both `index.html` and `slides/manifest.json` are created/updated
+
+**Prerequisites:** Epic 8 complete (viewer exists)
+
+**Technical Notes:**
+- Create manifest.json format: `{deckName, generatedAt, slides: [{number, filename, title}]}`
+- Modify viewer-template.html to fetch manifest via `fetch()` API
+- Add cache-busting query param `?t=${Date.now()}` to all iframe URLs
+- Update regenerate-viewer.js to generate manifest.json
+- Create standalone generate-manifest.js utility
+- Works with `file://` protocol (no server required)
+
+**Files to Create:**
+- `scripts/generate-manifest.js`
+- `output/{deck-slug}/slides/manifest.json`
+
+**Files to Modify:**
+- `.slide-builder/templates/viewer-template.html`
+- `scripts/regenerate-viewer.js`
+
+**Key Code Locations:**
+- Title extraction: `scripts/regenerate-viewer.js:26`
+- Slide discovery: `scripts/regenerate-viewer.js:76`
+- Gallery rendering: `.slide-builder/templates/viewer-template.html:347`
+
+---
+
+## Epic 9 Summary
+
+| Story | Description | Status |
+|-------|-------------|--------|
+| 9.1 | Dynamic Manifest-Based Viewer | Ready |
+
+**Dependencies:** Requires Epic 8 completion (viewer infrastructure)
+
+---
+
 

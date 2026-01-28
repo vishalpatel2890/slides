@@ -3,7 +3,7 @@
 This workflow captures intent for a single slide through a 5-phase process.
 
 ```xml
-<critical>This workflow creates .slide-builder/single/plan.yaml</critical>
+<critical>This workflow creates output/singles/plan.yaml</critical>
 <critical>Requires theme.json to exist before proceeding</critical>
 <critical>Updates status.yaml with mode: "single" upon completion</critical>
 
@@ -13,7 +13,7 @@ This workflow captures intent for a single slide through a 5-phase process.
   <!-- PHASE 1: Theme Verification                                              -->
   <!-- ═══════════════════════════════════════════════════════════════════════ -->
   <step n="1" goal="Verify theme exists">
-    <action>Check if .slide-builder/theme.json exists</action>
+    <action>Check if .slide-builder/config/theme.json exists</action>
 
     <check if="theme.json does not exist">
       <output>
@@ -140,9 +140,9 @@ Is this correct? (yes to proceed, or provide corrections)
   <!-- PHASE 5: State Persistence                                               -->
   <!-- ═══════════════════════════════════════════════════════════════════════ -->
   <step n="5" goal="Save plan and update status">
-    <action>Create .slide-builder/single/ directory if it doesn't exist</action>
+    <action>Create output/singles/ directory if it doesn't exist</action>
 
-    <action>Save plan.yaml to .slide-builder/single/plan.yaml with schema:
+    <action>Save plan.yaml to output/singles/plan.yaml with schema:
       ```yaml
       # Slide Metadata
       created: {{current_iso_timestamp}}
@@ -181,14 +181,27 @@ Is this correct? (yes to proceed, or provide corrections)
       - Append to history array: { action: "Single slide planned", timestamp: {{current_iso_timestamp}} }
     </action>
 
+    <!-- Generate slug for preview of output location -->
+    <slug-generation>
+      <action>Generate slug from intent (first 30 chars):
+        1. Convert to lowercase
+        2. Replace spaces with hyphens
+        3. Remove special characters (keep only a-z, 0-9, hyphens)
+        4. Truncate to 30 characters
+        5. Remove trailing hyphens
+      </action>
+      <action>Set {{slide_slug}} = generated slug</action>
+    </slug-generation>
+
     <output>
 **Plan Saved**
 
-Your slide plan is ready at `.slide-builder/single/plan.yaml`
+Your slide plan is ready at `output/singles/plan.yaml`
 
 **Summary:**
 - Template: {{suggested_template}}
 - Mode: single slide
+- Output will be: `output/singles/{{slide_slug}}.html`
 
 **Next step:** Run `/sb:build-one` to generate your slide.
     </output>

@@ -10,11 +10,16 @@ installed_path: "{project-root}/.slide-builder/workflows/plan-one"
 # Workflow components
 instructions: "{installed_path}/instructions.md"
 
+# Config paths (shareable brand assets)
+config_path: "{project-root}/.slide-builder/config"
+theme_file: "{config_path}/theme.json"
+
 # State management
-theme_file: "{project-root}/.slide-builder/theme.json"
-plan_file: "{project-root}/.slide-builder/single/plan.yaml"
 status_file: "{project-root}/.slide-builder/status.yaml"
-single_dir: "{project-root}/.slide-builder/single"
+
+# Output location - single slides go to output/singles/
+output_dir: "{project-root}/output/singles"
+plan_file: "{output_dir}/plan.yaml"
 
 # Template matching keywords (for reference)
 template_keywords:

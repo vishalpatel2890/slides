@@ -1,0 +1,182 @@
+<story-context id="4-1-edit-command-invocation" v="1.0">
+  <metadata>
+    <epicId>4</epicId>
+    <storyId>1</storyId>
+    <title>Edit Command Invocation</title>
+    <status>drafted</status>
+    <generatedAt>2026-01-27</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>notes/sprint-artifacts/4-1-edit-command-invocation.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>user</asA>
+    <iWant>to invoke editing on a specific slide via `/edit [n]`</iWant>
+    <soThat>I can refine any slide in my deck or single slide</soThat>
+    <tasks>
+      <task id="1" ac="1-6">Create Edit Workflow Structure
+        <subtask>1.1: Create `.slide-builder/workflows/edit/` directory</subtask>
+        <subtask>1.2: Create `workflow.yaml` with name, description, instructions path</subtask>
+        <subtask>1.3: Create `instructions.md` with step-by-step workflow execution logic</subtask>
+      </task>
+      <task id="2" ac="1,2,3,6">Implement Edit Command Router
+        <subtask>2.1: Parse `/edit` command arguments (optional slide number)</subtask>
+        <subtask>2.2: Read `status.yaml` to determine current mode (single vs deck)</subtask>
+        <subtask>2.3: In single mode: target `.slide-builder/single/slide.html`</subtask>
+        <subtask>2.4: In deck mode with number: target `.slide-builder/deck/slides/slide-{n}.html`</subtask>
+        <subtask>2.5: In deck mode without number: prompt user for slide number or show list</subtask>
+        <subtask>2.6: Validate target slide exists before proceeding</subtask>
+        <subtask>2.7: Return error with valid range if invalid slide number provided</subtask>
+        <subtask>2.8: Return error directing to `/build-one` if no slides exist</subtask>
+      </task>
+      <task id="3" ac="4">Implement Slide Loader
+        <subtask>3.1: Load slide HTML content from target path</subtask>
+        <subtask>3.2: Load corresponding `slide-state.json` (or create empty if missing)</subtask>
+        <subtask>3.3: Parse HTML to extract all data-field values (current structure)</subtask>
+        <subtask>3.4: Extract current layout type from HTML structure/class names</subtask>
+        <subtask>3.5: Count existing edits from state file</subtask>
+        <subtask>3.6: Display slide info summary to user</subtask>
+      </task>
+      <task id="4" ac="5">Implement Edit Instruction Prompt
+        <subtask>4.1: After slide loaded, prompt user: "Describe the layout change you want"</subtask>
+        <subtask>4.2: Capture user's natural language edit instruction</subtask>
+        <subtask>4.3: Confirm understanding: "I'll: [interpretation of instruction]"</subtask>
+        <subtask>4.4: Show: "Your text edits ([count]) will be preserved"</subtask>
+        <subtask>4.5: Ask: "Proceed? (y/n)" - if no, return to prompt</subtask>
+      </task>
+      <task id="5" ac="1-6">Register /edit Slash Command
+        <subtask>5.1: Add edit command to Claude Code skills system</subtask>
+        <subtask>5.2: Map `/sb:edit` to edit workflow</subtask>
+        <subtask>5.3: Support optional argument for slide number</subtask>
+        <subtask>5.4: Update help/usage documentation</subtask>
+      </task>
+      <task id="6" ac="1-6">Testing and Edge Cases
+        <subtask>6.1: Test single mode edit invocation</subtask>
+        <subtask>6.2: Test deck mode with valid slide number</subtask>
+        <subtask>6.3: Test deck mode with invalid slide number</subtask>
+        <subtask>6.4: Test with no slides existing</subtask>
+        <subtask>6.5: Test deck mode without number (prompt behavior)</subtask>
+        <subtask>6.6: Run Frontend Test Gate checklist</subtask>
+      </task>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <criterion id="AC4.1.1">Given slides exist (single mode or deck mode), when the user runs `/edit` (no number, single mode), then the single slide is loaded for editing</criterion>
+    <criterion id="AC4.1.2">Given slides exist in deck mode, when the user runs `/edit 3`, then slide 3 is loaded for editing</criterion>
+    <criterion id="AC4.1.3">Given an invalid slide number is provided, when `/edit 99` is run but only 5 slides exist, then error message shows valid range (1-5)</criterion>
+    <criterion id="AC4.1.4">When a slide is loaded for editing, then the current slide content summary is displayed (layout type, field count, existing edit count)</criterion>
+    <criterion id="AC4.1.5">When a slide is loaded for editing, then the user is prompted for edit instructions</criterion>
+    <criterion id="AC4.1.6">Given no slides exist, when `/edit` is run, then error message directs user to run `/build-one` first</criterion>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc path="notes/sprint-artifacts/tech-spec-epic-4.md" title="Epic 4 Technical Specification" section="Story 4.1: Edit Command Invocation">
+        Defines acceptance criteria, Edit Command Router module, Slide Loader module, command parsing specification, and complete /edit workflow phases.
+      </doc>
+      <doc path="notes/architecture.md" title="Slide Builder Architecture" section="Pattern 4: Dual-Mode State Management">
+        Describes mode detection from status.yaml - single vs deck mode. In single mode targets single/slide.html, in deck mode targets deck/slides/slide-{n}.html.
+      </doc>
+      <doc path="notes/epics.md" title="Epic Breakdown" section="Story 4.1: Edit Command Invocation">
+        User story definition: invoke editing on specific slide via /edit [n] to refine any slide in deck or single slide.
+      </doc>
+      <doc path="notes/prd.md" title="Product Requirements Document" section="Editing">
+        FR37: Users can edit any slide via `/edit [slide-number]`. FR38-41 cover layout changes and edit preservation.
+      </doc>
+      <doc path="notes/sprint-artifacts/3-5-text-auto-save.md" title="Previous Story - Text Auto-Save" section="Completion Notes List">
+        Establishes localStorage as primary persistence. slide-state.json schema: { slide, edits: [{selector, content}], lastModified }. Auto-save script pattern with [Slide Auto-Save] console logging prefix.
+      </doc>
+    </docs>
+
+    <code>
+      <file path=".slide-builder/workflows/edit/workflow.yaml" kind="workflow-config" reason="Existing edit workflow skeleton - needs enhancement for AC4.1.1-4.1.6">
+        <symbol>edit workflow</symbol>
+        <note>Already defines installed_path, instructions path, status_file, theme_file variables. Needs: mode detection, slide number argument parsing, validation logic.</note>
+      </file>
+      <file path=".slide-builder/workflows/edit/instructions.md" kind="workflow-instructions" reason="Existing basic edit instructions - needs enhancement for command routing and slide loading">
+        <symbol>edit workflow steps</symbol>
+        <note>Has basic structure for mode detection and slide loading. Needs: detailed error messages with valid range, slide info display, edit count from state file.</note>
+      </file>
+      <file path=".slide-builder/status.yaml" kind="state-file" reason="Contains mode (single/deck), total_slides, built_count for validation">
+        <symbol>mode, total_slides, built_count</symbol>
+        <note>Current mode: single. Read this first to determine which slide path to target.</note>
+      </file>
+      <file path=".slide-builder/single/plan.yaml" kind="state-file" reason="Single mode slide plan structure reference">
+        <symbol>plan.yaml schema</symbol>
+        <note>Contains intent, suggested_template, key_points, visual_guidance, tone fields.</note>
+      </file>
+      <file path=".slide-builder/workflows/build-one/instructions.md" kind="workflow-instructions" lines="159-250" reason="Reference for contenteditable and data-field patterns used in slide HTML">
+        <symbol>contenteditable-requirements, auto-save-script</symbol>
+        <note>All text elements have contenteditable="true" and unique data-field attributes. Auto-save script uses localStorage key 'slide-edits'.</note>
+      </file>
+      <file path=".slide-builder/samples/01-title.html" kind="html-slide" reason="Example slide HTML structure for parsing layout type and fields">
+        <symbol>slide HTML structure</symbol>
+        <note>Shows .slide container, CSS structure, element hierarchy. Use as reference for extracting layout type.</note>
+      </file>
+    </code>
+
+    <dependencies>
+      <npm>
+        <package name="puppeteer" version="^23.0.0" purpose="HTML-to-image conversion (Epic 7, not this story)" />
+        <package name="googleapis" version="^140.0.0" purpose="Google Slides API (Epic 7, not this story)" />
+      </npm>
+      <note>No npm dependencies required for Story 4.1 - uses Claude Code built-in capabilities only.</note>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint source="Architecture ADR-001">Workflow follows BMAD pattern: workflow.yaml contains config, instructions.md contains execution logic with XML step structure</constraint>
+    <constraint source="Architecture Pattern 4">Mode detection must read status.yaml to determine single vs deck mode before targeting slide path</constraint>
+    <constraint source="Tech Spec">In single mode: target .slide-builder/single/slide.html; In deck mode: target .slide-builder/deck/slides/slide-{n}.html</constraint>
+    <constraint source="Tech Spec">Validate slide exists before proceeding; return helpful error with valid range if not found</constraint>
+    <constraint source="Tech Spec">Display current slide info for user context: layout type, field count, existing edit count</constraint>
+    <constraint source="Story 3-5">Read slide-state.json for edit count; schema is { slide, edits: [{selector, content}], lastModified }</constraint>
+    <constraint source="PRD FR37">Users invoke editing via /edit [slide-number] - number is optional in single mode</constraint>
+  </constraints>
+
+  <interfaces>
+    <interface name="status.yaml" kind="state-file">
+      <signature>
+mode: single | deck
+current_slide: number
+total_slides: number
+built_count: number
+      </signature>
+      <path>.slide-builder/status.yaml</path>
+    </interface>
+    <interface name="slide-state.json" kind="state-file">
+      <signature>
+{
+  slide: "single" | number,
+  edits: [{ selector: string, content: string }],
+  lastModified: ISO8601 string
+}
+      </signature>
+      <path>.slide-builder/single/slide-state.json OR .slide-builder/deck/slides/slide-{n}-state.json</path>
+    </interface>
+    <interface name="/sb:edit command" kind="slash-command">
+      <signature>/sb:edit [slide_number?]</signature>
+      <note>Optional slide number argument. If omitted in single mode, edits single/slide.html. If omitted in deck mode, prompts for slide selection.</note>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>
+      Per Architecture test strategy, tests should be manual verification following the Frontend Test Gate pattern. Each AC maps to a specific test scenario. Tests cover: mode detection (single vs deck from status.yaml), path targeting (correct slide.html path constructed), validation (invalid slide numbers return error with range), edge cases (no slides returns error directing to /build-one), and slide info display (layout type, fields, edit count correctly extracted).
+    </standards>
+    <locations>
+      <location>Frontend Test Gate in story file (4-1-TG1)</location>
+      <location>Manual CLI testing via /sb:edit command invocations</location>
+    </locations>
+    <ideas>
+      <idea ac="AC4.1.1">In single mode (status.yaml mode: single), run /sb:edit without arguments. Verify system loads .slide-builder/single/slide.html and displays slide info.</idea>
+      <idea ac="AC4.1.2">Set up deck mode with 5 slides. Run /sb:edit 3. Verify system loads .slide-builder/deck/slides/slide-3.html.</idea>
+      <idea ac="AC4.1.3">In deck mode with 5 slides, run /sb:edit 99. Verify error message: "Invalid slide number. Valid range: 1-5".</idea>
+      <idea ac="AC4.1.4">After slide loads, verify CLI output shows: layout type (e.g., "Title slide"), field count (e.g., "3 text fields"), edit count (e.g., "2 saved edits").</idea>
+      <idea ac="AC4.1.5">After slide info displayed, verify user receives prompt: "Describe the layout change you want".</idea>
+      <idea ac="AC4.1.6">Delete all slide.html files. Run /sb:edit. Verify error: "No slide to edit. Run /build-one first."</idea>
+      <idea ac="AC4.1.1-6">In deck mode, run /sb:edit without slide number. Verify system prompts "Which slide? (1-N)" where N is total_slides.</idea>
+    </ideas>
+  </tests>
+</story-context>

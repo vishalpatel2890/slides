@@ -1,0 +1,44 @@
+# Slide Metadata
+created: "2026-01-27T23:00:00Z"
+last_modified: "2026-01-27T23:00:00Z"
+
+# Core Intent
+intent: "Represent the outcome OEMs (Honda/Airstream) achieve by building Household ID and identifying family members shopping for products. Focus on business capabilities enabled for marketers and new marketing actions with Household Profiles."
+suggested_template: "layout-rocd-initiative"
+
+# Audience Context
+audience: "OEM marketing executives, CMOs, marketing operations leaders"
+audience_knowledge_level: "intermediate"
+context: "Customer data platform sales/enablement - demonstrating ROI of household identity resolution"
+
+# Content Details
+key_points:
+  - "Transform anonymous, disconnected shoppers into unified household profiles"
+  - "Enable cross-household targeting (husband shops SUV, reach wife with complementary offers)"
+  - "Lifecycle orchestration - time outreach to 2nd vehicle purchase windows"
+  - "Unified insights - see total household LTV instead of fragmented individual metrics"
+  - "Family member identification enables coordinated multi-touch campaigns"
+  - "Know who influences purchase decisions within household"
+
+visual_guidance: "Use existing layout-rocd-initiative template - split panel with dark left (transformation visual) and light right (benefits list)"
+tone: "professional"
+
+# Technical Details
+technical_depth: "overview"
+include_elements:
+  - before_state: "Anonymous disconnected circles representing unknown individuals"
+  - transformation: "Household ID hub with lime accent border"
+  - after_state: "Connected family nodes (Dad, Mom, Son) with activity labels"
+  - benefits_list: "3 key marketing capabilities enabled"
+exclude_elements:
+  - "Technical implementation details"
+  - "API/code snippets"
+  - "Pricing information"
+
+# Template Reference
+template_file: ".slide-builder/templates/layout-rocd-initiative.html"
+template_features:
+  - "55%/45% split panel layout"
+  - "Vertical flow diagram (Before → Household ID → Connected)"
+  - "Contenteditable fields for customization"
+  - "Auto-save to localStorage"

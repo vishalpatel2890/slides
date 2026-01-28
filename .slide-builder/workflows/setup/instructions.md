@@ -1198,12 +1198,12 @@ Please check extraction data and try again.</output>
     <output>💾 Saving theme.json...</output>
 
     <action>Use Write tool to save theme.json:
-      - File path: {project-root}/.slide-builder/theme.json
+      - File path: {config_path}/theme.json
       - Content: JSON.stringify({{theme_json}}, null, 2) (pretty-printed with 2-space indent)
     </action>
 
     <check if="Write succeeds">
-      <output>✅ Theme saved to .slide-builder/theme.json</output>
+      <output>✅ Theme saved to .slide-builder/config/theme.json</output>
     </check>
 
     <check if="Write fails">
@@ -1221,7 +1221,7 @@ Please check file permissions and try again.</output>
 ✅ **THEME FILE GENERATED**
 ═══════════════════════════════════════════════════════════════════════════════
 
-📁 **File:** .slide-builder/theme.json
+📁 **File:** .slide-builder/config/theme.json
 
 **📋 META**
 ┌─────────────┬─────────────────────────────────────────┐
@@ -1287,7 +1287,7 @@ Each slide tests specific design primitives from theme.json.
 ───────────────────────────────────────────────────────────────────────────────
     </output>
 
-    <action>Read theme.json from {project-root}/.slide-builder/theme.json</action>
+    <action>Read theme.json from {config_path}/theme.json</action>
     <check if="theme.json does not exist or is invalid">
       <output>❌ Error: theme.json not found or invalid.
 Please ensure Phase 3 (theme generation) completed successfully.</output>
@@ -1301,7 +1301,7 @@ Please ensure Phase 3 (theme generation) completed successfully.</output>
       - personality: classification for tone guidance
     </action>
 
-    <action>Create .slide-builder/samples/ directory if it does not exist</action>
+    <action>Create .slide-builder/config/samples/ directory if it does not exist</action>
   </step>
 
   <step n="4.1" goal="Define slide specifications">
@@ -1426,7 +1426,7 @@ Please ensure Phase 3 (theme generation) completed successfully.</output>
         - Apply brand personality: {{theme.personality.classification}}
       </action>
 
-      <action>Save slide to {project-root}/.slide-builder/samples/{{slide_spec.filename}}</action>
+      <action>Save slide to {config_path}/samples/{{slide_spec.filename}}</action>
 
       <check if="Write fails">
         <output>⚠️ Failed to save {{slide_spec.filename}}: {{error_message}}</output>
@@ -1435,7 +1435,7 @@ Please ensure Phase 3 (theme generation) completed successfully.</output>
   </step>
 
   <step n="4.3" goal="Verify sample generation and update status">
-    <action>Verify all 6 files exist in .slide-builder/samples/:
+    <action>Verify all 6 files exist in .slide-builder/config/samples/:
       - 01-title.html
       - 02-agenda.html
       - 03-flow.html
@@ -1454,7 +1454,7 @@ Attempting to regenerate...</output>
     <action>Update status.yaml with:
       phase: "sample-review"
       samples:
-        directory: .slide-builder/samples/
+        directory: .slide-builder/config/samples/
         count: 6
         files:
           - 01-title.html
@@ -1471,7 +1471,7 @@ Attempting to regenerate...</output>
 ✅ **SAMPLE DECK GENERATED**
 ═══════════════════════════════════════════════════════════════════════════════
 
-📁 **Location:** .slide-builder/samples/
+📁 **Location:** .slide-builder/config/samples/
 
 **Generated Slides:**
 
@@ -1531,7 +1531,7 @@ Target: 1-3 feedback rounds to get it right.
     <ask>
 **Theme Validation** (Round {{feedback_iteration}})
 
-How do the sample slides look? Open .slide-builder/samples/*.html in your browser and provide feedback:
+How do the sample slides look? Open .slide-builder/config/samples/*.html in your browser and provide feedback:
 
 - "Too corporate" - I'll soften colors, add warmth, increase corner radius
 - "Not bold enough" - I'll increase contrast, reduce corner radius, use heavier weights
@@ -1636,7 +1636,7 @@ Applying changes to theme...</output>
   </step>
 
   <step n="5.4" goal="Apply theme modifications">
-    <action>Read current theme.json from {project-root}/.slide-builder/theme.json</action>
+    <action>Read current theme.json from {config_path}/theme.json</action>
     <action>Parse JSON into {{current_theme}} object</action>
 
     <action>Apply each adjustment from {{theme_adjustments}}:
@@ -1678,7 +1678,7 @@ Applying changes to theme...</output>
 
     <action>Validate complete theme structure before saving</action>
 
-    <action>Write updated theme to {project-root}/.slide-builder/theme.json using Write tool</action>
+    <action>Write updated theme to {config_path}/theme.json using Write tool</action>
 
     <check if="Write fails">
       <output>❌ Failed to save theme.json: {{error_message}}
@@ -1732,7 +1732,7 @@ Please check file permissions and try again.</output>
     <for-each item="slide_file" in="['01-title.html', '02-agenda.html', '03-flow.html', '04-comparison.html', '05-callout.html', '06-technical.html']">
       <output>  🖼️ Regenerating {{slide_file}}...</output>
 
-      <action>Read current slide from {project-root}/.slide-builder/samples/{{slide_file}}</action>
+      <action>Read current slide from {config_path}/samples/{{slide_file}}</action>
 
       <action>Regenerate the slide HTML:
         - Use the same layout structure and content as before
@@ -1742,7 +1742,7 @@ Please check file permissions and try again.</output>
         - Apply personality adjustments to visual weight and styling
       </action>
 
-      <action>Write regenerated slide to {project-root}/.slide-builder/samples/{{slide_file}}</action>
+      <action>Write regenerated slide to {config_path}/samples/{{slide_file}}</action>
 
       <check if="Write succeeds">
         <output>  ✅ {{slide_file}} regenerated</output>
@@ -1764,13 +1764,13 @@ Please check file permissions and try again.</output>
 {{theme_adjustments_summary}}
 
 **Updated Files:**
-- .slide-builder/theme.json (v{{theme.meta.version}})
-- .slide-builder/samples/01-title.html
-- .slide-builder/samples/02-agenda.html
-- .slide-builder/samples/03-flow.html
-- .slide-builder/samples/04-comparison.html
-- .slide-builder/samples/05-callout.html
-- .slide-builder/samples/06-technical.html
+- .slide-builder/config/theme.json (v{{theme.meta.version}})
+- .slide-builder/config/samples/01-title.html
+- .slide-builder/config/samples/02-agenda.html
+- .slide-builder/config/samples/03-flow.html
+- .slide-builder/config/samples/04-comparison.html
+- .slide-builder/config/samples/05-callout.html
+- .slide-builder/config/samples/06-technical.html
 
 **🔍 Please refresh your browser to see the changes.**
 ───────────────────────────────────────────────────────────────────────────────
@@ -1792,7 +1792,7 @@ We've gone through {{feedback_iteration}} rounds of feedback. If the theme still
   - Provide another round of gestalt feedback
 
 **Option 2: Direct theme editing** (escape hatch)
-  - Edit .slide-builder/theme.json directly
+  - Edit .slide-builder/config/theme.json directly
   - Modify specific values (colors, fonts, sizes)
   - Run `/sb:theme-edit` when done to regenerate samples
 
@@ -1811,9 +1811,9 @@ What would you like to do?
         <output>
 📝 **Direct Editing Mode**
 
-You can now edit .slide-builder/theme.json directly:
+You can now edit .slide-builder/config/theme.json directly:
 
-1. Open .slide-builder/theme.json in your editor
+1. Open .slide-builder/config/theme.json in your editor
 2. Modify values as needed (colors are hex, sizes have px suffix)
 3. Save the file
 4. Run `/sb:theme-edit` to regenerate samples with your changes
@@ -1872,7 +1872,7 @@ Locking your approved theme and creating layout templates...
   </step>
 
   <step n="6.1" goal="Create templates directory and copy samples">
-    <action>Create .slide-builder/templates/ directory if it doesn't exist</action>
+    <action>Create .slide-builder/config/templates/ directory if it doesn't exist</action>
 
     <output>📁 Creating layout templates...</output>
 
@@ -1888,8 +1888,8 @@ Locking your approved theme and creating layout templates...
     </action>
 
     <for-each item="sample_file, template_file" in="{{filename_mapping}}">
-      <action>Read {project-root}/.slide-builder/samples/{{sample_file}}</action>
-      <action>Write to {project-root}/.slide-builder/templates/{{template_file}}</action>
+      <action>Read {config_path}/samples/{{sample_file}}</action>
+      <action>Write to {project-root}/.slide-builder/config/templates/{{template_file}}</action>
 
       <check if="Write succeeds">
         <output>  ✅ {{sample_file}} → {{template_file}}</output>
@@ -1900,7 +1900,7 @@ Locking your approved theme and creating layout templates...
       </check>
     </for-each>
 
-    <output>✅ 6 layout templates created in .slide-builder/templates/</output>
+    <output>✅ 6 layout templates created in .slide-builder/config/templates/</output>
   </step>
 
   <step n="6.2" goal="Update theme.json layouts section">
@@ -1923,7 +1923,7 @@ Locking your approved theme and creating layout templates...
   </step>
 
   <step n="6.3" goal="Save theme version history">
-    <action>Create .slide-builder/theme-history/ directory if it doesn't exist</action>
+    <action>Create .slide-builder/config/theme-history/ directory if it doesn't exist</action>
 
     <action>Determine version number:
       - If first version: v1
@@ -1936,10 +1936,14 @@ Locking your approved theme and creating layout templates...
 
     <action>Read current theme.json</action>
 
-    <action>Write theme snapshot to {project-root}/.slide-builder/theme-history/{{history_filename}}</action>
+    <action>Write theme snapshot to {project-root}/.slide-builder/config/theme-history/{{history_filename}}</action>
 
     <check if="Write succeeds">
       <output>✅ Theme version saved: theme-history/{{history_filename}}</output>
+      <!-- Status Logger: Log version save to history -->
+      <action>Read .slide-builder/status.yaml</action>
+      <action>Append to history array: { action: "Theme v{{version}} saved to history", timestamp: "[current ISO 8601 timestamp]" }</action>
+      <action>Save status.yaml preserving existing structure</action>
     </check>
 
     <check if="Write fails">
@@ -1953,13 +1957,13 @@ Theme is still locked and functional, but version history was not saved.</output
       mode: "ready"
       phase: "complete"
       theme:
-        file: .slide-builder/theme.json
+        file: .slide-builder/config/theme.json
         status: locked
         personality: {{theme.personality.classification}}
         confidence: {{theme.personality.confidence}}
         approved: "[current date]"
       templates:
-        directory: .slide-builder/templates/
+        directory: .slide-builder/config/templates/
         count: 6
         files:
           - layout-title.html
@@ -1988,9 +1992,9 @@ Your brand theme is ready for slide generation!
 
 | Location | Description |
 |----------|-------------|
-| .slide-builder/theme.json | Your locked brand theme (v{{theme.meta.version}}) |
-| .slide-builder/templates/ | 6 layout templates |
-| .slide-builder/theme-history/ | Version snapshot for rollback |
+| .slide-builder/config/theme.json | Your locked brand theme (v{{theme.meta.version}}) |
+| .slide-builder/config/templates/ | 6 layout templates |
+| .slide-builder/config/theme-history/ | Version snapshot for rollback |
 
 **📑 Available Layout Templates:**
 

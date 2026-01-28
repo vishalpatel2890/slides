@@ -1,21 +1,28 @@
 # Theme Workflow - View Theme Summary
-# Displays current theme configuration
+# Displays current theme configuration with ANSI color swatches
 name: theme
 description: "Display current theme summary - colors, typography, shapes, and available templates"
 author: "Slide Builder"
+version: "2.0"
 
 # Path variables
 installed_path: "{project-root}/.slide-builder/workflows/theme"
 
+# Config paths (shareable brand assets)
+config_path: "{project-root}/.slide-builder/config"
+theme_file: "{config_path}/theme.json"
+theme_history_dir: "{config_path}/theme-history"
+
 # Workflow components
 instructions: "{installed_path}/instructions.md"
 
-# Theme file location
-theme_file: "{project-root}/.slide-builder/theme.json"
+# Status file for logging
+status_file: "{project-root}/.slide-builder/status.yaml"
 
 # Variables
 variables:
-  workflow_version: "1.0"
+  workflow_version: "2.0"
 
+# Workflow type
 template: false
 standalone: true

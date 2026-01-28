@@ -1,0 +1,197 @@
+<story-context id="6-3-theme-version-history" v="1.0">
+  <metadata>
+    <epicId>6</epicId>
+    <storyId>3</storyId>
+    <title>Theme Version History</title>
+    <status>drafted</status>
+    <generatedAt>2026-01-27</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>notes/sprint-artifacts/6-3-theme-version-history.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>system</asA>
+    <iWant>to maintain theme version history with timestamps and preserve all versions</iWant>
+    <soThat>users can track changes over time and have a complete audit trail for rollback capabilities</soThat>
+    <tasks>
+      <task id="1" ac="1,6">Implement Version Manager - Directory Setup: Check/create .slide-builder/theme-history/, log creation to status.yaml</task>
+      <task id="2" ac="3,4">Implement Version Manager - Version Number Resolution: Read meta.version, parse, increment, handle edge cases</task>
+      <task id="3" ac="1,2,5">Implement Version Manager - Save Version: Generate filename theme-v{N}-{YYYY-MM-DD}.json, copy theme content, write file, verify</task>
+      <task id="4" ac="4">Implement Version Manager - Meta Version Update: Update theme.json meta.version and lastModified after version save</task>
+      <task id="5" ac="6">Implement Version Manager - List Versions: Scan theme-history/, parse filenames, sort by version, return list</task>
+      <task id="6" ac="1,2,3,4">Integrate Version Manager with /setup Workflow: Save v1 to theme-history after theme creation</task>
+      <task id="7" ac="1,2,3,4,5">Integrate Version Manager with /theme-edit Workflow: Verify version save before changes, increment version after approval</task>
+      <task id="8" ac="1">Implement Status Logger for Version Operations: Log version save actions to status.yaml history</task>
+      <task id="9" ac="1-6">Testing - Version History Verification: Full test coverage of all ACs</task>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <criterion id="AC6.3.1">Given a theme change is made (via setup or edit), when the theme is saved, then a timestamped copy is saved to theme-history/</criterion>
+    <criterion id="AC6.3.2">Version files follow naming convention: theme-v{N}-{YYYY-MM-DD}.json</criterion>
+    <criterion id="AC6.3.3">Version number increments automatically based on theme meta.version</criterion>
+    <criterion id="AC6.3.4">The theme.json meta.version is updated after each change</criterion>
+    <criterion id="AC6.3.5">All previous versions are preserved in theme-history/ (never deleted)</criterion>
+    <criterion id="AC6.3.6">The theme-history/ directory maintains all versions with dates visible in filenames</criterion>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>notes/sprint-artifacts/tech-spec-epic-6.md</path>
+        <title>Epic 6 Technical Specification</title>
+        <section>Story 6.3: Theme Version History, Services and Modules, Data Models and Contracts</section>
+        <snippet>Version Manager module specification with save/list/restore operations. Version file naming convention theme-v{N}-{YYYY-MM-DD}.json. All versions preserved, never deleted.</snippet>
+      </doc>
+      <doc>
+        <path>notes/architecture.md</path>
+        <title>Slide Builder Architecture</title>
+        <section>Project Structure, Version Control Strategy (ADR-006), State File Patterns</section>
+        <snippet>Theme stored at .slide-builder/theme.json, version history in theme-history/ (gitignored per ADR-006). Status.yaml tracks all significant actions with ISO 8601 timestamps.</snippet>
+      </doc>
+      <doc>
+        <path>notes/epics.md</path>
+        <title>Epic Breakdown</title>
+        <section>Story 6.3: Theme Version History</section>
+        <snippet>User story for maintaining timestamped version history. Filename pattern theme-v{N}-{YYYY-MM-DD}.json. History directory maintains all versions.</snippet>
+      </doc>
+      <doc>
+        <path>notes/prd.md</path>
+        <title>Product Requirements Document</title>
+        <section>FR10, NFR13, NFR15</section>
+        <snippet>FR10: System maintains theme version history. NFR13: Theme files remain local. NFR15: Theme changes don't corrupt existing slides.</snippet>
+      </doc>
+      <doc>
+        <path>notes/sprint-artifacts/6-2-theme-editing.md</path>
+        <title>Story 6.2: Theme Editing</title>
+        <section>Dev Notes - Version Manager Interface</section>
+        <snippet>Story 6.2 defined Version Manager interface that 6.3 implements. Save operation: input ThemeJson, output versionFile path and newVersionNumber. Workflow calls version save in Phase 1.</snippet>
+      </doc>
+      <doc>
+        <path>notes/sprint-artifacts/6-1-theme-summary-view.md</path>
+        <title>Story 6.1: Theme Summary View</title>
+        <section>Completion Notes List</section>
+        <snippet>Established Theme Loader module and status.yaml update patterns. ANSI color swatch generation with 24-bit true color. Status history append format documented.</snippet>
+      </doc>
+    </docs>
+
+    <code>
+      <file>
+        <path>.slide-builder/theme.json</path>
+        <kind>data</kind>
+        <symbol>theme configuration</symbol>
+        <lines>all</lines>
+        <reason>Contains meta.version field that drives version numbering. Must read current version before save, update after save.</reason>
+      </file>
+      <file>
+        <path>.slide-builder/workflows/theme-edit/instructions.md</path>
+        <kind>workflow</kind>
+        <symbol>Phase 1: Load and Backup</symbol>
+        <lines>40-85</lines>
+        <reason>Theme-edit workflow Phase 1 calls Version Manager to save current theme before modifications. This story implements the actual save logic.</reason>
+      </file>
+      <file>
+        <path>.slide-builder/workflows/setup/instructions.md</path>
+        <kind>workflow</kind>
+        <symbol>Step 6.3: Save theme version history</symbol>
+        <lines>1926-1949</lines>
+        <reason>Setup workflow Step 6.3 saves first theme version to history. This story ensures the directory and file operations are correct.</reason>
+      </file>
+      <file>
+        <path>.slide-builder/status.yaml</path>
+        <kind>state</kind>
+        <symbol>history array</symbol>
+        <lines>59-98</lines>
+        <reason>Version operations must log to status.yaml history. Pattern: { action: "Theme v{N} saved to history", timestamp: "ISO8601" }</reason>
+      </file>
+      <file>
+        <path>.slide-builder/workflows/theme/instructions.md</path>
+        <kind>workflow</kind>
+        <symbol>Theme Loader module</symbol>
+        <lines>all</lines>
+        <reason>Reuse Theme Loader pattern for reading theme.json to extract version before save operation.</reason>
+      </file>
+    </code>
+
+    <dependencies>
+      <node>
+        <package>puppeteer</package>
+        <version>^23.0.0</version>
+        <purpose>HTML-to-image conversion (not used in this story)</purpose>
+      </node>
+      <node>
+        <package>googleapis</package>
+        <version>^140.0.0</version>
+        <purpose>Google Slides API (not used in this story)</purpose>
+      </node>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint source="tech-spec">Version files MUST follow naming: theme-v{N}-{YYYY-MM-DD}.json</constraint>
+    <constraint source="tech-spec">Version saved BEFORE changes applied in /theme-edit - always have rollback</constraint>
+    <constraint source="tech-spec">All previous versions preserved in theme-history/ - never deleted</constraint>
+    <constraint source="tech-spec">theme.json meta.version MUST be incremented on each change</constraint>
+    <constraint source="architecture">theme-history/ is gitignored per ADR-006 (user content, not framework)</constraint>
+    <constraint source="architecture">status.yaml tracks all significant actions with ISO 8601 timestamps</constraint>
+    <constraint source="prd">Theme files remain local to user's machine (NFR13)</constraint>
+    <constraint source="prd">Theme changes don't corrupt existing slides (NFR15)</constraint>
+    <constraint source="tech-spec">Performance: Version save &lt; 100ms, Version list &lt; 100ms (local file operations)</constraint>
+  </constraints>
+
+  <interfaces>
+    <interface>
+      <name>Version Manager - Save</name>
+      <kind>function signature</kind>
+      <signature>saveVersion(theme: ThemeJson): { versionFile: string, newVersionNumber: string }</signature>
+      <path>.slide-builder/workflows/theme-edit/instructions.md</path>
+    </interface>
+    <interface>
+      <name>Version Manager - List</name>
+      <kind>function signature</kind>
+      <signature>listVersions(): Array&lt;{ version: string, date: string, path: string }&gt;</signature>
+      <path>notes/sprint-artifacts/tech-spec-epic-6.md</path>
+    </interface>
+    <interface>
+      <name>Theme JSON Schema</name>
+      <kind>data structure</kind>
+      <signature>{ meta: { name, version, created, lastModified, sources, changeNotes }, colors, typography, shapes, layouts }</signature>
+      <path>.slide-builder/theme.json</path>
+    </interface>
+    <interface>
+      <name>Status History Entry</name>
+      <kind>data structure</kind>
+      <signature>{ action: string, timestamp: string (ISO 8601) }</signature>
+      <path>.slide-builder/status.yaml</path>
+    </interface>
+    <interface>
+      <name>Version File Naming</name>
+      <kind>convention</kind>
+      <signature>theme-v{N}-{YYYY-MM-DD}.json where N is version number, date is creation date</signature>
+      <path>notes/sprint-artifacts/tech-spec-epic-6.md</path>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>
+      Manual testing per Epic 6 Tech Spec Test Strategy. Each acceptance criterion verified through file system inspection and workflow execution. Test scenarios include: version creation on setup, version creation on edit, version preservation across multiple edits, correct filename format, meta.version increment verification.
+    </standards>
+    <locations>
+      <location>Manual verification via file system inspection</location>
+      <location>.slide-builder/theme-history/*.json for version files</location>
+      <location>.slide-builder/theme.json meta.version field</location>
+      <location>.slide-builder/status.yaml history array</location>
+    </locations>
+    <ideas>
+      <idea ac="AC6.3.1">Run /setup, verify theme-v1-{date}.json created in theme-history/</idea>
+      <idea ac="AC6.3.2">Check filename matches pattern theme-v{N}-{YYYY-MM-DD}.json exactly</idea>
+      <idea ac="AC6.3.3">Run /theme-edit twice, verify versions increment v1→v2→v3</idea>
+      <idea ac="AC6.3.4">After edit approval, verify theme.json meta.version updated</idea>
+      <idea ac="AC6.3.5">Run multiple edits, verify all version files preserved (v1, v2, v3 all exist)</idea>
+      <idea ac="AC6.3.6">List theme-history/ directory, verify dates visible in all filenames</idea>
+      <idea ac="edge-case">Delete theme-history/, run setup, verify directory created and v1 saved</idea>
+      <idea ac="edge-case">Manually set theme.json version to 999, run edit, verify v1000 created correctly</idea>
+      <idea ac="edge-case">Verify cancel in /theme-edit does NOT create spurious version</idea>
+    </ideas>
+  </tests>
+</story-context>

@@ -1,0 +1,195 @@
+<story-context id="6-1-theme-summary-view" v="1.0">
+  <metadata>
+    <epicId>6</epicId>
+    <storyId>1</storyId>
+    <title>Theme Summary View</title>
+    <status>drafted</status>
+    <generatedAt>2026-01-27</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>notes/sprint-artifacts/6-1-theme-summary-view.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>user</asA>
+    <iWant>to view my current theme summary via `/theme`</iWant>
+    <soThat>I can see what brand settings are in use without opening the raw theme.json file</soThat>
+    <tasks>
+      <task id="1" ac="1,10">Implement Theme Loader Module - check existence, read/parse theme.json, validate structure, return ThemeJson or error</task>
+      <task id="2" ac="2-8">Implement Theme Formatter Module - extract and format metadata, colors, typography, shapes, layouts sections</task>
+      <task id="3" ac="8">Implement Terminal Output Formatting - section headers, decorative lines, indentation, footer</task>
+      <task id="4" ac="4">Implement ANSI Color Swatch Generation - hex to ANSI conversion, graceful fallback</task>
+      <task id="5" ac="1">Implement Status Logger - update status.yaml with theme view action and history</task>
+      <task id="6" ac="1-10">Create Theme Workflow Files - workflow.yaml and instructions.md with phases</task>
+      <task id="7" ac="1">Register /theme Slash Command - create .claude/commands/sb/theme.md</task>
+      <task id="8" ac="1-10">Testing - verify all sections display, ANSI fallback, error handling</task>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <ac id="6.1.1">Given a theme.json exists, when the user runs `/theme`, then the system displays a human-readable summary</ac>
+    <ac id="6.1.2">The summary includes theme name and version</ac>
+    <ac id="6.1.3">The summary includes creation date and sources</ac>
+    <ac id="6.1.4">The summary includes primary, secondary, and accent colors (with swatches if terminal supports ANSI)</ac>
+    <ac id="6.1.5">The summary includes font families (heading, body, mono)</ac>
+    <ac id="6.1.6">The summary includes shape styles (corner radius, shadow style)</ac>
+    <ac id="6.1.7">The summary includes list of available layout templates</ac>
+    <ac id="6.1.8">The output is formatted for terminal readability with clear sections</ac>
+    <ac id="6.1.9">The path to full theme.json is displayed for power users</ac>
+    <ac id="6.1.10">Given no theme exists, when the user runs `/theme`, then error message directs them to run `/setup`</ac>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>notes/sprint-artifacts/tech-spec-epic-6.md</path>
+        <title>Epic 6 Technical Specification</title>
+        <section>Story 6.1: Theme Summary View, Services and Modules, Workflows and Sequencing</section>
+        <snippet>Defines Theme Loader and Theme Formatter modules, /theme workflow phases, and theme summary display format with ANSI color swatches.</snippet>
+      </doc>
+      <doc>
+        <path>notes/architecture.md</path>
+        <title>Slide Builder Architecture</title>
+        <section>State File Patterns, Project Structure</section>
+        <snippet>status.yaml tracks mode, last_action, history with ISO 8601 timestamps. Theme stored at .slide-builder/theme.json.</snippet>
+      </doc>
+      <doc>
+        <path>notes/epics.md</path>
+        <title>Epic Breakdown</title>
+        <section>Story 6.1: Theme Summary View</section>
+        <snippet>User story and acceptance criteria for viewing current theme via /theme command.</snippet>
+      </doc>
+    </docs>
+
+    <code>
+      <file>
+        <path>.slide-builder/workflows/theme/workflow.yaml</path>
+        <kind>workflow-config</kind>
+        <symbol>theme workflow</symbol>
+        <lines>1-22</lines>
+        <reason>Existing workflow configuration - needs enhancement to match tech spec requirements</reason>
+      </file>
+      <file>
+        <path>.slide-builder/workflows/theme/instructions.md</path>
+        <kind>workflow-instructions</kind>
+        <symbol>theme instructions</symbol>
+        <lines>1-58</lines>
+        <reason>Basic implementation exists - needs update for full display format with ANSI colors, all sections per tech spec</reason>
+      </file>
+      <file>
+        <path>.slide-builder/theme.json</path>
+        <kind>data</kind>
+        <symbol>theme config</symbol>
+        <lines>1-230</lines>
+        <reason>Current theme data to be displayed - has Amperity brand with colors, typography, shapes, components, slides sections</reason>
+      </file>
+      <file>
+        <path>.slide-builder/status.yaml</path>
+        <kind>state</kind>
+        <symbol>workflow status</symbol>
+        <lines>1-89</lines>
+        <reason>State file to update with "Theme viewed via /theme" action in history array</reason>
+      </file>
+      <file>
+        <path>.claude/commands/sb/theme.md</path>
+        <kind>command</kind>
+        <symbol>slash command</symbol>
+        <lines>1-14</lines>
+        <reason>Existing command registration - invokes theme workflow</reason>
+      </file>
+      <file>
+        <path>.slide-builder/workflows/build-all/workflow.yaml</path>
+        <kind>workflow-config</kind>
+        <symbol>build-all workflow</symbol>
+        <reason>Reference for workflow.yaml structure pattern established in Epic 5</reason>
+      </file>
+      <file>
+        <path>.slide-builder/workflows/build-all/instructions.md</path>
+        <kind>workflow-instructions</kind>
+        <symbol>build-all instructions</symbol>
+        <reason>Reference for instructions.md structure and status.yaml update pattern</reason>
+      </file>
+    </code>
+
+    <dependencies>
+      <node>
+        <package name="puppeteer" version="^23.0.0">HTML to image conversion for export</package>
+        <package name="googleapis" version="^140.0.0">Google Slides API for export</package>
+      </node>
+      <note>Epic 6 does not require npm dependencies - all operations use Claude Code built-in capabilities</note>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint source="tech-spec">Theme MUST be at .slide-builder/theme.json as the active theme location</constraint>
+    <constraint source="tech-spec">status.yaml history MUST log theme view actions with ISO 8601 timestamps</constraint>
+    <constraint source="tech-spec">Display path to full theme.json for power users who want direct access</constraint>
+    <constraint source="tech-spec">ANSI color codes should gracefully fall back if terminal doesn't support</constraint>
+    <constraint source="tech-spec">Theme load should complete in under 100ms (local file, simple JSON parse)</constraint>
+    <constraint source="tech-spec">Theme display should complete in under 500ms (local processing, format + ANSI codes)</constraint>
+    <constraint source="architecture">Follow BMAD workflow pattern: workflow.yaml + instructions.md structure</constraint>
+  </constraints>
+
+  <interfaces>
+    <interface>
+      <name>Theme Loader</name>
+      <kind>module</kind>
+      <signature>
+        Input:
+          - path: string (default: ".slide-builder/theme.json")
+        Output:
+          - theme: ThemeJson | null
+          - error: string | null
+      </signature>
+      <path>.slide-builder/workflows/theme/instructions.md</path>
+    </interface>
+    <interface>
+      <name>Theme Formatter</name>
+      <kind>module</kind>
+      <signature>
+        Input:
+          - theme: ThemeJson
+          - useAnsiColors: boolean (default: true)
+        Output:
+          - formatted: string (terminal-ready display)
+      </signature>
+      <path>.slide-builder/workflows/theme/instructions.md</path>
+    </interface>
+    <interface>
+      <name>/theme Command</name>
+      <kind>slash-command</kind>
+      <signature>/sb:theme - Display current theme summary</signature>
+      <path>.claude/commands/sb/theme.md</path>
+    </interface>
+    <interface>
+      <name>status.yaml history entry</name>
+      <kind>data-structure</kind>
+      <signature>
+        history:
+          - action: "Theme viewed via /theme"
+            timestamp: "ISO8601 format"
+      </signature>
+      <path>.slide-builder/status.yaml</path>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>Per Epic 6 Tech Spec: Manual verification of theme display output. Test all sections displayed, ANSI color swatches (with fallback), error handling for missing theme. All tests are manual - no automated test framework required.</standards>
+    <locations>
+      <location>Manual testing via /sb:theme command in Claude Code</location>
+      <location>Frontend Test Gate checklist in story file</location>
+    </locations>
+    <ideas>
+      <idea ac="6.1.1">Run /theme with valid theme.json, verify human-readable summary displayed</idea>
+      <idea ac="6.1.2">Check header shows theme name and version from meta section</idea>
+      <idea ac="6.1.3">Check created date and sources displayed from meta.extractedFrom</idea>
+      <idea ac="6.1.4">Check colors section shows primary (#CCFF00), secondary (#5DBAB6), accent (#FF6B6B) with ANSI swatches</idea>
+      <idea ac="6.1.5">Check typography lists heading (Outfit), body (Outfit), mono (SF Mono) fonts</idea>
+      <idea ac="6.1.6">Check shapes section shows borderRadius and shadow styles</idea>
+      <idea ac="6.1.7">Check layouts section lists available templates (title, content, split, data)</idea>
+      <idea ac="6.1.8">Verify output has clear section separators and indentation</idea>
+      <idea ac="6.1.9">Verify footer shows path to .slide-builder/theme.json</idea>
+      <idea ac="6.1.10">Delete theme.json temporarily, run /theme, verify error message guides to /setup</idea>
+      <idea ac="all">Verify status.yaml updated with "Theme viewed via /theme" in history array</idea>
+    </ideas>
+  </tests>
+</story-context>

@@ -1,40 +1,60 @@
 # Build One Workflow Instructions
 
-This workflow generates a single slide from plan.yaml using the matching template.
+This workflow generates a single slide from plan.yaml using the matching template or frontend-design skill.
+Supports both single mode (Epic 3) and deck mode (Epic 5).
 
 ```xml
 <critical>This workflow generates HTML slides from plan.yaml</critical>
 <critical>Requires theme.json and a plan (single or deck mode)</critical>
-<critical>In single mode, builds from .slide-builder/single/plan.yaml</critical>
-<critical>Output saved to .slide-builder/single/slide.html</critical>
+<critical>In single mode, builds from output/singles/plan.yaml to output/singles/</critical>
+<critical>In deck mode, builds next pending slide from output/{deck_slug}/plan.yaml to output/{deck_slug}/slides/</critical>
+<critical>All slides must have contenteditable="true" and data-field attributes</critical>
+<critical>Deck slug is generated from deck_name: lowercase, spaces to hyphens, remove special chars</critical>
 
 <workflow>
 
   <!-- ═══════════════════════════════════════════════════════════════════════ -->
-  <!-- PHASE 1: State Verification                                              -->
+  <!-- PHASE 1: Mode Detection & Routing                                        -->
   <!-- ═══════════════════════════════════════════════════════════════════════ -->
-  <step n="1" goal="Verify plan exists and load context">
+  <step n="1" goal="Detect mode and load appropriate plan">
     <action>Read .slide-builder/status.yaml to determine current mode</action>
 
+    <check if="mode is 'deck'">
+      <action>Proceed to Deck Build Flow (Phase 1B)</action>
+      <goto step="1B">Deck Build Flow</goto>
+    </check>
+
     <check if="mode is 'single'">
-      <action>Verify .slide-builder/single/plan.yaml exists</action>
+      <action>Verify output/singles/plan.yaml exists</action>
       <check if="plan.yaml does not exist">
         <output>
 **No Plan Found**
 
-No single slide plan found at `.slide-builder/single/plan.yaml`
+No single slide plan found at `output/singles/plan.yaml`
 
 Run `/sb:plan-one` first to create a plan for your slide.
         </output>
         <action>HALT</action>
       </check>
       <action>Load plan.yaml completely</action>
-    </check>
 
-    <check if="mode is 'deck'">
-      <action>Verify .slide-builder/deck/plan.yaml exists</action>
-      <action>Identify next unbuilt slide in deck plan</action>
-      <action>Load that slide's plan details</action>
+      <!-- Generate slug for single slide from intent -->
+      <slug-generation>
+        <action>Extract intent from plan.yaml</action>
+        <action>Generate slug from intent (first 30 chars):
+          1. Convert to lowercase
+          2. Replace spaces with hyphens
+          3. Remove special characters (keep only a-z, 0-9, hyphens)
+          4. Truncate to 30 characters
+          5. Remove trailing hyphens
+        </action>
+        <action>Set {{slide_slug}} = generated slug</action>
+      </slug-generation>
+
+      <action>Set {{slide_number}} = "single"</action>
+      <action>Set {{output_folder}} = "output/singles"</action>
+      <action>Set {{output_path}} = "{{output_folder}}/{{slide_slug}}.html"</action>
+      <goto step="2">Template Decision</goto>
     </check>
 
     <check if="mode is not set or invalid">
@@ -47,23 +67,88 @@ You need to plan your slides first:
       </output>
       <action>HALT</action>
     </check>
+  </step>
 
-    <action>Load .slide-builder/theme.json</action>
-    <check if="theme.json does not exist">
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  <!-- PHASE 1B: Deck Build Router                                              -->
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  <step n="1B" goal="Find next unbuilt slide in deck plan">
+    <!-- Get deck_slug from status.yaml to find plan location -->
+    <action>Read current_deck_slug from status.yaml</action>
+
+    <check if="current_deck_slug is not set">
       <output>
-**Theme Required**
+**No Active Deck**
 
-No theme found. Run `/sb:setup` to create your brand theme first.
+No deck is currently active. Run `/sb:plan-deck` first to create a deck plan.
       </output>
       <action>HALT</action>
     </check>
 
-    <output>
-**Plan Loaded**
+    <action>Set {{deck_slug}} = current_deck_slug from status.yaml</action>
+    <action>Verify output/{{deck_slug}}/plan.yaml exists</action>
 
-Mode: {{mode}}
-Intent: {{plan.intent}}
-Suggested template: {{plan.suggested_template}}
+    <check if="deck plan.yaml does not exist">
+      <output>
+**No Deck Plan Found**
+
+No deck plan found at `output/{{deck_slug}}/plan.yaml`
+
+Run `/sb:plan-deck` first to create your presentation plan.
+      </output>
+      <action>HALT</action>
+    </check>
+
+    <action>Load output/{{deck_slug}}/plan.yaml completely</action>
+    <action>Read the slides array</action>
+    <action>Find first slide with status: "pending"</action>
+
+    <check if="no pending slides found">
+      <output>
+**All Slides Built!**
+
+All slides in your deck have been built successfully.
+
+**Next Steps:**
+- Review slides in `output/{{deck_slug}}/slides/`
+- Use `/sb:edit {n}` to refine any slide
+- Run `/sb:export` when ready to export to Google Slides
+      </output>
+      <action>HALT</action>
+    </check>
+
+    <!-- deck_slug already set from status.yaml in step 1B -->
+    <action>Extract deck_name from plan.yaml for display</action>
+
+    <!-- Set output paths based on deck_slug from status.yaml -->
+    <action>Set {{output_folder}} = "output/{{deck_slug}}"</action>
+    <action>Set {{slides_folder}} = "{{output_folder}}/slides"</action>
+
+    <action>Extract slide context from the first pending slide:
+      - number: slide number
+      - intent: main purpose/content
+      - template: suggested template
+      - status: should be "pending"
+      - storyline_role: opening/tension/evidence/resolution/cta
+      - key_points: array of points to include
+      - visual_guidance: how slide should look
+      - tone: professional/bold/warm/technical/urgent
+    </action>
+
+    <action>Set {{slide_number}} = slide.number</action>
+    <action>Set {{output_path}} = "{{slides_folder}}/slide-{{slide_number}}.html"</action>
+    <action>Set {{state_path}} = "{{slides_folder}}/slide-{{slide_number}}-state.json"</action>
+
+    <output>
+**Building Slide {{slide_number}}**
+
+Deck: {{deck_name}}
+Slug: {{deck_slug}}
+Output: {{output_folder}}/
+
+Intent: {{slide.intent}}
+Template: {{slide.template}}
+Storyline Role: {{slide.storyline_role}}
     </output>
   </step>
 
@@ -71,10 +156,10 @@ Suggested template: {{plan.suggested_template}}
   <!-- PHASE 2: Template Decision                                               -->
   <!-- ═══════════════════════════════════════════════════════════════════════ -->
   <step n="2" goal="Determine template to use">
-    <action>Read suggested_template from plan.yaml</action>
+    <action>Read template field from slide definition (plan.yaml or deck slide)</action>
 
     <template-mapping>
-      <!-- Map suggested_template to actual template file -->
+      <!-- Map template names to sample files for design reference -->
       <map from="layout-title" to="01-title.html" />
       <map from="layout-list" to="02-agenda.html" />
       <map from="layout-flow" to="03-flow.html" />
@@ -84,57 +169,61 @@ Suggested template: {{plan.suggested_template}}
       <map from="layout-code" to="06-technical.html" />
     </template-mapping>
 
-    <check if="suggested_template is 'custom'">
+    <check if="template is 'custom'">
       <output>
 **Custom Layout Requested**
 
-The plan specifies a custom layout. This will use the frontend-design skill
+The plan specifies a custom layout. Using frontend-design skill
 to create a unique slide design.
       </output>
-      <goto step="3B">Proceed to Custom Build</goto>
+      <action>Set {{build_type}} = "custom"</action>
+      <goto step="3B">Custom Build</goto>
     </check>
 
-    <check if="suggested_template maps to a known template file">
-      <action>Set {{template_file}} to mapped template filename</action>
-      <action>Check if .slide-builder/templates/{{template_file}} exists</action>
+    <check if="template maps to a known layout">
+      <action>Set {{template_file}} = mapped template filename</action>
+      <action>Check if .slide-builder/config/samples/{{template_file}} exists for reference</action>
 
-      <check if="template file exists">
-        <output>
-**Using Template**
+      <output>
+**Using Template Layout**
 
-Template: {{suggested_template}} -> {{template_file}}
-        </output>
-        <action>Proceed to Template Build (Phase 3)</action>
-      </check>
+Layout: {{template}} -> {{template_file}}
+Reference: .slide-builder/config/samples/{{template_file}}
+      </output>
+      <action>Set {{build_type}} = "template"</action>
+      <goto step="3">Template Build</goto>
+    </check>
 
-      <check if="template file does NOT exist">
-        <output>
-**Template Missing**
+    <check if="template does not match any known layout">
+      <output>
+**Unknown Template**
 
-Warning: Template file {{template_file}} not found.
-Falling back to custom generation.
-        </output>
-        <goto step="3B">Proceed to Custom Build</goto>
-      </check>
+Template "{{template}}" not recognized.
+Falling back to custom generation via frontend-design skill.
+      </output>
+      <action>Set {{build_type}} = "custom"</action>
+      <goto step="3B">Custom Build</goto>
     </check>
   </step>
 
   <!-- ═══════════════════════════════════════════════════════════════════════ -->
   <!-- PHASE 3: Template Build                                                  -->
   <!-- ═══════════════════════════════════════════════════════════════════════ -->
-  <step n="3" goal="Generate slide from template">
-    <action>Load template HTML from .slide-builder/templates/{{template_file}}</action>
-    <action>Load theme.json for CSS variables</action>
+  <step n="3" goal="Generate slide using template pattern">
+    <action>Load reference sample from .slide-builder/config/samples/{{template_file}}</action>
+    <action>Load theme.json from .slide-builder/config/theme.json</action>
 
-    <css-variable-injection>
-      <!-- Map theme.json values to CSS custom properties in :root -->
+    <css-variable-extraction>
+      <!-- Extract these values from theme.json for CSS variables -->
       <var name="--color-primary" value="{{theme.colors.primary}}" />
       <var name="--color-secondary" value="{{theme.colors.secondary}}" />
       <var name="--color-accent" value="{{theme.colors.accent}}" />
       <var name="--color-bg-default" value="{{theme.colors.background.default}}" />
       <var name="--color-bg-alt" value="{{theme.colors.background.alt}}" />
+      <var name="--color-bg-dark" value="{{theme.colors.background.dark}}" />
       <var name="--color-text-heading" value="{{theme.colors.text.heading}}" />
       <var name="--color-text-body" value="{{theme.colors.text.body}}" />
+      <var name="--color-text-on-dark" value="{{theme.colors.text.onDark}}" />
       <var name="--font-heading" value="{{theme.typography.fonts.heading}}" />
       <var name="--font-body" value="{{theme.typography.fonts.body}}" />
       <var name="--font-mono" value="{{theme.typography.fonts.mono}}" />
@@ -143,135 +232,51 @@ Falling back to custom generation.
       <var name="--size-h2" value="{{theme.typography.scale.h2}}" />
       <var name="--size-h3" value="{{theme.typography.scale.h3}}" />
       <var name="--size-body" value="{{theme.typography.scale.body}}" />
-      <var name="--corner-radius" value="{{theme.shapes.boxes.default.cornerRadius}}" />
-      <var name="--box-shadow" value="{{theme.shapes.boxes.default.shadow}}" />
-    </css-variable-injection>
+      <var name="--border-radius" value="{{theme.shapes.borderRadius.medium}}" />
+      <var name="--shadow" value="{{theme.shapes.shadow.medium}}" />
+    </css-variable-extraction>
 
     <content-generation>
-      <!-- Generate slide content based on plan.yaml -->
-      <action>Extract title from plan.intent (first line or main concept)</action>
-      <action>Create subtitle from plan.context or plan.audience if present</action>
-      <action>Generate body content from plan.key_points array</action>
+      <!-- Generate slide content based on plan context -->
+      <action>Extract title from intent (first line or main concept)</action>
+      <action>Create subtitle from context or audience if present</action>
+      <action>Generate body content from key_points array</action>
       <action>Apply visual_guidance preferences to styling choices</action>
-      <action>Respect plan.tone in content voice (professional, bold, warm, technical)</action>
+      <action>Respect tone in content voice (professional, bold, warm, technical, urgent)</action>
+      <action>Reference the sample HTML structure for layout pattern</action>
     </content-generation>
 
-    <contenteditable-requirements>
-      <!-- CRITICAL: All text elements MUST have these attributes -->
-      <mandate>Every text element (h1, h2, p, span with text) MUST have contenteditable="true"</mandate>
+    <contenteditable-requirements critical="true">
+      <!-- MANDATORY: All text elements must have these attributes -->
+      <mandate>Every text element (h1, h2, p, span with text, li) MUST have contenteditable="true"</mandate>
       <mandate>Every contenteditable element MUST have a unique data-field attribute</mandate>
+      <mandate>data-field values must be descriptive: "title", "subtitle", "point-1", "point-2", etc.</mandate>
       <example>
         <h1 contenteditable="true" data-field="title">Title Here</h1>
         <p contenteditable="true" data-field="subtitle">Subtitle Here</p>
-        <p contenteditable="true" data-field="body-1">First point</p>
+        <p contenteditable="true" data-field="point-1">First point</p>
       </example>
     </contenteditable-requirements>
 
-    <auto-save-script>
-      <!-- Add JavaScript for auto-saving contenteditable changes -->
-      <script>
-        // Check if localStorage is available
-        const isLocalStorageAvailable = () => {
-          try {
-            const test = '__localStorage_test__';
-            localStorage.setItem(test, test);
-            localStorage.removeItem(test);
-            return true;
-          } catch (e) {
-            return false;
-          }
-        };
-
-        const localStorageEnabled = isLocalStorageAvailable();
-        if (!localStorageEnabled) {
-          console.warn('[Slide Auto-Save] localStorage is disabled. Edits will not persist.');
-        }
-
-        // Auto-save script for contenteditable elements
-        const saveEdits = () => {
-          if (!localStorageEnabled) return;
-
-          try {
-            const edits = [];
-            document.querySelectorAll('[contenteditable]').forEach(el => {
-              const field = el.getAttribute('data-field');
-              if (field) {
-                edits.push({ selector: `[data-field='${field}']`, content: el.innerHTML });
-              }
-            });
-            localStorage.setItem('slide-edits', JSON.stringify({
-              slide: 'single',
-              edits: edits,
-              lastModified: new Date().toISOString()
-            }));
-            console.log('[Slide Auto-Save] Saved', edits.length, 'edits at', new Date().toLocaleTimeString());
-          } catch (e) {
-            console.error('[Slide Auto-Save] Failed to save:', e.message);
-          }
-        };
-
-        document.querySelectorAll('[contenteditable]').forEach(el => {
-          el.addEventListener('blur', saveEdits);
-          el.addEventListener('input', () => setTimeout(saveEdits, 1000));
-        });
-
-        // Restore edits on load
-        const restoreEdits = () => {
-          if (!localStorageEnabled) return;
-
-          try {
-            const stored = localStorage.getItem('slide-edits');
-            if (stored) {
-              const data = JSON.parse(stored);
-              if (data.slide === 'single' && Array.isArray(data.edits)) {
-                let restored = 0;
-                let skipped = 0;
-                data.edits.forEach(edit => {
-                  const el = document.querySelector(edit.selector);
-                  if (el) {
-                    el.innerHTML = edit.content;
-                    restored++;
-                  } else {
-                    console.warn('[Slide Auto-Save] Element not found:', edit.selector);
-                    skipped++;
-                  }
-                });
-                console.log('[Slide Auto-Save] Restored', restored, 'edits,', skipped, 'skipped');
-              }
-            }
-          } catch (e) {
-            console.error('[Slide Auto-Save] Failed to restore edits, clearing corrupted data:', e.message);
-            localStorage.removeItem('slide-edits');
-          }
-        };
-
-        restoreEdits();
-      </script>
-    </auto-save-script>
-
-    <dimension-validation>
-      <mandate>Slide MUST have viewport meta: width=1920, height=1080</mandate>
-      <mandate>Body MUST have width: 1920px; height: 1080px</mandate>
-      <mandate>.slide container MUST have width: 1920px; height: 1080px</mandate>
-    </dimension-validation>
+    <dimension-requirements critical="true">
+      <mandate>Viewport meta: width=1920, height=1080</mandate>
+      <mandate>Body: width: 1920px; height: 1080px</mandate>
+      <mandate>.slide container: width: 1920px; height: 1080px</mandate>
+    </dimension-requirements>
 
     <action>Assemble final HTML with:
-      1. DOCTYPE and html structure
-      2. Theme CSS variables in :root
-      3. Google Fonts link for heading font
-      4. Template layout and styles
-      5. Generated content with contenteditable attributes
-      6. Auto-save JavaScript
+      1. DOCTYPE html with lang="en"
+      2. Meta charset UTF-8
+      3. Viewport meta: width=1920, height=1080
+      4. Google Fonts link for Outfit font
+      5. CSS reset and theme variables in :root
+      6. Slide container with data-slide-id attribute
+      7. All text elements with contenteditable and data-field
+      8. Auto-save JavaScript
+      9. Viewport scaling script
     </action>
 
-    <check if="single mode">
-      <action>Save to .slide-builder/single/slide.html</action>
-    </check>
-
-    <check if="deck mode">
-      <action>Save to .slide-builder/deck/slides/slide-{{n}}.html</action>
-      <action>Update deck plan.yaml to mark slide as "built"</action>
-    </check>
+    <goto step="4">Save and Update</goto>
   </step>
 
   <!-- ═══════════════════════════════════════════════════════════════════════ -->
@@ -284,57 +289,28 @@ Falling back to custom generation.
 Loading theme and plan context...
     </output>
 
-    <action>Load complete theme.json from .slide-builder/theme.json</action>
-    <action>Load plan.yaml from .slide-builder/single/plan.yaml (or current deck slide)</action>
-
-    <custom-build-context>
-      <!-- Prepare context for frontend-design skill invocation -->
-      <context-item name="theme">
-        Complete theme object including:
-        - colors: primary, secondary, accent, background (default/alt), text (heading/body), semantic
-        - typography: fonts (heading/body/mono), scale (hero/h1/h2/h3/body/small), weights
-        - shapes: boxes (cornerRadius, border, shadow), arrows, lines
-        - personality: classification, confidence
-      </context-item>
-
-      <context-item name="intent">
-        From plan.yaml:
-        - intent: The main purpose/content of the slide
-        - key_points: Array of specific points to include
-        - visual_guidance: How the slide should look
-        - tone: professional/bold/warm/technical
-        - audience: Who will view the slide
-        - technical_depth: none/overview/detailed/deep-dive
-      </context-item>
-
-      <context-item name="constraints">
-        MANDATORY requirements for all custom slides:
-        - Dimensions: 1920x1080 (16:9 presentation standard)
-        - All text elements MUST have contenteditable="true"
-        - All text elements MUST have unique data-field attributes
-        - MUST use theme CSS variables (--color-primary, --font-heading, etc.)
-        - MUST be self-contained HTML (no external dependencies except Google Fonts)
-        - MUST include viewport auto-scaling script
-        - MUST include auto-save script for contenteditable elements
-      </context-item>
-    </custom-build-context>
+    <action>Load complete theme.json from .slide-builder/config/theme.json</action>
+    <action>Prepare full context from plan (single or deck slide)</action>
 
     <skill-invocation name="frontend-design">
-      <!-- Invoke the frontend-design skill with full context -->
+      <!-- Invoke frontend-design skill with full context -->
       <prompt>
 Create a production-quality HTML slide for a presentation with the following specifications:
 
 **SLIDE INTENT:**
-{{plan.intent}}
+{{slide.intent}}
 
 **KEY POINTS TO INCLUDE:**
-{{plan.key_points}}
+{{slide.key_points}}
 
 **VISUAL GUIDANCE:**
-{{plan.visual_guidance}}
+{{slide.visual_guidance}}
 
 **TONE:**
-{{plan.tone}}
+{{slide.tone}}
+
+**STORYLINE ROLE:**
+{{slide.storyline_role}}
 
 **BRAND THEME:**
 Use these exact CSS custom properties in :root:
@@ -343,28 +319,28 @@ Use these exact CSS custom properties in :root:
 - --color-accent: {{theme.colors.accent}}
 - --color-bg-default: {{theme.colors.background.default}}
 - --color-bg-alt: {{theme.colors.background.alt}}
+- --color-bg-dark: {{theme.colors.background.dark}}
 - --color-text-heading: {{theme.colors.text.heading}}
 - --color-text-body: {{theme.colors.text.body}}
+- --color-text-on-dark: {{theme.colors.text.onDark}}
 - --font-heading: {{theme.typography.fonts.heading}}
 - --font-body: {{theme.typography.fonts.body}}
 - --font-mono: {{theme.typography.fonts.mono}}
-- --size-hero: {{theme.typography.scale.hero}}
-- --size-h1: {{theme.typography.scale.h1}}
-- --size-h2: {{theme.typography.scale.h2}}
-- --size-h3: {{theme.typography.scale.h3}}
-- --size-body: {{theme.typography.scale.body}}
-- --corner-radius: {{theme.shapes.boxes.default.cornerRadius}}
-- --box-shadow: {{theme.shapes.boxes.default.shadow}}
+
+**BRAND PERSONALITY:**
+{{theme.personality.classification}} - {{theme.personality.traits}}
 
 **MANDATORY REQUIREMENTS:**
 1. Slide MUST be exactly 1920x1080 pixels
 2. Include viewport meta: width=1920, height=1080
 3. ALL text elements MUST have contenteditable="true" attribute
 4. ALL text elements MUST have unique data-field attribute (e.g., data-field="title", data-field="point-1")
-5. Use Google Fonts link for the heading font family
-6. Background should use theme colors with subtle gradients matching the brand personality: {{theme.personality.classification}}
-7. Create actual visual elements (diagrams, shapes, etc.) - NOT placeholders
-8. Output must be a complete, self-contained HTML file
+5. Use Google Fonts link for Outfit font
+6. Background should use theme colors with subtle gradients matching the brand personality
+7. Create actual visual elements (diagrams, shapes, icons) - NOT placeholders
+8. Include focus styles for contenteditable: outline: 2px solid primary color
+9. Output must be a complete, self-contained HTML file
+10. Include the auto-save script for contenteditable elements
 
 **OUTPUT FORMAT:**
 Return ONLY the complete HTML code, starting with <!DOCTYPE html>
@@ -378,7 +354,7 @@ Return ONLY the complete HTML code, starting with <!DOCTYPE html>
 
       <check name="contenteditable-check">
         <action>Scan all text elements (h1, h2, h3, h4, p, span, li, td, th)</action>
-        <action if="element has text content AND lacks contenteditable">
+        <action if="element has visible text AND lacks contenteditable">
           Add contenteditable="true" attribute
         </action>
       </check>
@@ -387,16 +363,8 @@ Return ONLY the complete HTML code, starting with <!DOCTYPE html>
         <action>Scan all contenteditable elements</action>
         <action if="element lacks data-field attribute">
           Generate unique data-field value based on:
-          - Element type (title, subtitle, heading, body, point, etc.)
+          - Element type and purpose (title, subtitle, heading, body, point, etc.)
           - Position/index if multiple of same type
-          Example: data-field="title", data-field="point-1", data-field="point-2"
-        </action>
-      </check>
-
-      <check name="css-variables-check">
-        <action>Verify :root section contains theme CSS variables</action>
-        <action if="CSS variables missing or incorrect">
-          Inject correct CSS variables from theme.json
         </action>
       </check>
 
@@ -410,203 +378,204 @@ Return ONLY the complete HTML code, starting with <!DOCTYPE html>
     </validation>
 
     <script-injection name="auto-save-script">
-      <!-- Inject auto-save script if not present in generated HTML -->
+      <!-- Ensure auto-save script is present -->
       <check if="saveEdits function not found in generated HTML">
-        <action>Inject the standard auto-save script before closing body tag:</action>
-        <script>
-    // Auto-save script for contenteditable elements
-    const saveEdits = () => {
-      const edits = [];
-      document.querySelectorAll('[contenteditable]').forEach(el => {
-        const field = el.getAttribute('data-field');
-        if (field) {
-          edits.push({ selector: `[data-field='${field}']`, content: el.innerHTML });
-        }
-      });
-      localStorage.setItem('slide-edits', JSON.stringify({
-        slide: 'single',
-        edits: edits,
-        lastModified: new Date().toISOString()
-      }));
-    };
-
-    document.querySelectorAll('[contenteditable]').forEach(el => {
-      el.addEventListener('blur', saveEdits);
-      el.addEventListener('input', () => setTimeout(saveEdits, 1000));
-    });
-
-    // Restore edits on load
-    const stored = localStorage.getItem('slide-edits');
-    if (stored) {
-      const data = JSON.parse(stored);
-      if (data.slide === 'single') {
-        data.edits.forEach(edit => {
-          const el = document.querySelector(edit.selector);
-          if (el) el.innerHTML = edit.content;
-        });
-      }
-    }
-        </script>
+        <action>Inject the standard auto-save script before closing body tag</action>
       </check>
     </script-injection>
 
-    <script-injection name="viewport-scaling-script">
-      <!-- Inject viewport auto-scaling script if not present -->
-      <check if="scaleSlide function not found in generated HTML">
-        <action>Ensure slide is wrapped in .slide-wrapper div</action>
-        <action>Inject viewport scaling script:</action>
-        <script>
-    function scaleSlide() {
-      const wrapper = document.querySelector('.slide-wrapper');
-      if (wrapper) {
-        const scaleX = (window.innerWidth * 0.95) / 1920;
-        const scaleY = (window.innerHeight * 0.95) / 1080;
-        wrapper.style.transform = `scale(${Math.min(scaleX, scaleY, 1)})`;
-      }
-    }
-    window.addEventListener('load', scaleSlide);
-    window.addEventListener('resize', scaleSlide);
-    scaleSlide();
-        </script>
-      </check>
-    </script-injection>
-
-    <check if="single mode">
-      <action>Save validated HTML to .slide-builder/single/slide.html</action>
-    </check>
-
-    <check if="deck mode">
-      <action>Save validated HTML to .slide-builder/deck/slides/slide-{{n}}.html</action>
-      <action>Update deck plan.yaml to mark slide as "built"</action>
-    </check>
-
-    <output>
-**Custom Slide Generated**
-
-Generated via frontend-design skill with full theme integration.
-    </output>
-
-    <goto step="4">Proceed to state update</goto>
+    <goto step="4">Save and Update</goto>
   </step>
 
   <!-- ═══════════════════════════════════════════════════════════════════════ -->
-  <!-- PHASE 4: State Update and Completion                                     -->
+  <!-- PHASE 4: Save Slide and Create State File                                -->
   <!-- ═══════════════════════════════════════════════════════════════════════ -->
-  <step n="4" goal="Update status and notify user">
-    <action>Update .slide-builder/status.yaml:
-      - Increment built_count (or set to 1 if not exists)
-      - Update last_action based on build type:
-        - If template build: "Built slide using {{template_name}} template"
-        - If custom build: "Built custom slide via frontend-design skill"
-      - Update last_modified: current ISO timestamp
-      - Append to history array with action and timestamp
-    </action>
+  <step n="4" goal="Save slide HTML and create state file">
 
-    <check if="template build (Phase 3)">
+    <check if="deck mode">
+      <!-- Create output directory structure if it doesn't exist -->
+      <action>Ensure output/{{deck_slug}}/slides/ directory exists (create if needed)</action>
+
+      <!-- Save slide HTML to new output location -->
+      <action>Save slide HTML to {{output_path}} (output/{{deck_slug}}/slides/slide-{{slide_number}}.html)</action>
+
+      <!-- Create empty state file for Epic 4 compatibility -->
+      <action>Create state file at {{state_path}} with schema:
+        {
+          "slide": {{slide_number}},
+          "edits": [],
+          "lastModified": null
+        }
+      </action>
+
+      <!-- Plan.yaml already lives at output/{{deck_slug}}/plan.yaml - no copy needed -->
+
       <output>
-**Slide Generated**
+**Slide {{slide_number}} Generated**
 
-Saved to: `.slide-builder/single/slide.html`
-
-**Details:**
-- Template: {{suggested_template}}
-- Theme: {{theme.meta.name}}
-- Dimensions: 1920x1080
-
-**Features:**
-- All text is editable (click to edit in browser)
-- Changes auto-save to localStorage
-- Theme colors and fonts applied
-
-Open the file in your browser to preview and edit.
+Output folder: `output/{{deck_slug}}/`
+Files created:
+- `{{output_path}}`
+- `{{state_path}}`
       </output>
     </check>
 
-    <check if="custom build (Phase 3B)">
-      <output>
-**Custom Slide Generated**
+    <check if="single mode">
+      <!-- Create output/singles/ directory if it doesn't exist -->
+      <action>Ensure output/singles/ directory exists (create if needed)</action>
 
-Saved to: `.slide-builder/single/slide.html`
+      <!-- Save slide HTML to new output location -->
+      <action>Save slide HTML to {{output_path}} (output/singles/{{slide_slug}}.html)</action>
+
+      <output>
+**Slide Generated**
+
+File: `{{output_path}}`
+      </output>
+    </check>
+
+    <goto step="4B">Generate Viewer</goto>
+  </step>
+
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  <!-- PHASE 4B: Generate Viewer and Manifest (Deck Mode Only)                  -->
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  <step n="4B" goal="Regenerate viewer and manifest for deck">
+
+    <check if="single mode">
+      <!-- Skip viewer generation for single slides -->
+      <goto step="5">Update Progress</goto>
+    </check>
+
+    <check if="deck mode">
+      <!-- Viewer and manifest generation for deck mode -->
+      <viewer-generation critical="true">
+        <mandate>Viewer and manifest MUST be regenerated after EVERY slide build</mandate>
+        <mandate>Use regenerate-viewer.js script to ensure consistency</mandate>
+
+        <!-- Run the regenerate script -->
+        <action>Execute: node scripts/regenerate-viewer.js {{deck_slug}}</action>
+
+        <output>
+**Viewer & Manifest Generated**
+
+Manifest: `output/{{deck_slug}}/slides/manifest.json`
+Viewer: `output/{{deck_slug}}/index.html`
+        </output>
+      </viewer-generation>
+    </check>
+
+    <goto step="5">Update Progress</goto>
+  </step>
+
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  <!-- PHASE 5: Update Progress and Status                                      -->
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  <step n="5" goal="Update plan.yaml status and status.yaml progress">
+
+    <check if="deck mode">
+      <!-- Update plan.yaml slide status -->
+      <action>Read output/{{deck_slug}}/plan.yaml</action>
+      <action>Find slide with number: {{slide_number}}</action>
+      <action>Update slide status: "pending" -> "built"</action>
+      <action>Save updated output/{{deck_slug}}/plan.yaml</action>
+
+      <!-- Update status.yaml -->
+      <action>Read status.yaml</action>
+      <action>Update current_slide: {{slide_number}}</action>
+      <action>Increment built_count by 1</action>
+      <action>Set output_folder: "output/{{deck_slug}}"</action>
+      <action>Set deck_slug: "{{deck_slug}}"</action>
+      <action>Set last_action: "Built slide {{slide_number}}: {{slide.intent}}"</action>
+      <action>Set last_modified: current ISO 8601 timestamp</action>
+      <action>Append to history array:
+        {
+          action: "Built slide {{slide_number}}: {{slide.intent}}",
+          timestamp: current ISO 8601 timestamp
+        }
+      </action>
+      <action>Save updated status.yaml</action>
+
+      <!-- Calculate remaining slides -->
+      <action>Count remaining pending slides in plan.yaml</action>
+      <action>Set {{remaining_count}} = count of slides with status: "pending"</action>
+      <action>Set {{total_slides}} = total slides in plan</action>
+      <action>Set {{built_count}} = updated built_count from status.yaml</action>
+
+      <output>
+**Slide {{slide_number}} Built Successfully**
+
+Progress: {{built_count}}/{{total_slides}} slides built
+Remaining: {{remaining_count}} slides
+
+Build Type: {{build_type}}
+Intent: {{slide.intent}}
+
+**Output:**
+- Folder: `output/{{deck_slug}}/`
+- Slide: `output/{{deck_slug}}/slides/slide-{{slide_number}}.html`
+- State: `output/{{deck_slug}}/slides/slide-{{slide_number}}-state.json`
+
+**Next Steps:**
+- Run `/sb:build-one` to build the next slide
+- Run `/sb:build-all` to build all remaining slides
+- Open the slide file in browser to preview
+      </output>
+    </check>
+
+    <check if="single mode">
+      <!-- Update status.yaml for single mode -->
+      <action>Read status.yaml</action>
+      <action>Set last_action based on build type:
+        - If template: "Built slide using {{template}} template"
+        - If custom: "Built custom slide via frontend-design skill"
+      </action>
+      <action>Set output_folder: "output/singles"</action>
+      <action>Set last_modified: current ISO 8601 timestamp</action>
+      <action>Append to history array with action and timestamp</action>
+      <action>Save updated status.yaml</action>
+
+      <output>
+**Slide Generated Successfully**
+
+Saved to: `output/singles/{{slide_slug}}.html`
 
 **Details:**
-- Build Type: Custom (frontend-design skill)
-- Theme: {{theme.meta.name}}
+- Build Type: {{build_type}}
+- Theme: {{theme.name}}
 - Dimensions: 1920x1080
 
 **Features:**
 - All text is editable (click to edit in browser)
 - Changes auto-save to localStorage
 - Theme colors and fonts applied
-- Custom layout generated from intent
 
-Open the file in your browser to preview and edit.
+**Next Steps:**
+- Open the file in your browser to preview and edit
+- Run `/sb:edit` to make layout changes via natural language
+- Run `/sb:export` when ready to export to Google Slides
       </output>
     </check>
 
     <browser-preview>
-      <!-- Determine absolute path for reliable browser opening -->
-      <action>Resolve absolute path: {{project_root}}/.slide-builder/single/slide.html</action>
-      <action>Store as {{absolute_slide_path}}</action>
+      <action>Resolve absolute path for the slide file</action>
 
       <output>
 **Slide File Path:**
-`{{absolute_slide_path}}`
-
-(You can copy this path to open manually if needed)
+`{{absolute_path}}`
       </output>
 
-      <ask>
-Open in browser? (y/n)
-      </ask>
+      <ask>Open in browser? (y/n)</ask>
 
       <check if="user says yes">
-        <!-- Platform-specific browser open commands -->
-        <action>Detect platform from environment</action>
-
-        <check if="platform is darwin (macOS)">
-          <action>Execute via Bash: open "{{absolute_slide_path}}"</action>
-        </check>
-
-        <check if="platform is linux">
-          <action>Execute via Bash: xdg-open "{{absolute_slide_path}}"</action>
-        </check>
-
-        <check if="platform is windows">
-          <action>Execute via Bash: start "" "{{absolute_slide_path}}"</action>
-        </check>
-
-        <check if="browser open command succeeds">
-          <output>
-✅ Opened slide in your default browser.
-          </output>
-        </check>
-
-        <check if="browser open command fails">
-          <output>
-⚠️ Could not open browser automatically.
-
-Open the file manually at:
-`{{absolute_slide_path}}`
-          </output>
-        </check>
-      </check>
-
-      <check if="user says no">
-        <output>
-No problem. You can open the slide manually at:
-`{{absolute_slide_path}}`
-        </output>
+        <action>Detect platform (darwin/linux/windows)</action>
+        <action>Execute appropriate open command:
+          - macOS: open "{{absolute_path}}"
+          - Linux: xdg-open "{{absolute_path}}"
+          - Windows: start "" "{{absolute_path}}"
+        </action>
       </check>
     </browser-preview>
-
-    <output>
-**Slide ready. Edit text directly in browser.**
-
-**Next Steps:**
-- Edit text directly in the browser (click any text to edit)
-- Run `/sb:edit` to make layout changes via natural language
-- Run `/sb:export` when ready to export to Google Slides
-    </output>
   </step>
 
 </workflow>
@@ -614,8 +583,8 @@ No problem. You can open the slide manually at:
 
 ## Template File Mapping
 
-| suggested_template | Template File |
-|-------------------|---------------|
+| template | Sample Reference |
+|----------|------------------|
 | layout-title | 01-title.html |
 | layout-list | 02-agenda.html |
 | layout-flow | 03-flow.html |
@@ -623,7 +592,7 @@ No problem. You can open the slide manually at:
 | layout-columns-3 | 04-comparison.html |
 | layout-callout | 05-callout.html |
 | layout-code | 06-technical.html |
-| custom | (use frontend-design skill) |
+| custom | (frontend-design skill) |
 
 ## Required HTML Structure
 
@@ -635,40 +604,119 @@ Every generated slide must follow this structure:
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=1920, height=1080">
-  <title>{{slide_title}}</title>
+  <title>Slide {{number}}: {{intent}}</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family={{font_family}}&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
-    :root {
-      /* Theme CSS variables */
-      --color-primary: {{theme.colors.primary}};
-      --color-secondary: {{theme.colors.secondary}};
-      /* ... all theme variables */
-    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
     body {
-      margin: 0;
       width: 1920px;
       height: 1080px;
       overflow: hidden;
     }
+
     .slide {
       width: 1920px;
       height: 1080px;
-      /* Layout styles */
+      font-family: 'Outfit', system-ui, -apple-system, sans-serif;
+      /* Layout-specific styles */
+    }
+
+    /* Contenteditable focus styles */
+    [contenteditable]:focus {
+      outline: 2px solid var(--color-primary);
+      outline-offset: 4px;
     }
   </style>
 </head>
 <body>
-  <div class="slide" data-slide-id="single">
+  <div class="slide" data-slide-id="{{slide_number}}">
     <!-- All text elements MUST have contenteditable and data-field -->
     <h1 contenteditable="true" data-field="title">Title</h1>
     <p contenteditable="true" data-field="subtitle">Subtitle</p>
-    <!-- More content -->
+    <!-- More content with contenteditable -->
   </div>
+
   <script>
-    // Auto-save script (see instructions above)
+    // Auto-save script for contenteditable elements
+    const isLocalStorageAvailable = () => {
+      try {
+        const test = '__localStorage_test__';
+        localStorage.setItem(test, test);
+        localStorage.removeItem(test);
+        return true;
+      } catch (e) {
+        return false;
+      }
+    };
+
+    const localStorageEnabled = isLocalStorageAvailable();
+    if (!localStorageEnabled) {
+      console.warn('[Slide Auto-Save] localStorage is disabled.');
+    }
+
+    const saveEdits = () => {
+      if (!localStorageEnabled) return;
+      try {
+        const edits = [];
+        document.querySelectorAll('[contenteditable]').forEach(el => {
+          const field = el.getAttribute('data-field');
+          if (field) {
+            edits.push({ selector: `[data-field='${field}']`, content: el.innerHTML });
+          }
+        });
+        localStorage.setItem('slide-{{slide_number}}-edits', JSON.stringify({
+          slide: {{slide_number}},
+          edits: edits,
+          lastModified: new Date().toISOString()
+        }));
+      } catch (e) {
+        console.error('[Slide Auto-Save] Failed to save:', e.message);
+      }
+    };
+
+    document.querySelectorAll('[contenteditable]').forEach(el => {
+      el.addEventListener('blur', saveEdits);
+      el.addEventListener('input', () => setTimeout(saveEdits, 1000));
+    });
+
+    // Restore edits on load
+    const restoreEdits = () => {
+      if (!localStorageEnabled) return;
+      try {
+        const stored = localStorage.getItem('slide-{{slide_number}}-edits');
+        if (stored) {
+          const data = JSON.parse(stored);
+          if (data.slide === {{slide_number}} && Array.isArray(data.edits)) {
+            data.edits.forEach(edit => {
+              const el = document.querySelector(edit.selector);
+              if (el) el.innerHTML = edit.content;
+            });
+          }
+        }
+      } catch (e) {
+        localStorage.removeItem('slide-{{slide_number}}-edits');
+      }
+    };
+
+    restoreEdits();
   </script>
 </body>
 </html>
 ```
+
+## State File Schema (Deck Mode)
+
+For each deck slide, create a corresponding state file:
+
+```json
+{
+  "slide": 1,
+  "edits": [],
+  "lastModified": null
+}
+```
+
+This enables Epic 4 edit preservation across regenerations.

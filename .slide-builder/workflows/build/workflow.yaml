@@ -13,12 +13,12 @@ instructions: "{installed_path}/instructions.md"
 # State and plan files
 status_file: "{project-root}/.slide-builder/status.yaml"
 theme_file: "{project-root}/.slide-builder/theme.json"
-single_plan: "{project-root}/.slide-builder/single/plan.yaml"
-deck_plan: "{project-root}/.slide-builder/deck/plan.yaml"
+single_plan: "{project-root}/output/singles/plan.yaml"
+# deck_plan is dynamic: output/{deck_slug}/plan.yaml (read deck_slug from status.yaml)
 
 # Output locations
-single_output: "{project-root}/.slide-builder/single/slide.html"
-deck_output: "{project-root}/.slide-builder/deck/slides"
+single_output: "{project-root}/output/singles"
+deck_output: "{project-root}/output"  # Deck slides at output/{slug}/slides/
 templates: "{project-root}/.slide-builder/templates"
 
 # Variables

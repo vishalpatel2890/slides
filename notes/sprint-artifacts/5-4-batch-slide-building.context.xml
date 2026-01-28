@@ -1,0 +1,417 @@
+<story-context id="bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>5</epicId>
+    <storyId>5-4-batch-slide-building</storyId>
+    <title>Batch Slide Building</title>
+    <status>drafted</status>
+    <generatedAt>2026-01-27</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>notes/sprint-artifacts/5-4-batch-slide-building.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>user</asA>
+    <iWant>to build all remaining slides at once with `/build-all`</iWant>
+    <soThat>I can generate my entire deck quickly without manually running /build-one for each slide</soThat>
+    <tasks>
+      <task id="1" ac="1">Implement Batch Build Prerequisites Check
+        - 1.1: Read status.yaml to verify mode == "deck"
+        - 1.2: If mode != "deck", return error: "/build-all is for deck mode only"
+        - 1.3: Read deck/plan.yaml to get slides array
+        - 1.4: Count slides with status: "pending"
+        - 1.5: If zero pending slides, return: "All slides already built! Run /export when ready."
+        - 1.6: Display: "Building {n} remaining slides..."
+      </task>
+      <task id="2" ac="1,2,4">Implement Batch Generation Loop
+        - 2.1: Iterate through slides array in order (by slide number)
+        - 2.2: For each slide with status "pending": Display progress, Extract slide context, Determine template vs custom
+        - 2.3: Reuse template decision logic from Story 5.3
+      </task>
+      <task id="3" ac="2,3">Implement Per-Slide Generation
+        - 3.1: For template-based slides: Load template, inject content, apply theme CSS
+        - 3.2: For custom slides: Invoke frontend-design skill with full context
+        - 3.3: Ensure all generated slides follow HTML Slide Pattern (1920x1080, contenteditable, data-field)
+      </task>
+      <task id="4" ac="3">Implement Per-Slide Save Operations
+        - 4.1: Save slide to deck/slides/slide-{n}.html
+        - 4.2: Create empty state file: deck/slides/slide-{n}-state.json
+        - 4.3: State file schema: { "slide": n, "edits": [], "lastModified": null }
+      </task>
+      <task id="5" ac="6,7">Implement Error Handling
+        - 5.1: Wrap each slide generation in try-catch
+        - 5.2: On error: Log error message to console
+        - 5.3: On error: Mark slide status as "failed" in plan.yaml
+        - 5.4: On error: Continue to next slide (DO NOT abort batch)
+        - 5.5: Track failed slide numbers for summary
+      </task>
+      <task id="6" ac="5,9">Implement Progress Tracking
+        - 6.1: After each successful slide, update plan.yaml: status → "built"
+        - 6.2: Increment built_count tracking variable
+        - 6.3: After batch completion, update status.yaml: built_count, last_action, last_modified
+        - 6.4: Add entry to status.yaml history array
+      </task>
+      <task id="7" ac="8">Implement Batch Summary
+        - 7.1: Calculate summary stats: total attempted, successfully built, failed (with slide numbers)
+        - 7.2: Display completion message: "Build complete! Built: {n}/{total} slides"
+        - 7.3: If failures exist, add: "Failed slides: {list} - Retry failed slides with /build-one"
+        - 7.4: Suggest next steps: "Review slides in deck/slides/", "Use /edit {n} to refine", "Run /export when ready"
+      </task>
+      <task id="8" ac="1-9">Enhance Build Workflow Instructions
+        - 8.1: Review .slide-builder/workflows/build/workflow.yaml
+        - 8.2: Update/create .slide-builder/workflows/build-all/workflow.yaml if separate workflow
+        - 8.3: Add batch mode phases to instructions.md
+      </task>
+      <task id="9" ac="1">Register/Update Slash Command
+        - 9.1: Create/update .claude/commands/sb/build-all.md
+        - 9.2: Document deck mode requirement
+        - 9.3: Document error continuation behavior
+        - 9.4: Include example output in command docs
+      </task>
+      <task id="10" ac="1-9">Testing - Batch Build Verification
+        - 10.1-10.7: Full batch build test (7 slides, all pending → all built)
+        - 10.8-10.10: Error scenario test (continue on failure, mark failed)
+        - 10.11: Run Frontend Test Gate checklist
+      </task>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <ac id="5.4.1">Given a deck plan exists with unbuilt slides, when the user runs `/build-all`, then the system iterates through all unbuilt slides in order</ac>
+    <ac id="5.4.2">Each slide is generated using template or frontend-design skill based on intent</ac>
+    <ac id="5.4.3">Each slide is saved to `.slide-builder/deck/slides/slide-{n}.html` with corresponding state file</ac>
+    <ac id="5.4.4">Progress is reported during generation (e.g., "Building slide 3 of 7...")</ac>
+    <ac id="5.4.5">plan.yaml statuses are updated as each slide completes (status: "built")</ac>
+    <ac id="5.4.6">If an error occurs during batch generation, the error is logged and generation continues with the next slide</ac>
+    <ac id="5.4.7">Failed slides are marked in plan.yaml with status: "failed" for retry</ac>
+    <ac id="5.4.8">Final summary shows total slides built and any failures (e.g., "Build complete: 7/8 slides. Failed: slide 3")</ac>
+    <ac id="5.4.9">status.yaml is updated with final built_count and batch action in history</ac>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc name="tech-spec-epic-5.md" path="notes/sprint-artifacts/tech-spec-epic-5.md">
+        <summary>Epic 5 technical specification with Batch Builder module design, /build-all workflow phases, data models (plan.yaml schema, slide status enum), and complete workflow diagrams</summary>
+        <relevantSections>
+          <section>Services and Modules - Batch Builder module definition</section>
+          <section>Data Models and Contracts - plan.yaml schema, slide status enum (pending/built/failed)</section>
+          <section>Workflows and Sequencing - Complete /build-all Workflow (3 phases)</section>
+          <section>Non-Functional Requirements - NFR1, NFR14, NFR17</section>
+        </relevantSections>
+      </doc>
+      <doc name="architecture.md" path="notes/architecture.md">
+        <summary>System architecture defining BMAD-pattern structure, Novel Patterns (Template-or-Custom Decision, Dual-Mode State Management), HTML Slide Pattern, and State File Patterns</summary>
+        <relevantSections>
+          <section>Novel Pattern 2: Template-or-Custom Decision - Intent keyword → template mapping</section>
+          <section>Novel Pattern 4: Dual-Mode State Management - Mode detection from status.yaml</section>
+          <section>Implementation Patterns - HTML Slide Pattern (contenteditable, data-field, 1920x1080)</section>
+          <section>State File Patterns - status.yaml schema (mode, built_count, history)</section>
+        </relevantSections>
+      </doc>
+      <doc name="prd.md" path="notes/prd.md">
+        <summary>Product requirements document with FR22-30 (Building), FR48-52 (Framework), and NFR definitions</summary>
+        <relevantSections>
+          <section>FR22-30: Building functional requirements</section>
+          <section>NFR1: Sample deck generation timing</section>
+          <section>NFR14: Partial deck builds are recoverable</section>
+          <section>NFR17: State files are human-readable YAML</section>
+        </relevantSections>
+      </doc>
+    </docs>
+
+    <code>
+      <file name="build-all.md" path=".claude/commands/sb/build-all.md">
+        <summary>Slash command definition for /sb:build-all - currently minimal, needs enhancement</summary>
+        <content><![CDATA[---
+description: 'Build all remaining slides in deck plan'
+---
+
+# Slide Builder - Build All Command
+
+This command builds all remaining slides in your deck plan.
+
+<steps CRITICAL="TRUE">
+1. Read the workflow configuration at @.slide-builder/workflows/build/workflow.yaml
+2. Read the instructions at @.slide-builder/workflows/build/instructions.md
+3. Verify mode is "deck" from .slide-builder/status.yaml
+4. Iterate through all unbuilt slides and generate HTML
+5. Update .slide-builder/status.yaml with workflow progress
+</steps>]]></content>
+        <notes>This command needs enhancement to implement batch mode phases, error continuation, and summary reporting per ACs</notes>
+      </file>
+
+      <file name="build-one.md" path=".claude/commands/sb/build-one.md">
+        <summary>Slash command for /sb:build-one - single slide build with mode detection</summary>
+        <content><![CDATA[---
+description: 'Build the next slide (or single planned slide) from plan using theme'
+---
+
+# Slide Builder - Build One Command
+
+**Behavior depends on current mode:**
+- **Single mode:** Builds the slide from `.slide-builder/single/plan.yaml`
+- **Deck mode:** Builds the next unbuilt slide from `.slide-builder/deck/plan.yaml`
+
+<steps CRITICAL="TRUE">
+1. Read the workflow configuration at @.slide-builder/workflows/build-one/workflow.yaml
+2. Read the instructions at @.slide-builder/workflows/build-one/instructions.md
+3. Execute the 5-phase workflow:
+   - Phase 1: Mode Detection & Routing (check status.yaml mode)
+   - Phase 1B: Deck Build Router (find next pending slide in deck plan)
+   - Phase 2: Template Decision (map template to sample file or use custom)
+   - Phase 3/3B: Template or Custom Build (generate slide HTML)
+   - Phase 4: Save Slide (create .html and state.json files)
+   - Phase 5: Update Progress (update plan.yaml status, status.yaml counts)
+4. All text elements must have contenteditable="true" and data-field attributes
+5. Slide must render at 1920x1080 (16:9)
+6. In deck mode, create corresponding slide-{n}-state.json for Epic 4 compatibility
+</steps>]]></content>
+        <notes>Story 5.4 batch build reuses this per-slide logic - the Batch Builder wraps this in a loop</notes>
+      </file>
+
+      <file name="workflow.yaml" path=".slide-builder/workflows/build-one/workflow.yaml">
+        <summary>Build-one workflow configuration with template mapping and intent keywords</summary>
+        <relevantContent><![CDATA[name: build-one
+description: "Build the next slide (or single planned slide) from plan using theme"
+version: "2.0"
+
+# Template file mapping (suggested_template -> actual file)
+template_mapping:
+  layout-title: "01-title.html"
+  layout-list: "02-agenda.html"
+  layout-flow: "03-flow.html"
+  layout-columns-2: "04-comparison.html"
+  layout-columns-3: "04-comparison.html"
+  layout-callout: "05-callout.html"
+  layout-code: "06-technical.html"
+
+# Intent keyword to template mapping
+intent_keywords:
+  layout-title: ["title", "intro", "opening", "cover"]
+  layout-list: ["list", "bullets", "points", "agenda", "steps"]
+  layout-flow: ["flow", "process", "timeline", "journey", "workflow"]
+  layout-columns-2: ["compare", "vs", "two", "side-by-side", "ROI", "numbers", "metrics"]
+  layout-columns-3: ["three", "triad", "options", "landscape", "products"]
+  layout-callout: ["key", "insight", "callout", "cta", "important", "highlight", "exercise"]
+  layout-code: ["code", "technical", "api", "commands", "CLI"]
+
+# Slide status enum
+slide_status: ["pending", "built", "failed"]
+
+# State file schema for deck slides
+state_file_schema:
+  slide: "number"
+  edits: "[]"
+  lastModified: "null"]]></relevantContent>
+        <notes>Story 5.4 reuses these mappings for template decision in batch mode</notes>
+      </file>
+
+      <file name="instructions.md" path=".slide-builder/workflows/build-one/instructions.md">
+        <summary>Build-one workflow instructions with 5-phase execution</summary>
+        <keyPhases>
+          <phase n="1">Mode Detection and Routing - read status.yaml, route to single or deck mode</phase>
+          <phase n="1B">Deck Build Router - find first pending slide from plan.yaml</phase>
+          <phase n="2">Template Decision - map template name to sample file or fall back to custom</phase>
+          <phase n="3">Template Build - load sample, inject content with theme CSS variables</phase>
+          <phase n="3B">Custom Build - invoke frontend-design skill with full context</phase>
+          <phase n="4">Save Slide - write HTML file and empty state.json</phase>
+          <phase n="5">Update Progress - update plan.yaml status, status.yaml built_count and history</phase>
+        </keyPhases>
+        <criticalRequirements>
+          <requirement>All text elements MUST have contenteditable="true" attribute</requirement>
+          <requirement>All text elements MUST have unique data-field attribute</requirement>
+          <requirement>Viewport meta: width=1920, height=1080</requirement>
+          <requirement>Body/slide dimensions: 1920px x 1080px</requirement>
+          <requirement>Google Fonts link for Outfit font</requirement>
+          <requirement>Auto-save JavaScript for contenteditable elements</requirement>
+        </criticalRequirements>
+        <notes>Story 5.4 wraps Phases 1B through 5 in a loop with error continuation</notes>
+      </file>
+
+      <file name="status.yaml" path=".slide-builder/status.yaml">
+        <summary>Current workflow status tracking state</summary>
+        <currentState><![CDATA[mode: deck
+current_slide: 2
+total_slides: 10
+built_count: 2
+
+phase: complete
+workflow_version: "2.0"
+
+theme:
+  file: .slide-builder/theme.json
+  status: locked
+  personality: bold
+  confidence: 0.85
+
+deck:
+  name: "Claude Code Fundamentals"
+  plan_file: .slide-builder/deck/plan.yaml
+  slides_dir: .slide-builder/deck/slides/
+
+last_action: "Built slide 2: What is Claude Code?"
+last_modified: "2026-01-27T16:05:00Z"]]></currentState>
+        <notes>Batch build will update: built_count (increment per slide), last_action ("Batch built N slides"), history (append batch entry)</notes>
+      </file>
+
+      <file name="plan.yaml" path=".slide-builder/deck/plan.yaml">
+        <summary>Current deck plan with 10 slides (2 built, 8 pending)</summary>
+        <structure><![CDATA[deck_name: "Claude Code Fundamentals"
+audience: "Solution Engineers"
+audience_knowledge_level: beginner
+
+storyline:
+  opening_hook: "SEs need to confidently demo AI coding capabilities..."
+  tension: "Multiple Claude products exist..."
+  resolution: "Claude Code is the agentic CLI..."
+  call_to_action: "Install Claude Code today..."
+
+slides:
+  - number: 1, status: built, template: layout-title
+  - number: 2, status: built, template: layout-callout
+  - number: 3, status: pending, template: layout-callout
+  - number: 4, status: pending, template: layout-columns-3
+  - number: 5, status: pending, template: layout-list
+  - number: 6, status: pending, template: layout-list
+  - number: 7, status: pending, template: layout-code
+  - number: 8, status: pending, template: layout-flow
+  - number: 9, status: pending, template: layout-callout
+  - number: 10, status: pending, template: layout-columns-2]]></structure>
+        <notes>Batch build will iterate pending slides 3-10, updating each status to "built" (or "failed" on error)</notes>
+      </file>
+
+      <file name="theme.json" path=".slide-builder/theme.json">
+        <summary>Brand theme primitives - Amperity brand with bold-minimal personality</summary>
+        <keyValues><![CDATA[colors:
+  primary: "#CCFF00" (lime yellow)
+  secondary: "#5DBAB6" (teal)
+  accent: "#FF6B6B" (coral)
+  background.dark: "#1A1A1A"
+  text.onDark: "#FFFFFF"
+
+typography:
+  fonts.heading: "'Outfit', system-ui, sans-serif"
+  scale.hero: "72px", scale.h1: "48px"
+
+personality:
+  classification: "bold-minimal"
+  traits: ["tech-forward", "data-driven", "high-contrast"]]]></keyValues>
+        <notes>All generated slides must inject these as CSS variables in :root</notes>
+      </file>
+
+      <file name="slide-1.html" path=".slide-builder/deck/slides/slide-1.html">
+        <summary>Example generated deck slide showing required HTML structure</summary>
+        <keyPatterns><![CDATA[- Viewport: width=1920, height=1080
+- Body/slide dimensions: 1920px x 1080px
+- All text elements have contenteditable="true"
+- All text elements have data-field attributes
+- Google Fonts link for Outfit
+- CSS variables from theme.json in :root
+- Auto-save script for contenteditable elements
+- data-slide-id attribute on .slide container]]></keyPatterns>
+        <notes>All batch-generated slides must follow this exact pattern</notes>
+      </file>
+
+      <file name="01-title.html" path=".slide-builder/samples/01-title.html">
+        <summary>Sample title slide template for reference</summary>
+        <notes>Used as design reference when template: layout-title is specified in plan.yaml</notes>
+      </file>
+    </code>
+
+    <dependencies>
+      <dependency name="puppeteer" version="^23.0.0">Used for HTML-to-image conversion in /export (Epic 7)</dependency>
+      <dependency name="googleapis" version="^140.0.0">Used for Google Slides API in /export (Epic 7)</dependency>
+      <dependency name="frontend-design skill" type="claude-code-skill">Invoked for custom slide generation when no template matches intent</dependency>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint type="architecture">Deck mode MUST use `.slide-builder/deck/` directory exclusively</constraint>
+    <constraint type="architecture">Each slide MUST be saved as `deck/slides/slide-{n}.html` with matching state file</constraint>
+    <constraint type="architecture">Batch builds MUST continue on error (don't abort entire batch)</constraint>
+    <constraint type="architecture">Template selection MUST follow the intent-to-template mapping pattern from workflow.yaml</constraint>
+    <constraint type="architecture">All slides MUST have contenteditable and data-field attributes for Epic 4 compatibility</constraint>
+    <constraint type="html">Slide dimensions: 1920x1080 pixels exactly</constraint>
+    <constraint type="html">Viewport meta tag: width=1920, height=1080</constraint>
+    <constraint type="html">Google Fonts link for Outfit font family</constraint>
+    <constraint type="html">CSS variables from theme.json must be in :root</constraint>
+    <constraint type="state">status.yaml must be updated with built_count, last_action, and history after batch completion</constraint>
+    <constraint type="state">plan.yaml slide statuses must be updated: "pending" → "built" or "failed"</constraint>
+  </constraints>
+
+  <interfaces>
+    <interface type="slash-command" name="/sb:build-all">
+      <input>None - reads from plan.yaml</input>
+      <output>All pending slides generated to deck/slides/, summary displayed</output>
+      <prerequisite>mode == "deck" in status.yaml</prerequisite>
+      <prerequisite>deck/plan.yaml exists with pending slides</prerequisite>
+    </interface>
+    <interface type="file-read" name="status.yaml">
+      <purpose>Mode detection - verify mode == "deck"</purpose>
+      <path>.slide-builder/status.yaml</path>
+    </interface>
+    <interface type="file-read" name="plan.yaml">
+      <purpose>Get slides array, find pending slides, read slide context</purpose>
+      <path>.slide-builder/deck/plan.yaml</path>
+    </interface>
+    <interface type="file-read" name="theme.json">
+      <purpose>Get brand primitives for CSS variable injection</purpose>
+      <path>.slide-builder/theme.json</path>
+    </interface>
+    <interface type="file-read" name="samples/*.html">
+      <purpose>Template design reference for layout generation</purpose>
+      <path>.slide-builder/samples/{template}.html</path>
+    </interface>
+    <interface type="file-write" name="slide-{n}.html">
+      <purpose>Generated slide output</purpose>
+      <path>.slide-builder/deck/slides/slide-{n}.html</path>
+    </interface>
+    <interface type="file-write" name="slide-{n}-state.json">
+      <purpose>Empty state file for Epic 4 edit preservation</purpose>
+      <path>.slide-builder/deck/slides/slide-{n}-state.json</path>
+      <schema>{ "slide": n, "edits": [], "lastModified": null }</schema>
+    </interface>
+    <interface type="file-update" name="plan.yaml">
+      <purpose>Update each slide status: "pending" → "built" or "failed"</purpose>
+    </interface>
+    <interface type="file-update" name="status.yaml">
+      <purpose>Update built_count, last_action, last_modified, history</purpose>
+    </interface>
+    <interface type="skill" name="frontend-design">
+      <purpose>Generate custom slides when no template matches intent</purpose>
+      <invocation>Via skill-invocation tag in instructions.md</invocation>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>
+      <standard>Frontend Test Gate pattern - manual browser testing checklist</standard>
+      <standard>All slides must render at 1920x1080 in browser</standard>
+      <standard>All text elements must be editable (contenteditable visible)</standard>
+      <standard>Theme colors and fonts must be applied correctly</standard>
+      <standard>Batch must continue past individual slide failures</standard>
+    </standards>
+    <locations>
+      <location>Frontend Test Gate checklist in story file (5-4-TG1)</location>
+      <location>.slide-builder/deck/slides/ - verify file creation</location>
+      <location>.slide-builder/deck/plan.yaml - verify status updates</location>
+      <location>.slide-builder/status.yaml - verify built_count and history</location>
+    </locations>
+    <ideas>
+      <testCase id="TC1">Create plan with 7 pending slides, run /build-all, verify all 7 built</testCase>
+      <testCase id="TC2">Verify progress messages: "Building slide 1 of 7...", "Building slide 2 of 7..."</testCase>
+      <testCase id="TC3">Verify all slide-{n}.html files created in deck/slides/</testCase>
+      <testCase id="TC4">Verify all slide-{n}-state.json files created</testCase>
+      <testCase id="TC5">Verify plan.yaml shows all status: "built"</testCase>
+      <testCase id="TC6">Verify status.yaml built_count = 7</testCase>
+      <testCase id="TC7">Verify summary: "Build complete! 7/7 slides"</testCase>
+      <testCase id="TC8">Force one slide to fail (corrupt template), verify batch continues</testCase>
+      <testCase id="TC9">Verify failed slide marked status: "failed" in plan.yaml</testCase>
+      <testCase id="TC10">Verify summary shows "Built 6/7, Failed 1: slide X"</testCase>
+      <testCase id="TC11">Mode not "deck": Error "/build-all is for deck mode only"</testCase>
+      <testCase id="TC12">No pending slides: "All slides already built! Run /export when ready."</testCase>
+      <testCase id="TC13">Partial pre-built: Only pending slides attempted, pre-built skipped</testCase>
+      <testCase id="TC14">Verify generated slides have contenteditable and data-field attributes</testCase>
+      <testCase id="TC15">Verify slides render at 1920x1080 in browser</testCase>
+    </ideas>
+  </tests>
+</story-context>

@@ -1,23 +1,81 @@
 # Edit Workflow - Slide Editing
 # Allows layout changes via natural language while preserving text edits
+# Story 4.1: Edit Command Invocation - Enhanced for AC4.1.1-AC4.1.6
+# Story 4.2: Natural Language Layout Changes - Enhanced for AC4.2.1-AC4.2.9
+# Story 4.3: Edit Preservation Across Regenerations - Enhanced for AC4.3.1-AC4.3.9
+
 name: edit
 description: "Edit slide layout via natural language prompts while preserving user text edits"
 author: "Slide Builder"
+version: "2.2"
 
 # Path variables
 installed_path: "{project-root}/.slide-builder/workflows/edit"
+
+# Config paths (shareable brand assets)
+config_path: "{project-root}/.slide-builder/config"
+theme_file: "{config_path}/theme.json"
 
 # Workflow components
 instructions: "{installed_path}/instructions.md"
 
 # State files
 status_file: "{project-root}/.slide-builder/status.yaml"
-theme_file: "{project-root}/.slide-builder/theme.json"
+
+# Output locations - slides are now in output/ folder
+output_root: "{project-root}/output"
+single_output_dir: "{output_root}/singles"
+deck_output_dir: "{output_root}"  # Deck slides at output/{slug}/slides/
+
+# Legacy paths (for deck working files only)
+deck_working_dir: "{project-root}/.slide-builder/deck"
 
 # Variables
 variables:
-  workflow_version: "1.0"
-  # slide_number will be passed as argument (e.g., /sb-edit 3)
+  workflow_version: "2.2"
+  # slide_number: passed as argument (e.g., /sb:edit 3)
+  # Resolved at runtime:
+  #   mode: from status.yaml (single | deck)
+  #   total_slides: from status.yaml
+  #   target_slide_path: computed based on mode and argument
+  #   target_state_path: computed based on mode and argument
+  #
+  # Story 4.2 additions:
+  #   current_slide_html: loaded from target_slide_path
+  #   saved_edits: loaded from target_state_path
+  #   field_names_list: extracted data-field values from HTML
+  #   edit_request: user's natural language instruction
+  #   regenerated_html: output from frontend-design skill
+  #   applied_edits: edits successfully matched and reapplied
+  #   orphaned_edits: edits with no matching field in new layout
+  #
+  # Story 4.3 additions:
+  #   orphanedEdits: array of edits moved from active edits when field not found
+  #   regenerationCount: counter incremented on each successful regeneration
+  #   new_orphaned_edits: newly orphaned edits from current regeneration
+  #   merged_orphaned_edits: combined previous + new orphaned edits
+
+# Command interface
+# Usage: /sb:edit [slide_number?]
+# - In single mode: slide_number is optional (defaults to single slide)
+# - In deck mode: slide_number required or will prompt
+# - Supports immediate instruction: /sb:edit "make title bigger"
+# - Supports deck with instruction: /sb:edit 3 "add subtitle"
+
+# Skills used
+skills:
+  - frontend-design  # Used for layout regeneration (Story 4.2)
+
+# Workflow phases (Story 4.2 enhanced)
+# Phase 1: Mode Detection and Slide Targeting
+# Phase 2: Load and Analyze Slide (reads HTML and state file)
+# Phase 3: Collect Edit Request (natural language prompt)
+# Phase 4: Confirm Understanding
+# Phase 5A: Layout Regeneration (frontend-design skill invocation)
+# Phase 5B: Edit Reapplication (match and inject saved edits)
+# Phase 5C: Save and Report (write files, update status)
+# Phase 6: Continue or Complete
+# Phase 7: Completion
 
 template: false
 standalone: true

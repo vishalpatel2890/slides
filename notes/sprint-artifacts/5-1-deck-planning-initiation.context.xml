@@ -1,0 +1,248 @@
+<story-context id="5-1-deck-planning-initiation" v="1.0">
+  <metadata>
+    <epicId>5</epicId>
+    <storyId>1</storyId>
+    <title>Deck Planning Initiation</title>
+    <status>drafted</status>
+    <generatedAt>2026-01-27</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>notes/sprint-artifacts/5-1-deck-planning-initiation.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>Solutions Consultant</asA>
+    <iWant>to describe my presentation purpose and audience</iWant>
+    <soThat>the system can propose an appropriate narrative structure for a complete slide deck</soThat>
+    <tasks>
+      <task id="1" name="Create Plan-Deck Workflow Structure" acs="1-4">
+        <subtask>1.1: Create .slide-builder/workflows/plan-deck/ directory</subtask>
+        <subtask>1.2: Create workflow.yaml with configuration</subtask>
+        <subtask>1.3: Create instructions.md with Phase 1: Prerequisites and Input Collection</subtask>
+        <subtask>1.4: Implement theme.json prerequisite check with clear error message</subtask>
+        <note>Directory and basic workflow files already exist - need to enhance instructions</note>
+      </task>
+      <task id="2" name="Implement Deck Plan Initiator Module" acs="1-4, 9">
+        <subtask>2.1: Implement presentation purpose prompt</subtask>
+        <subtask>2.2: Implement target audience prompt with example suggestions</subtask>
+        <subtask>2.3: Implement key points prompt (accepts bullet list)</subtask>
+        <subtask>2.4: Implement optional desired length prompt (default 6-10)</subtask>
+        <subtask>2.5: Store collected inputs for Narrative Generator</subtask>
+        <subtask>2.6: Handle error case: no theme exists</subtask>
+      </task>
+      <task id="3" name="Implement Narrative Generator Module" acs="5, 6">
+        <subtask>3.1: Analyze user inputs to determine storyline arc</subtask>
+        <subtask>3.2: Generate storyline structure (opening_hook, tension, resolution, call_to_action)</subtask>
+        <subtask>3.3: Generate slide breakdown (6-10 slides) with number, intent, template, storyline_role</subtask>
+        <subtask>3.4: Display proposed narrative to user for review</subtask>
+      </task>
+      <task id="4" name="Implement Plan Modifier Module" acs="5, 6">
+        <subtask>4.1: Display slide-by-slide breakdown in readable format</subtask>
+        <subtask>4.2: Prompt: "Make changes or type 'done' to finalize"</subtask>
+        <subtask>4.3: Parse modification commands (add, remove, reorder, modify)</subtask>
+        <subtask>4.4: Renumber slides after structural changes</subtask>
+        <subtask>4.5: Redisplay plan after each modification</subtask>
+        <subtask>4.6: Loop until user confirms "done"</subtask>
+      </task>
+      <task id="5" name="Implement Mode Switcher and Persister" acs="7, 8">
+        <subtask>5.1: Write plan.yaml to .slide-builder/deck/ with full schema</subtask>
+        <subtask>5.2: Create deck/slides/ directory if needed</subtask>
+        <subtask>5.3: Update status.yaml with mode: deck, total_slides, built_count</subtask>
+        <subtask>5.4: Add to history array with timestamp</subtask>
+        <subtask>5.5: Display success message with next steps</subtask>
+      </task>
+      <task id="6" name="Register /sb:plan-deck Slash Command" acs="1">
+        <subtask>6.1: Create .claude/commands/sb/plan-deck.md with usage documentation</subtask>
+        <subtask>6.2: Reference plan-deck workflow from command file</subtask>
+        <subtask>6.3: Document command options</subtask>
+        <note>File already exists - verify it correctly invokes the workflow</note>
+      </task>
+      <task id="7" name="Testing - Full Workflow Verification" acs="1-9">
+        <subtask>7.1: Test with theme present - verify all prompts appear</subtask>
+        <subtask>7.2: Test default slide count applied when skipped</subtask>
+        <subtask>7.3: Test narrative structure has all storyline elements</subtask>
+        <subtask>7.4: Test slide breakdown has required fields</subtask>
+        <subtask>7.5: Test plan.yaml created with correct schema</subtask>
+        <subtask>7.6: Test status.yaml updated correctly</subtask>
+        <subtask>7.7: Test error case: no theme.json</subtask>
+        <subtask>7.8: Run Frontend Test Gate checklist</subtask>
+      </task>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <ac id="AC5.1.1">Given a theme exists, when the user runs /plan-deck, then they are prompted for presentation purpose</ac>
+    <ac id="AC5.1.2">The user is prompted for target audience (e.g., "Technical decision makers")</ac>
+    <ac id="AC5.1.3">The user is prompted for key points to convey (bullet list)</ac>
+    <ac id="AC5.1.4">The user can optionally specify desired length (defaults to 6-10 slides)</ac>
+    <ac id="AC5.1.5">After collecting inputs, the system proposes a narrative structure with slide-by-slide breakdown</ac>
+    <ac id="AC5.1.6">Each slide in the proposal shows: number, title/purpose, key content description, suggested template</ac>
+    <ac id="AC5.1.7">The deck plan is saved to .slide-builder/deck/plan.yaml</ac>
+    <ac id="AC5.1.8">status.yaml is updated with mode: "deck" and total_slides count</ac>
+    <ac id="AC5.1.9">Given no theme exists, when user runs /plan-deck, then error message directs them to run /setup first</ac>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>notes/sprint-artifacts/tech-spec-epic-5.md</path>
+        <title>Epic 5 Technical Specification</title>
+        <section>Services and Modules, Data Models and Contracts, Workflows and Sequencing</section>
+        <snippet>Defines Deck Plan Initiator, Narrative Generator, and Mode Switcher modules. Contains complete plan.yaml schema with rich per-slide context. Details /plan-deck workflow phases.</snippet>
+      </doc>
+      <doc>
+        <path>notes/architecture.md</path>
+        <title>Slide Builder Architecture</title>
+        <section>Novel Pattern 2 (Template-or-Custom), Novel Pattern 4 (Dual-Mode State), State File Patterns</section>
+        <snippet>Intent-to-template mapping pattern. Mode detection via status.yaml. Complete plan.yaml schema with storyline, audience context, and per-slide rich context.</snippet>
+      </doc>
+      <doc>
+        <path>notes/epics.md</path>
+        <title>Epic Breakdown</title>
+        <section>Epic 5: Full Deck Mode, Story 5.1</section>
+        <snippet>User story and acceptance criteria context for deck planning initiation workflow.</snippet>
+      </doc>
+    </docs>
+
+    <code>
+      <file>
+        <path>.slide-builder/workflows/plan-deck/workflow.yaml</path>
+        <kind>workflow-config</kind>
+        <symbol>plan-deck workflow</symbol>
+        <lines>1-22</lines>
+        <reason>EXISTING: Basic workflow configuration. Needs to be enhanced with all required variables.</reason>
+      </file>
+      <file>
+        <path>.slide-builder/workflows/plan-deck/instructions.md</path>
+        <kind>workflow-instructions</kind>
+        <symbol>plan-deck workflow steps</symbol>
+        <lines>1-98</lines>
+        <reason>EXISTING: Basic workflow with 5 steps. Needs enhancement for sequential prompts (AC5.1.1-4), narrative generation (AC5.1.5-6), plan.yaml schema (AC5.1.7), status.yaml updates (AC5.1.8).</reason>
+      </file>
+      <file>
+        <path>.claude/commands/sb/plan-deck.md</path>
+        <kind>slash-command</kind>
+        <symbol>/sb:plan-deck command registration</symbol>
+        <lines>1-16</lines>
+        <reason>EXISTING: Slash command registration. Verify it correctly invokes the workflow.</reason>
+      </file>
+      <file>
+        <path>.slide-builder/status.yaml</path>
+        <kind>state-file</kind>
+        <symbol>status tracking</symbol>
+        <lines>1-75</lines>
+        <reason>READ/MODIFY: Current status shows mode: single. Story must update to mode: deck with deck-specific tracking fields.</reason>
+      </file>
+      <file>
+        <path>.slide-builder/theme.json</path>
+        <kind>config</kind>
+        <symbol>brand theme</symbol>
+        <lines>1-230</lines>
+        <reason>PREREQUISITE: Must exist before /plan-deck can run. Contains Amperity brand primitives.</reason>
+      </file>
+      <file>
+        <path>.slide-builder/samples/01-title.html</path>
+        <kind>template</kind>
+        <symbol>layout-title template reference</symbol>
+        <reason>REFERENCE: Example template structure for template matching in narrative generator.</reason>
+      </file>
+    </code>
+
+    <dependencies>
+      <npm>
+        <package name="puppeteer" version="^23.0.0" purpose="HTML-to-image conversion (Epic 7)" used="no" />
+        <package name="googleapis" version="^140.0.0" purpose="Google Slides API (Epic 7)" used="no" />
+      </npm>
+      <note>Epic 5 does not require npm dependencies. All operations use Claude Code built-in capabilities.</note>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint source="tech-spec">Deck mode MUST use .slide-builder/deck/ directory exclusively</constraint>
+    <constraint source="tech-spec">plan.yaml MUST follow the documented schema with rich per-slide context</constraint>
+    <constraint source="tech-spec">Mode MUST be set to "deck" in status.yaml when deck planning starts</constraint>
+    <constraint source="tech-spec">Template selection MUST follow the intent-to-template mapping pattern</constraint>
+    <constraint source="prd">Story-first Planning: Captures narrative, not layout details</constraint>
+    <constraint source="architecture">Workflow follows workflow.yaml + instructions.md pattern (ADR-001)</constraint>
+    <constraint source="architecture">Phase-based execution with checkpoint approvals</constraint>
+    <constraint source="architecture">YAML state files for persistence</constraint>
+  </constraints>
+
+  <interfaces>
+    <interface name="plan.yaml schema" kind="data-contract" path="notes/architecture.md#State File Patterns">
+      <signature>
+deck_name: string
+created: ISO-date
+last_modified: ISO-timestamp
+audience: string
+audience_knowledge_level: beginner | intermediate | expert
+audience_priorities: string[]
+purpose: string
+desired_outcome: string
+key_message: string
+storyline:
+  opening_hook: string
+  tension: string
+  resolution: string
+  call_to_action: string
+recurring_themes: string[]
+slides:
+  - number: int
+    intent: string
+    template: string
+    status: pending | built | failed
+    storyline_role: opening | tension | evidence | resolution | cta
+    key_points: string[]
+    visual_guidance: string
+    tone: professional | bold | warm | technical | urgent
+      </signature>
+    </interface>
+    <interface name="status.yaml deck fields" kind="data-contract" path="notes/architecture.md#State File Patterns">
+      <signature>
+mode: deck | single | null
+current_slide: int
+total_slides: int
+built_count: int
+last_action: string
+last_modified: ISO-timestamp
+history: { action: string, timestamp: ISO-timestamp }[]
+      </signature>
+    </interface>
+    <interface name="Template Matching" kind="decision-logic" path="notes/architecture.md#Novel Pattern 2">
+      <signature>
+Intent Keywords → Template Mapping:
+├── "title", "intro", "opening" → layout-title
+├── "list", "bullets", "points" → layout-list
+├── "flow", "process", "timeline", "steps" → layout-flow
+├── "compare", "vs", "two" → layout-columns-2
+├── "three", "triad", "options" → layout-columns-3
+├── "key", "insight", "callout", "cta" → layout-callout
+└── "code", "technical", "api" → layout-code
+      </signature>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>
+Per Tech Spec Test Strategy: Manual verification per AC table. Integration testing via end-to-end workflow execution. All tests performed through Claude Code CLI interactions.
+    </standards>
+    <locations>
+      <location>Manual testing via /sb:plan-deck command execution</location>
+      <location>File system verification at .slide-builder/deck/plan.yaml</location>
+      <location>State verification at .slide-builder/status.yaml</location>
+    </locations>
+    <ideas>
+      <idea ac="AC5.1.1">Run /plan-deck with theme present, verify purpose prompt appears first</idea>
+      <idea ac="AC5.1.2">After purpose, verify audience prompt appears with example suggestions</idea>
+      <idea ac="AC5.1.3">After audience, verify key points prompt appears and accepts bullet list</idea>
+      <idea ac="AC5.1.4">Skip length prompt, verify default 6-10 slides applied</idea>
+      <idea ac="AC5.1.5">Provide full inputs, verify narrative structure with storyline elements proposed</idea>
+      <idea ac="AC5.1.6">Verify each slide shows number, intent, template assignment, storyline_role</idea>
+      <idea ac="AC5.1.7">Confirm plan, verify .slide-builder/deck/plan.yaml created with correct schema</idea>
+      <idea ac="AC5.1.8">Verify status.yaml updated: mode=deck, total_slides set, built_count=0</idea>
+      <idea ac="AC5.1.9">Delete theme.json, run /plan-deck, verify clear error directing to /setup</idea>
+      <idea ac="edge">Very long deck (15+ slides): Allow but recommend 10-12</idea>
+      <idea ac="edge">Existing deck plan: Prompt "continue or new?"</idea>
+      <idea ac="edge">Empty key points: Proceed with minimal narrative</idea>
+    </ideas>
+  </tests>
+</story-context>

@@ -1,0 +1,260 @@
+<story-context id="7-1-google-oauth-setup" v="1.0">
+  <metadata>
+    <epicId>7</epicId>
+    <storyId>1</storyId>
+    <title>Google OAuth Setup</title>
+    <status>drafted</status>
+    <generatedAt>2026-01-28</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>notes/sprint-artifacts/7-1-google-oauth-setup.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>user</asA>
+    <iWant>to authenticate with Google once during my first export</iWant>
+    <soThat>I can export decks to Google Slides without repeated login prompts</soThat>
+    <tasks>
+      <task id="1" ac="1">
+        <title>Create Export Workflow Structure</title>
+        <subtasks>
+          <subtask id="1.1">Create `.slide-builder/workflows/export/` directory</subtask>
+          <subtask id="1.2">Create `workflow.yaml` with name, description, instructions path</subtask>
+          <subtask id="1.3">Create `instructions.md` skeleton with workflow steps placeholder</subtask>
+          <subtask id="1.4">Register `/sb:export` slash command in skill configuration</subtask>
+        </subtasks>
+        <note>Export workflow structure already exists - verify and enhance</note>
+      </task>
+      <task id="2" ac="1,6">
+        <title>Implement OAuth Manager - Credential Check</title>
+        <subtasks>
+          <subtask id="2.1">Check for `.slide-builder/credentials/google-oauth.json`</subtask>
+          <subtask id="2.2">Parse JSON and verify structure (access_token, refresh_token, expiry_date)</subtask>
+          <subtask id="2.3">If valid credentials exist, skip to token validation step</subtask>
+          <subtask id="2.4">If missing or malformed, trigger OAuth flow</subtask>
+        </subtasks>
+      </task>
+      <task id="3" ac="1,2,3">
+        <title>Implement First-Time OAuth Flow</title>
+        <subtasks>
+          <subtask id="3.1">Display OAuth setup guidance with Google Cloud requirements</subtask>
+          <subtask id="3.2">Prompt user for client credentials or path to credentials JSON</subtask>
+          <subtask id="3.3">Generate OAuth authorization URL with presentations scope</subtask>
+          <subtask id="3.4">Open browser to authorization URL</subtask>
+          <subtask id="3.5">Prompt user to paste authorization code</subtask>
+          <subtask id="3.6">Exchange code for tokens via Google OAuth token endpoint</subtask>
+        </subtasks>
+      </task>
+      <task id="4" ac="4,5">
+        <title>Implement Token Storage</title>
+        <subtasks>
+          <subtask id="4.1">Create credentials/ directory if not exists</subtask>
+          <subtask id="4.2">Save tokens to google-oauth.json with proper structure</subtask>
+          <subtask id="4.3">Set appropriate file permissions</subtask>
+          <subtask id="4.4">Verify .gitignore includes credentials/</subtask>
+          <subtask id="4.5">Display success message</subtask>
+        </subtasks>
+      </task>
+      <task id="5" ac="6,7">
+        <title>Implement Token Validation and Refresh</title>
+        <subtasks>
+          <subtask id="5.1">Check token expiry_date vs current time</subtask>
+          <subtask id="5.2">Trigger proactive refresh if expires within 5 minutes</subtask>
+          <subtask id="5.3">Trigger refresh if already expired</subtask>
+          <subtask id="5.4">Refresh flow: request new access_token, update file</subtask>
+          <subtask id="5.5">If successful, proceed silently</subtask>
+        </subtasks>
+      </task>
+      <task id="6" ac="8">
+        <title>Implement Refresh Failure Handling</title>
+        <subtasks>
+          <subtask id="6.1">Handle invalid_grant/revoked token errors</subtask>
+          <subtask id="6.2">Handle network errors</subtask>
+          <subtask id="6.3">Log refresh failures to status.yaml</subtask>
+        </subtasks>
+      </task>
+      <task id="7" ac="all">
+        <title>Integration with Export Workflow</title>
+        <subtasks>
+          <subtask id="7.1">Add OAuth check as Step 1 in export instructions</subtask>
+          <subtask id="7.2">Store valid access_token in workflow context</subtask>
+          <subtask id="7.3">Halt workflow if OAuth fails</subtask>
+          <subtask id="7.4">Never display tokens in terminal output</subtask>
+        </subtasks>
+      </task>
+      <task id="8" ac="all">
+        <title>Testing - OAuth Flow Verification</title>
+        <subtasks>
+          <subtask id="8.1">Test first-time flow</subtask>
+          <subtask id="8.2">Test subsequent export</subtask>
+          <subtask id="8.3">Test token refresh</subtask>
+          <subtask id="8.4">Test refresh failure</subtask>
+          <subtask id="8.5">Verify credentials gitignored</subtask>
+          <subtask id="8.6">Run Frontend Test Gate checklist</subtask>
+        </subtasks>
+      </task>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <ac id="7.1.1">When user runs `/export` for the first time and no credentials exist, the system guides them through OAuth flow</ac>
+    <ac id="7.1.2">OAuth flow opens browser for Google authentication</ac>
+    <ac id="7.1.3">System requests only `presentations` scope (minimal permissions)</ac>
+    <ac id="7.1.4">Tokens are saved to `.slide-builder/credentials/google-oauth.json`</ac>
+    <ac id="7.1.5">Credentials file is in gitignored directory</ac>
+    <ac id="7.1.6">Subsequent exports use saved tokens without re-authentication</ac>
+    <ac id="7.1.7">Expired tokens are refreshed automatically</ac>
+    <ac id="7.1.8">If refresh fails, user is prompted to re-authenticate</ac>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>notes/sprint-artifacts/tech-spec-epic-7.md</path>
+        <title>Epic 7 Technical Specification</title>
+        <section>Story 7.1: Google OAuth Setup</section>
+        <snippet>OAuth Manager handles authentication flow with authenticate(), getValidToken(), isAuthenticated() interface. Token storage schema includes access_token, refresh_token, scope, token_type, expiry_date.</snippet>
+      </doc>
+      <doc>
+        <path>notes/prd.md</path>
+        <title>Product Requirements Document</title>
+        <section>Export (FR42-47) and NFR6-7, NFR11</section>
+        <snippet>FR42-47 define export functionality. NFR6-7 specify OAuth 2.0 integration with secure credential storage. NFR11 requires credentials stored securely, not in plain text.</snippet>
+      </doc>
+      <doc>
+        <path>notes/architecture.md</path>
+        <title>Architecture Document</title>
+        <section>Security Architecture, ADR-004, ADR-005, ADR-006</section>
+        <snippet>Credentials stored in gitignored credentials/ directory. ADR-004 specifies Puppeteer for export. ADR-005 mandates user-initiated external integrations. ADR-006 defines gitignore strategy.</snippet>
+      </doc>
+      <doc>
+        <path>notes/epics.md</path>
+        <title>Epic Breakdown</title>
+        <section>Epic 7: Google Slides Export, Story 7.1</section>
+        <snippet>User authenticates with Google once so they can export decks without repeated login prompts. Foundation for Stories 7.2-7.4.</snippet>
+      </doc>
+    </docs>
+
+    <code>
+      <file>
+        <path>.slide-builder/workflows/export/workflow.yaml</path>
+        <kind>workflow</kind>
+        <symbol>export workflow</symbol>
+        <lines>1-25</lines>
+        <reason>Existing export workflow configuration. Story 7.1 implements OAuth authentication step referenced in this workflow.</reason>
+      </file>
+      <file>
+        <path>.slide-builder/workflows/export/instructions.md</path>
+        <kind>instructions</kind>
+        <symbol>export instructions</symbol>
+        <lines>1-104</lines>
+        <reason>Current export instructions with Step 1 placeholder for OAuth. Story 7.1 implements the authentication logic.</reason>
+      </file>
+      <file>
+        <path>.gitignore</path>
+        <kind>config</kind>
+        <symbol>.slide-builder/credentials/</symbol>
+        <lines>8</lines>
+        <reason>Confirms credentials directory is already gitignored per AC7.1.5.</reason>
+      </file>
+      <file>
+        <path>package.json</path>
+        <kind>manifest</kind>
+        <symbol>googleapis</symbol>
+        <lines>18-21</lines>
+        <reason>googleapis ^140.0.0 already installed. Use for OAuth 2.0 token exchange.</reason>
+      </file>
+    </code>
+
+    <dependencies>
+      <npm>
+        <package name="googleapis" version="^140.0.0">Google Slides API client and OAuth support</package>
+        <package name="puppeteer" version="^23.0.0">Used in Story 7.2 for screenshots, not needed for OAuth</package>
+      </npm>
+      <system>
+        <requirement name="Node.js" version="18+">Runtime environment</requirement>
+        <requirement name="Browser">Required for OAuth consent screen</requirement>
+      </system>
+      <external>
+        <service name="Google OAuth 2.0">Token exchange endpoint</service>
+        <service name="Google Slides API">Presentation creation (Story 7.3)</service>
+      </external>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint type="security">OAuth credentials must be stored in gitignored credentials/ directory - never commit tokens</constraint>
+    <constraint type="security">Never display access_token or refresh_token in terminal output</constraint>
+    <constraint type="security">Use OAuth 2.0 with PKCE flow for desktop applications</constraint>
+    <constraint type="scope">Request only presentations scope - no drive, email, or other access</constraint>
+    <constraint type="scope">Scopes: https://www.googleapis.com/auth/presentations</constraint>
+    <constraint type="pattern">Follow BMAD workflow pattern: workflow.yaml + instructions.md</constraint>
+    <constraint type="pattern">Log all state changes to status.yaml with ISO 8601 timestamps</constraint>
+    <constraint type="error">If OAuth fails, halt workflow with clear guidance</constraint>
+    <constraint type="error">On refresh failure, delete invalid credentials and prompt re-auth</constraint>
+    <constraint type="ux">User must complete Google Cloud project setup one-time (enable Slides API, create OAuth credentials)</constraint>
+  </constraints>
+
+  <interfaces>
+    <interface>
+      <name>OAuth Manager</name>
+      <kind>module interface</kind>
+      <signature>
+interface OAuthManager {
+  authenticate(): Promise&lt;OAuth2Client&gt;;
+  getValidToken(): Promise&lt;string&gt;;
+  isAuthenticated(): boolean;
+}
+      </signature>
+      <path>notes/sprint-artifacts/tech-spec-epic-7.md#Services-and-Modules</path>
+    </interface>
+    <interface>
+      <name>Token Storage Schema</name>
+      <kind>data contract</kind>
+      <signature>
+{
+  "access_token": "ya29.xxx",
+  "refresh_token": "1//xxx",
+  "scope": "https://www.googleapis.com/auth/presentations",
+  "token_type": "Bearer",
+  "expiry_date": 1706400000000
+}
+      </signature>
+      <path>.slide-builder/credentials/google-oauth.json</path>
+    </interface>
+    <interface>
+      <name>Google OAuth Token Endpoint</name>
+      <kind>REST endpoint</kind>
+      <signature>POST https://oauth2.googleapis.com/token</signature>
+      <path>external</path>
+    </interface>
+    <interface>
+      <name>MCP Google Workspace Auth</name>
+      <kind>MCP tool</kind>
+      <signature>mcp__google_workspace__start_google_auth</signature>
+      <path>MCP server</path>
+      <note>Investigate if this can simplify OAuth flow vs raw googleapis</note>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>
+      No automated test framework currently configured. Manual testing via Frontend Test Gate checklist.
+      Tests focus on OAuth flow verification: first-time auth, token refresh, refresh failure handling,
+      credentials storage verification. All test scenarios documented in tech-spec-epic-7.md#Test-Strategy.
+    </standards>
+    <locations>
+      <location>Manual browser testing via Frontend Test Gate</location>
+      <location>CLI workflow execution via /sb:export</location>
+      <location>File verification at .slide-builder/credentials/google-oauth.json</location>
+    </locations>
+    <ideas>
+      <idea ac="7.1.1">Test first-time flow: Delete credentials, run /export, verify OAuth guidance appears</idea>
+      <idea ac="7.1.2">Test browser opens: Verify authorization URL opens in default browser</idea>
+      <idea ac="7.1.3">Test scope: Check consent screen shows only "Google Slides" permission</idea>
+      <idea ac="7.1.4,7.1.5">Test storage: Verify google-oauth.json created and gitignored</idea>
+      <idea ac="7.1.6">Test reuse: Run /export second time, verify no OAuth prompt</idea>
+      <idea ac="7.1.7">Test refresh: Modify expiry_date to past, verify silent refresh</idea>
+      <idea ac="7.1.8">Test failure: Use invalid refresh_token, verify re-auth prompt</idea>
+    </ideas>
+  </tests>
+</story-context>

@@ -1,0 +1,289 @@
+<story-context id="6-4-theme-rollback" v="1.0">
+  <metadata>
+    <epicId>6</epicId>
+    <storyId>4</storyId>
+    <title>Theme Rollback</title>
+    <status>drafted</status>
+    <generatedAt>2026-01-27</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>notes/sprint-artifacts/6-4-theme-rollback.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>user</asA>
+    <iWant>to rollback to a previous theme version</iWant>
+    <soThat>I can undo unwanted changes and restore a known-good theme state</soThat>
+    <tasks>
+      <task id="1" ac="1,2">Implement Version Manager - List Versions
+        <subtask>1.1: Scan `.slide-builder/theme-history/` for `theme-v*.json` files</subtask>
+        <subtask>1.2: Parse version number and date from each filename using regex</subtask>
+        <subtask>1.3: Sort versions by version number (ascending)</subtask>
+        <subtask>1.4: Return formatted list: `[{ version: "1", date: "2026-01-26", path: "..." }, ...]`</subtask>
+        <subtask>1.5: Handle empty directory (return empty list with message)</subtask>
+        <subtask>1.6: Load each version's meta.changeNotes for description if available</subtask>
+      </task>
+      <task id="2" ac="3,8">Implement Version Selection and Validation
+        <subtask>2.1: Parse user input for version number (support "1", "v1", "previous")</subtask>
+        <subtask>2.2: "previous" keyword resolves to N-1 where N is current version</subtask>
+        <subtask>2.3: Validate version exists in theme-history/</subtask>
+        <subtask>2.4: If invalid, display error with available version numbers</subtask>
+        <subtask>2.5: Load selected version file and parse JSON</subtask>
+        <subtask>2.6: Verify JSON structure is valid theme schema</subtask>
+      </task>
+      <task id="3" ac="4">Implement Sample Deck Preview
+        <subtask>3.1: Load selected version's theme.json content</subtask>
+        <subtask>3.2: Regenerate 6 sample slides using frontend-design skill</subtask>
+        <subtask>3.3: Save samples to `.slide-builder/samples/`</subtask>
+        <subtask>3.4: Open samples in browser for user preview</subtask>
+        <subtask>3.5: Display message: "Sample deck regenerated with v{N} theme. Review in browser."</subtask>
+      </task>
+      <task id="4" ac="5">Implement Confirmation Prompt
+        <subtask>4.1: After preview, display confirmation prompt</subtask>
+        <subtask>4.2: Show: "Restore v{N} from {date}? Current theme will be preserved as v{M}. (y/n)"</subtask>
+        <subtask>4.3: Accept "y", "yes", "n", "no", "cancel" as valid responses</subtask>
+        <subtask>4.4: If "n" or "cancel", exit workflow without changes</subtask>
+        <subtask>4.5: If "y", proceed to restore</subtask>
+      </task>
+      <task id="5" ac="6">Implement Current State Preservation
+        <subtask>5.1: Before restore, read current theme.json</subtask>
+        <subtask>5.2: Determine next version number (N+1)</subtask>
+        <subtask>5.3: Save current theme to `theme-history/theme-v{N+1}-{date}.json`</subtask>
+        <subtask>5.4: Log to status.yaml: "Theme v{N+1} saved to history (pre-rollback backup)"</subtask>
+        <subtask>5.5: Verify backup file exists and is valid JSON</subtask>
+      </task>
+      <task id="6" ac="7">Implement Theme Restoration
+        <subtask>6.1: Copy selected version content to theme.json</subtask>
+        <subtask>6.2: Update meta.version to new number (N+2, not original version number)</subtask>
+        <subtask>6.3: Update meta.lastModified to current timestamp (ISO 8601)</subtask>
+        <subtask>6.4: Add meta.changeNotes: "Rolled back from v{N+1} to v{X} settings"</subtask>
+        <subtask>6.5: Save updated theme.json</subtask>
+        <subtask>6.6: Verify save succeeded</subtask>
+      </task>
+      <task id="7" ac="9">Implement Template Regeneration
+        <subtask>7.1: Compare restored theme shapes/layouts with previous theme</subtask>
+        <subtask>7.2: If shape primitives differ, regenerate layout templates</subtask>
+        <subtask>7.3: If only colors/typography differ, skip template regeneration</subtask>
+        <subtask>7.4: Log template regeneration status to status.yaml</subtask>
+      </task>
+      <task id="8" ac="all">Implement Status Logger for Rollback
+        <subtask>8.1: Log "Theme rolled back to v{X}" to status.yaml last_action</subtask>
+        <subtask>8.2: Update last_modified timestamp</subtask>
+        <subtask>8.3: Append to history array with rollback details</subtask>
+        <subtask>8.4: Display success message with version details</subtask>
+      </task>
+      <task id="9" ac="all">Integrate with /theme-edit Workflow
+        <subtask>9.1: Review theme-edit/instructions.md for rollback trigger</subtask>
+        <subtask>9.2: Add rollback detection: if feedback contains "rollback" or "restore"</subtask>
+        <subtask>9.3: Route to rollback flow instead of edit flow</subtask>
+        <subtask>9.4: Support syntax: "rollback to v1", "restore version 2", "rollback to previous"</subtask>
+      </task>
+      <task id="10" ac="1-9">Testing - Rollback Verification
+        <subtask>10.1: Create 3 versions through setup + 2 edits</subtask>
+        <subtask>10.2: Request rollback, verify list shows v1, v2, v3 with dates</subtask>
+        <subtask>10.3: Select v1, verify samples regenerated with v1 theme</subtask>
+        <subtask>10.4: Confirm rollback and verify state preservation</subtask>
+        <subtask>10.5: Request invalid version "v99", verify error with available list</subtask>
+        <subtask>10.6: Test "previous" keyword (rollback to N-1)</subtask>
+        <subtask>10.7: Verify templates regenerated if shapes changed</subtask>
+        <subtask>10.8: Verify status.yaml history updated</subtask>
+        <subtask>10.9: Run Frontend Test Gate checklist</subtask>
+      </task>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <ac id="1">Given theme history exists with multiple versions, when the user requests rollback, then available versions are listed</ac>
+    <ac id="2">Each version in the list shows version number and date</ac>
+    <ac id="3">User can select a specific version to restore</ac>
+    <ac id="4">Sample slides are regenerated with the selected version's theme for preview</ac>
+    <ac id="5">User must confirm before rollback is applied</ac>
+    <ac id="6">The current theme state is saved as a new version BEFORE rollback (preserving current state)</ac>
+    <ac id="7">The rolled-back state becomes a new version number (not overwriting history)</ac>
+    <ac id="8">Given an invalid version number is requested, then error shows available versions</ac>
+    <ac id="9">Templates are regenerated after rollback if needed</ac>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>notes/sprint-artifacts/tech-spec-epic-6.md</path>
+        <title>Epic 6 Technical Specification</title>
+        <section>Story 6.4: Theme Rollback</section>
+        <snippet>Defines AC6.4.1-AC6.4.9, Version Manager restore operation, Theme Rollback Workflow phases, and rollback safety pattern ensuring no data loss.</snippet>
+      </doc>
+      <doc>
+        <path>notes/architecture.md</path>
+        <title>Architecture Document</title>
+        <section>Project Structure, State File Patterns</section>
+        <snippet>Defines .slide-builder/ directory structure including theme-history/, status.yaml schema with history array, and ISO 8601 timestamp format.</snippet>
+      </doc>
+      <doc>
+        <path>notes/prd.md</path>
+        <title>Product Requirements Document</title>
+        <section>FR11</section>
+        <snippet>"Users can rollback to previous theme version" - core functional requirement for theme version history feature.</snippet>
+      </doc>
+      <doc>
+        <path>notes/epics.md</path>
+        <title>Epics and Stories</title>
+        <section>Epic 6: Theme Management</section>
+        <snippet>Story 6.4 Theme Rollback user story with high-level AC definitions and context for version history management.</snippet>
+      </doc>
+      <doc>
+        <path>notes/sprint-artifacts/6-3-theme-version-history.md</path>
+        <title>Previous Story: Theme Version History</title>
+        <section>Dev Notes</section>
+        <snippet>Establishes Version Manager foundation including theme-history/ directory management, version save logic, and naming pattern theme-v{N}-{YYYY-MM-DD}.json.</snippet>
+      </doc>
+      <doc>
+        <path>notes/sprint-artifacts/6-2-theme-editing.md</path>
+        <title>Story 6.2: Theme Editing</title>
+        <section>Implementation</section>
+        <snippet>Established /theme-edit workflow structure with feedback loop pattern, sample regeneration using frontend-design skill, and approval flow.</snippet>
+      </doc>
+    </docs>
+
+    <code>
+      <file>
+        <path>.slide-builder/workflows/theme-edit/instructions.md</path>
+        <kind>workflow</kind>
+        <symbol>theme-edit-workflow</symbol>
+        <lines>1-496</lines>
+        <reason>Primary integration point for rollback - need to add rollback detection when user provides "rollback" or "restore" feedback. Contains existing Phase 1 version save logic (lines 66-73), sample regeneration pattern (Phase 4), and status logging patterns.</reason>
+      </file>
+      <file>
+        <path>.slide-builder/workflows/theme/instructions.md</path>
+        <kind>workflow</kind>
+        <symbol>theme-workflow</symbol>
+        <lines>103-129</lines>
+        <reason>Phase 2.5 contains version list display logic - scan theme-history/, parse filenames, sort by version. Reuse this pattern for rollback version listing.</reason>
+      </file>
+      <file>
+        <path>.slide-builder/theme.json</path>
+        <kind>config</kind>
+        <symbol>ThemeJson</symbol>
+        <lines>1-245</lines>
+        <reason>Current theme structure showing version "2.0", meta.changeNotes array, shapes primitives, and all theme schema fields. Target for rollback restore operation.</reason>
+      </file>
+      <file>
+        <path>.slide-builder/theme-history/theme-v1-2026-01-27.json</path>
+        <kind>config</kind>
+        <symbol>ThemeVersion</symbol>
+        <lines>1-230</lines>
+        <reason>Example version file showing original v1.0 theme structure. Used as source for rollback restore - compare shapes (borderRadius 8px vs 0px) to determine if templates need regeneration.</reason>
+      </file>
+      <file>
+        <path>.slide-builder/status.yaml</path>
+        <kind>state</kind>
+        <symbol>StatusYaml</symbol>
+        <lines>1-101</lines>
+        <reason>State file to update with rollback actions. Contains history array pattern, last_action field, last_modified timestamp, and theme.status field.</reason>
+      </file>
+      <file>
+        <path>.slide-builder/samples/01-title.html</path>
+        <kind>template</kind>
+        <symbol>sample-title</symbol>
+        <reason>Sample slide for preview - regenerated with selected version theme during rollback preview phase.</reason>
+      </file>
+      <file>
+        <path>.slide-builder/samples/index.html</path>
+        <kind>template</kind>
+        <symbol>sample-index</symbol>
+        <reason>Sample deck index - opens in browser for user to preview theme during rollback selection.</reason>
+      </file>
+      <file>
+        <path>.slide-builder/templates/</path>
+        <kind>directory</kind>
+        <symbol>templates</symbol>
+        <reason>Layout templates directory - regenerated if shape primitives change during rollback.</reason>
+      </file>
+    </code>
+
+    <dependencies>
+      <note>This project is a BMAD agentic framework for Claude Code - not a traditional npm/pip project. Dependencies are Claude Code skills and workflows, not packages.</note>
+      <skill name="frontend-design">Used for regenerating 6 sample slides during rollback preview</skill>
+      <skill name="sb:theme-edit">Primary command that will route to rollback flow</skill>
+      <skill name="sb:theme">Displays theme with version history summary</skill>
+      <workflow name="theme-edit">Located at .slide-builder/workflows/theme-edit/</workflow>
+      <workflow name="theme">Located at .slide-builder/workflows/theme/</workflow>
+      <workflow name="setup">Located at .slide-builder/workflows/setup/</workflow>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint type="data-safety">NEVER delete version history entries - all versions must be preserved for audit trail</constraint>
+    <constraint type="data-safety">Current theme state MUST be saved BEFORE restore operation - no data loss scenario possible</constraint>
+    <constraint type="versioning">Rollback creates NEW version entry (e.g., v4 might be rollback to v2 settings) - don't overwrite original version number</constraint>
+    <constraint type="performance">Version list operation: &lt; 100ms (local directory scan)</constraint>
+    <constraint type="performance">Full rollback operation: &lt; 30 seconds (includes sample regeneration per NFR)</constraint>
+    <constraint type="architecture">Templates regenerated ONLY if shape primitives change (borderRadius, shadow, arrow styles) - not for color/typography changes</constraint>
+    <constraint type="architecture">All timestamps in ISO 8601 format per status.yaml patterns</constraint>
+    <constraint type="architecture">Version filename pattern: theme-v{N}-{YYYY-MM-DD}.json</constraint>
+    <constraint type="architecture">Status logger updates: last_action, last_modified, history array append</constraint>
+    <constraint type="ux">User must confirm rollback after previewing samples - no automatic restore</constraint>
+  </constraints>
+
+  <interfaces>
+    <interface name="Version Manager - List Versions">
+      <kind>module-function</kind>
+      <signature>
+        listVersions(): Array&lt;{ version: string, date: string, path: string, changeNotes?: string }&gt;
+      </signature>
+      <path>.slide-builder/workflows/theme/instructions.md (Phase 2.5)</path>
+    </interface>
+    <interface name="Version Manager - Restore">
+      <kind>module-function</kind>
+      <signature>
+        restoreVersion(versionNumber: string): { restoredTheme: ThemeJson, error: string | null }
+      </signature>
+      <path>NEW - to be implemented in theme-edit/instructions.md</path>
+    </interface>
+    <interface name="Theme Editor - Sample Regeneration">
+      <kind>workflow-phase</kind>
+      <signature>
+        regenerateSamples(theme: ThemeJson): void
+        // Generates 6 slides to .slide-builder/samples/ using frontend-design skill
+      </signature>
+      <path>.slide-builder/workflows/theme-edit/instructions.md (Phase 4)</path>
+    </interface>
+    <interface name="Status Logger">
+      <kind>state-update</kind>
+      <signature>
+        updateStatus(action: string, additionalFields?: object): void
+        // Updates last_action, last_modified, appends to history
+      </signature>
+      <path>.slide-builder/status.yaml</path>
+    </interface>
+    <interface name="Template Updater">
+      <kind>workflow-phase</kind>
+      <signature>
+        updateTemplatesIfNeeded(oldTheme: ThemeJson, newTheme: ThemeJson): void
+        // Compares shapes, regenerates templates if changed
+      </signature>
+      <path>.slide-builder/workflows/theme-edit/instructions.md (Phase 6)</path>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>
+      This is an agentic workflow project - testing is manual via Frontend Test Gates. Each story includes a test gate checklist with prerequisites, test steps, success criteria, and feedback questions. Tests verify workflow behavior by running commands and checking file system state.
+    </standards>
+    <locations>
+      <location>Story file: notes/sprint-artifacts/6-4-theme-rollback.md (Frontend Test Gate section)</location>
+      <location>Sample verification: .slide-builder/samples/</location>
+      <location>Theme history verification: .slide-builder/theme-history/</location>
+      <location>Status log verification: .slide-builder/status.yaml</location>
+    </locations>
+    <ideas>
+      <idea ac="1,2">Verify version list displays all theme-v*.json files from theme-history/ with correct version numbers and dates parsed from filenames</idea>
+      <idea ac="3">Test version selection with formats: "1", "v1", "previous" - all should resolve correctly</idea>
+      <idea ac="4">After version selection, verify 6 sample slides regenerated in samples/ with selected version's theme colors and shapes applied</idea>
+      <idea ac="5">Verify confirmation prompt appears and "n"/"cancel" exits without changes, "y" proceeds</idea>
+      <idea ac="6">Before rollback completion, verify current theme saved to theme-history/ with incremented version number</idea>
+      <idea ac="7">After rollback, verify theme.json has restored content but NEW version number (not original v1 number)</idea>
+      <idea ac="8">Test invalid version "v99" - should display error with list of available versions</idea>
+      <idea ac="9">Compare v1 (borderRadius 8px) vs v2 (borderRadius 0px) - rollback from v2 to v1 should trigger template regeneration</idea>
+      <idea ac="all">Run full Frontend Test Gate 6-4-TG1 checklist to verify end-to-end workflow</idea>
+    </ideas>
+  </tests>
+</story-context>

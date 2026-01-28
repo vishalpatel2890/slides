@@ -2,16 +2,18 @@
 # This file tracks the current state of slide generation workflows
 
 # Current operating mode
-mode: single
+mode: deck
 
-# Single slide tracking
-current_slide: 1
-total_slides: 1
-built_count: 1
+# Deck tracking
+current_deck_slug: "claude-code-fundamentals"
+deck_slug: "claude-code-fundamentals"
+current_slide: 14
+total_slides: 14
+built_count: 14
 
 # Setup workflow tracking
 phase: complete
-workflow_version: "1.0"
+workflow_version: "2.0"
 
 # Assets collected
 assets:
@@ -28,7 +30,7 @@ extraction:
 
 # Theme status
 theme:
-  file: .slide-builder/theme.json
+  file: .slide-builder/config/theme.json
   status: locked
   personality: bold
   confidence: 0.85
@@ -36,7 +38,7 @@ theme:
 
 # Template files
 templates:
-  directory: .slide-builder/templates/
+  directory: .slide-builder/config/templates/
   count: 6
   files:
     - 01-title.html
@@ -47,8 +49,9 @@ templates:
     - 06-technical.html
 
 # Last action tracking
-last_action: "Built custom slide via frontend-design skill"
-last_modified: "2026-01-27T20:15:00Z"
+last_action: "Batch built all 14 slides for Claude Code Fundamentals deck"
+last_modified: "2026-01-28T00:00:00Z"
+output_folder: "output/claude-code-fundamentals"
 
 # Action history
 history:
@@ -72,3 +75,33 @@ history:
     timestamp: "2026-01-27T20:00:00Z"
   - action: "Built custom slide via frontend-design skill"
     timestamp: "2026-01-27T20:15:00Z"
+  - action: "Deck plan created with 9 slides"
+    timestamp: "2026-01-27T00:00:00Z"
+  - action: "Built slide 1: Title - Claude Code Fundamentals"
+    timestamp: "2026-01-27T16:00:00Z"
+  - action: "Built slide 2: What is Claude Code?"
+    timestamp: "2026-01-27T16:05:00Z"
+  - action: "Batch built 8 slides (slides 3-10)"
+    timestamp: "2026-01-27T18:30:00Z"
+  - action: "Single slide planned - Activation Hub concept"
+    timestamp: "2026-01-27T10:00:00Z"
+  - action: "Theme viewed via /theme"
+    timestamp: "2026-01-27T20:30:00Z"
+  - action: "Built custom Activation Hub slide via frontend-design skill"
+    timestamp: "2026-01-27T21:00:00Z"
+  - action: "Single slide planned - Household Constellation concept"
+    timestamp: "2026-01-27T21:30:00Z"
+  - action: "Built custom Household Constellation slide via frontend-design skill"
+    timestamp: "2026-01-27T21:45:00Z"
+  - action: "Built custom Household Transformation slide via frontend-design skill"
+    timestamp: "2026-01-27T22:35:00Z"
+  - action: "Single slide planned - Household ID outcome using layout-rocd-initiative"
+    timestamp: "2026-01-27T23:00:00Z"
+  - action: "Built slide using layout-rocd-initiative template"
+    timestamp: "2026-01-27T23:05:00Z"
+  - action: "Deck plan 'Claude Code Fundamentals' created with 14 slides"
+    timestamp: "2026-01-27T23:30:00Z"
+  - action: "Built slide 1: Title - Claude Code Fundamentals"
+    timestamp: "2026-01-27T23:35:00Z"
+  - action: "Batch built slides 2-14 for Claude Code Fundamentals deck"
+    timestamp: "2026-01-28T00:00:00Z"

@@ -1,0 +1,239 @@
+<story-context id="5-2-plan-modification" v="1.0">
+  <metadata>
+    <epicId>5</epicId>
+    <storyId>5-2</storyId>
+    <title>Plan Modification</title>
+    <status>drafted</status>
+    <generatedAt>2026-01-27</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>notes/sprint-artifacts/5-2-plan-modification.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>user</asA>
+    <iWant>to add, remove, reorder, and modify slides in my deck plan</iWant>
+    <soThat>the narrative matches my exact intent before building slides</soThat>
+    <tasks>
+      <task id="1">Enhance Plan Modification Command Parser (AC: 1-4)
+        - 1.1: Review existing parser from Story 5.1 (Task 4 in plan-deck instructions.md)
+        - 1.2: Enhance add command parsing: extract position ("after slide N") and content topic
+        - 1.3: Enhance remove command parsing: extract slide number, validate range
+        - 1.4: Enhance move/reorder command parsing: extract source slide and target position
+        - 1.5: Enhance modify command parsing: extract slide number and new focus/intent
+        - 1.6: Add error handling for malformed commands with helpful suggestions
+      </task>
+      <task id="2">Implement Add Slide Logic (AC: 1, 5, 6, 7)
+        - 2.1: Generate new slide entry with inferred template from content topic
+        - 2.2: Set storyline_role based on position context (opening, tension, evidence, resolution, cta)
+        - 2.3: Generate key_points based on topic and surrounding slides
+        - 2.4: Insert slide at specified position
+        - 2.5: Renumber all subsequent slides
+        - 2.6: Save updated plan.yaml
+        - 2.7: Display updated plan
+      </task>
+      <task id="3">Implement Remove Slide Logic (AC: 2, 5, 6, 7)
+        - 3.1: Validate slide number exists in plan
+        - 3.2: Remove slide entry from slides array
+        - 3.3: Renumber all subsequent slides
+        - 3.4: Update total_slides count
+        - 3.5: Save updated plan.yaml
+        - 3.6: Display updated plan showing removal
+      </task>
+      <task id="4">Implement Reorder/Move Slide Logic (AC: 3, 5, 6, 7, 8)
+        - 4.1: Validate source and target positions
+        - 4.2: Check if any affected slides have status "built"
+        - 4.3: If built slides affected, display warning: "Note: Slide files not renamed. Built slides unchanged."
+        - 4.4: Remove slide from source position
+        - 4.5: Insert slide at target position
+        - 4.6: Renumber all slides sequentially
+        - 4.7: Save updated plan.yaml
+        - 4.8: Display updated plan
+      </task>
+      <task id="5">Implement Modify Slide Description Logic (AC: 4, 5, 7)
+        - 5.1: Validate slide number exists
+        - 5.2: Update intent field with new focus
+        - 5.3: Re-generate key_points based on new focus
+        - 5.4: Re-evaluate suggested template based on new intent
+        - 5.5: Update visual_guidance if needed
+        - 5.6: Save updated plan.yaml
+        - 5.7: Display updated slide details
+      </task>
+      <task id="6">Implement Plan Display After Modifications (AC: 5)
+        - 6.1: Create consistent plan display format showing all slides
+        - 6.2: Highlight the modified slide(s) in output
+        - 6.3: Show slide number, intent, template, storyline_role for each
+        - 6.4: Show total slide count
+      </task>
+      <task id="7">Update Workflow Instructions for Modification Loop (AC: 1-8)
+        - 7.1: Enhance .slide-builder/workflows/plan-deck/instructions.md Step 4
+        - 7.2: Add detailed parsing logic for all command types
+        - 7.3: Add built slide detection and warning logic
+        - 7.4: Ensure modification loop continues until "done"
+        - 7.5: Verify plan.yaml persistence after each modification
+      </task>
+      <task id="8">Testing - All Modification Operations (AC: 1-8)
+        - 8.1: Test add slide at various positions (beginning, middle, end)
+        - 8.2: Test remove slide at various positions
+        - 8.3: Test move slide forward (e.g., 7 to 2) and backward (e.g., 2 to 7)
+        - 8.4: Test modify slide description
+        - 8.5: Test built slide warning (build a slide, then try to affect it)
+        - 8.6: Verify plan.yaml correct after compound modifications
+        - 8.7: Run Frontend Test Gate checklist
+      </task>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <criterion id="AC5.2.1">Given a deck plan has been proposed, when the user requests to add a slide (e.g., "Add a slide about ROI after slide 3"), then a new slide is inserted at the specified position</criterion>
+    <criterion id="AC5.2.2">When the user requests to remove a slide (e.g., "Remove slide 5"), then the slide is deleted and remaining slides are renumbered</criterion>
+    <criterion id="AC5.2.3">When the user requests to reorder slides (e.g., "Move slide 7 to position 2"), then slides are reordered accordingly</criterion>
+    <criterion id="AC5.2.4">When the user requests to modify a slide description (e.g., "Change slide 3 to focus on security"), then the slide intent/description is updated</criterion>
+    <criterion id="AC5.2.5">After each modification, the updated plan is displayed to the user</criterion>
+    <criterion id="AC5.2.6">Slide numbers are automatically renumbered after structural changes</criterion>
+    <criterion id="AC5.2.7">The plan.yaml file is saved after each modification</criterion>
+    <criterion id="AC5.2.8">If built slides exist and would be affected by reorder, a warning is displayed</criterion>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc path="notes/sprint-artifacts/tech-spec-epic-5.md" relevance="high">
+        Epic 5 tech spec - defines Plan Modifier module, modification command patterns, renumbering flow, and edge cases
+      </doc>
+      <doc path="notes/architecture.md" relevance="high">
+        Architecture document - Novel Pattern 2 (Template-or-Custom Decision), Novel Pattern 4 (Dual-Mode State Management), State File Patterns
+      </doc>
+      <doc path="notes/epics.md" relevance="medium">
+        Epic definitions - Story 5.2 user story and acceptance criteria context
+      </doc>
+      <doc path="notes/sprint-artifacts/5-1-deck-planning-initiation.md" relevance="high">
+        Previous story - establishes plan.yaml schema, modification loop basics in Step 4, template mapping patterns
+      </doc>
+    </docs>
+    <code>
+      <artifact path=".slide-builder/workflows/plan-deck/instructions.md" relevance="critical">
+        <description>Main workflow instructions implementing plan-deck. Step 4 contains the modification loop to be enhanced.</description>
+        <keySection name="Step 4 - Plan modification loop" lines="195-256">
+          Current implementation includes basic add/remove/move/change parsing but needs:
+          - Robust error handling for malformed commands
+          - Built slide detection and warning
+          - Immediate persistence after each change
+          - Rich context regeneration for added/modified slides
+        </keySection>
+        <keySection name="Step 5 - Save plan and update status" lines="258-340">
+          Contains plan.yaml schema with full slide structure: number, intent, template, status, storyline_role, key_points, visual_guidance, tone
+        </keySection>
+      </artifact>
+      <artifact path=".slide-builder/workflows/plan-deck/workflow.yaml" relevance="high">
+        <description>Workflow configuration with template_mapping patterns for intent-to-template matching</description>
+        <keySection name="template_mapping" lines="37-45">
+          title: ["title", "intro", "opening", "welcome"]
+          list: ["list", "bullets", "points", "agenda"]
+          flow: ["flow", "process", "timeline", "steps", "journey"]
+          columns-2: ["compare", "vs", "versus", "two", "split"]
+          columns-3: ["three", "triad", "options", "trio"]
+          callout: ["key", "insight", "callout", "cta", "highlight", "quote"]
+          code: ["code", "technical", "api", "demo"]
+        </keySection>
+      </artifact>
+      <artifact path=".slide-builder/deck/plan.yaml" relevance="high">
+        <description>Example deck plan with 9 slides - reference for plan.yaml structure</description>
+        <keySection name="Slide structure">
+          Each slide has: number, intent, template, status (pending/built), storyline_role, key_points array, visual_guidance, tone
+        </keySection>
+      </artifact>
+      <artifact path=".slide-builder/status.yaml" relevance="medium">
+        <description>Current status tracking file - shows mode: deck, total_slides, built_count</description>
+        <keySection name="Deck tracking">
+          mode: deck
+          current_slide: 0
+          total_slides: 9
+          built_count: 0
+        </keySection>
+      </artifact>
+    </code>
+    <dependencies>
+      <dependency name="YAML file operations">Read/write plan.yaml after each modification</dependency>
+      <dependency name="Template mapping">Use template_mapping from workflow.yaml for new/modified slides</dependency>
+      <dependency name="Storyline role inference">Determine storyline_role based on position context</dependency>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint id="C1" source="tech-spec">Slide numbers MUST be automatically renumbered after structural changes</constraint>
+    <constraint id="C2" source="tech-spec">plan.yaml MUST be saved after each modification (not just at the end)</constraint>
+    <constraint id="C3" source="tech-spec">Built slides warning MUST be displayed when reordering affects built slides</constraint>
+    <constraint id="C4" source="tech-spec">Slide files named slide-{n}.html remain stable after build (renumbering in plan doesn't rename files)</constraint>
+    <constraint id="C5" source="architecture">Never delete history entries in status.yaml</constraint>
+    <constraint id="C6" source="architecture">All modification logic lives in instructions.md (not separate code files)</constraint>
+    <constraint id="C7" source="architecture">Deck mode uses .slide-builder/deck/ exclusively</constraint>
+  </constraints>
+
+  <interfaces>
+    <interface name="Plan Modification Commands">
+      <description>Natural language commands parsed in Step 4 of plan-deck workflow</description>
+      <commands>
+        <command type="add">"Add a slide about X after slide N" - Insert new slide at position N+1</command>
+        <command type="remove">"Remove slide N" - Delete slide, renumber remaining</command>
+        <command type="move">"Move slide N to position M" - Reorder slides</command>
+        <command type="modify">"Change slide N to focus on Y" - Update slide intent/description</command>
+        <command type="done">"done" / "looks good" - Finalize plan</command>
+      </commands>
+    </interface>
+    <interface name="plan.yaml Schema">
+      <description>Deck plan file structure</description>
+      <fields>
+        <field name="slides" type="array">Array of slide objects</field>
+        <field name="slides[].number" type="integer">Sequential slide number (1-based)</field>
+        <field name="slides[].intent" type="string">Clear description of slide purpose</field>
+        <field name="slides[].template" type="string">Template name (layout-title, layout-list, etc.)</field>
+        <field name="slides[].status" type="string">pending | built | failed</field>
+        <field name="slides[].storyline_role" type="string">opening | tension | evidence | resolution | cta</field>
+        <field name="slides[].key_points" type="array">Specific points for this slide</field>
+        <field name="slides[].visual_guidance" type="string">Brief visual approach description</field>
+        <field name="slides[].tone" type="string">professional | bold | warm | technical | urgent</field>
+      </fields>
+    </interface>
+    <interface name="Template Mapping Pattern">
+      <description>Intent keywords to template matching (Architecture Novel Pattern 2)</description>
+      <mappings>
+        <mapping keywords="title, intro, opening" template="layout-title" />
+        <mapping keywords="list, bullets, points" template="layout-list" />
+        <mapping keywords="flow, process, timeline, steps" template="layout-flow" />
+        <mapping keywords="compare, vs, two" template="layout-columns-2" />
+        <mapping keywords="three, triad, options" template="layout-columns-3" />
+        <mapping keywords="key, insight, callout, cta" template="layout-callout" />
+        <mapping keywords="code, technical, api" template="layout-code" />
+        <mapping keywords="ROI, numbers, metrics, data" template="layout-columns-2" />
+        <mapping keywords="security, compliance, risk" template="layout-list" />
+      </mappings>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>
+      <standard>Test each modification type (add, remove, move, change) independently</standard>
+      <standard>Verify plan.yaml file updated on disk after each modification</standard>
+      <standard>Verify slide numbers sequential (1, 2, 3...) after structural changes</standard>
+      <standard>Test with built slides present to verify warning display</standard>
+      <standard>Run Frontend Test Gate checklist as final validation</standard>
+    </standards>
+    <locations>
+      <location>Frontend Test Gate 5-2-TG1 in story file - manual browser testing steps</location>
+      <location>Task 8 subtasks in story file - comprehensive test scenarios</location>
+    </locations>
+    <ideas>
+      <idea>Test add slide at beginning (after slide 0 or position 1)</idea>
+      <idea>Test add slide at end (after last slide)</idea>
+      <idea>Test add slide in middle (after slide 3 in 9-slide deck)</idea>
+      <idea>Test remove first slide, middle slide, last slide</idea>
+      <idea>Test move forward (slide 7 to position 2) and backward (slide 2 to position 7)</idea>
+      <idea>Test move to same position (should report "no change needed")</idea>
+      <idea>Test remove only slide (should warn "cannot remove only slide")</idea>
+      <idea>Test modify slide with significant intent change (should re-match template)</idea>
+      <idea>Test compound modifications: add, then remove, then move in sequence</idea>
+      <idea>Test built slide warning: build slide 1, then move slide 3 to position 1</idea>
+      <idea>Edge case: slide number out of range</idea>
+      <idea>Edge case: malformed command syntax</idea>
+    </ideas>
+  </tests>
+</story-context>

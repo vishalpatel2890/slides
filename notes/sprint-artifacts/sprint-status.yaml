@@ -36,7 +36,7 @@ story_location: notes/sprint-artifacts
 
 development_status:
   # Epic 1: Foundation & Framework
-  epic-1: contexted
+  epic-1: done
   1-1-project-structure-scaffolding: done
   1-2-workflow-definition-pattern: done
   1-3-state-file-management: done
@@ -44,7 +44,7 @@ development_status:
   epic-1-retrospective: completed
 
   # Epic 2: Theme Creation
-  epic-2: contexted
+  epic-2: done
   2-1-brand-asset-input-collection: done
   2-2-brand-primitive-extraction: done
   2-3-theme-file-generation: done
@@ -53,7 +53,7 @@ development_status:
   epic-2-retrospective: optional
 
   # Epic 3: Single Slide Workflow
-  epic-3: contexted
+  epic-3: done
   3-1-single-slide-planning: done
   3-2-template-based-slide-building: done
   3-3-custom-slide-building: done
@@ -62,32 +62,51 @@ development_status:
   epic-3-retrospective: optional
 
   # Epic 4: Slide Editing
-  epic-4: contexted
-  4-1-edit-command-invocation: backlog
-  4-2-natural-language-layout-changes: backlog
-  4-3-edit-preservation-across-regenerations: backlog
+  epic-4: done
+  4-1-edit-command-invocation: done
+  4-2-natural-language-layout-changes: done
+  4-3-edit-preservation-across-regenerations: done
   epic-4-retrospective: optional
 
   # Epic 5: Full Deck Mode
-  epic-5: backlog
-  5-1-deck-planning-initiation: backlog
-  5-2-plan-modification: backlog
-  5-3-incremental-slide-building: backlog
-  5-4-batch-slide-building: backlog
+  epic-5: contexted
+  5-1-deck-planning-initiation: done
+  5-2-plan-modification: done
+  5-3-incremental-slide-building: done
+  5-4-batch-slide-building: done
   epic-5-retrospective: optional
 
   # Epic 6: Theme Management
-  epic-6: backlog
-  6-1-theme-summary-view: backlog
-  6-2-theme-editing: backlog
-  6-3-theme-version-history: backlog
-  6-4-theme-rollback: backlog
+  epic-6: contexted
+  6-1-theme-summary-view: done
+  6-2-theme-editing: done
+  6-3-theme-version-history: done
+  6-4-theme-rollback: done
   epic-6-retrospective: optional
 
   # Epic 7: Google Slides Export
-  epic-7: backlog
-  7-1-google-oauth-setup: backlog
+  epic-7: contexted
+  7-1-google-oauth-setup: ready-for-dev
   7-2-html-to-image-conversion: backlog
   7-3-google-slides-creation: backlog
   7-4-export-progress-and-completion: backlog
   epic-7-retrospective: optional
+
+  # Epic 8: Slide Viewer & Output Architecture
+  epic-8: contexted
+  8-1-output-folder-architecture: done
+  8-2-core-viewer-component: done
+  8-3-presentation-mode-polish: done
+  epic-8-retrospective: optional
+
+  # Epic 9: Dynamic Viewer Loading
+  epic-9: contexted
+  9-1-dynamic-manifest-viewer: review
+  epic-9-retrospective: optional
+
+  # Epic 10: Config Folder Refactor (Mini-Epic)
+  epic-10-config-folder: contexted
+  config-folder-1-create-structure: done
+  config-folder-2-update-workflow-paths: done
+  config-folder-3-gitignore-updates: drafted
+  epic-10-retrospective: optional

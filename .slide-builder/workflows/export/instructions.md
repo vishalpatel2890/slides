@@ -5,6 +5,7 @@ This workflow exports slides to Google Slides.
 ```xml
 <critical>This workflow exports slides to Google Slides via API</critical>
 <critical>Requires Google OAuth authentication</critical>
+<critical>Slides are in output/{deck_slug}/slides/ (deck) or output/singles/ (single)</critical>
 
 <workflow>
 
@@ -28,15 +29,18 @@ To export to Google Slides, you need to authenticate once.
   </step>
 
   <step n="2" goal="Identify slides to export">
-    <action>Read status.yaml to determine mode</action>
+    <action>Read status.yaml to determine mode, deck_slug, and output_folder</action>
 
     <check if="single mode">
-      <action>Export .slide-builder/single/slide.html</action>
+      <action>Glob output/singles/*.html to find slide files</action>
+      <action>Prepare list of slides to export</action>
     </check>
 
     <check if="deck mode">
+      <action>Get deck_slug from status.yaml</action>
+      <action>Set slides_folder = output/{{deck_slug}}/slides</action>
       <action>Read plan.yaml to get list of built slides</action>
-      <action>Prepare to export all slides in order</action>
+      <action>Prepare to export all slides from output/{{deck_slug}}/slides/ in order</action>
     </check>
 
     <output>
@@ -44,6 +48,8 @@ To export to Google Slides, you need to authenticate once.
 
 Slides to export: {{slide_count}}
 Mode: {{mode}}
+{{if deck mode}}Deck: {{deck_slug}}
+Output folder: output/{{deck_slug}}/{{end if}}
 
 Starting conversion...
     </output>

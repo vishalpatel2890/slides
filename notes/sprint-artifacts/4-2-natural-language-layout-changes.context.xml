@@ -1,0 +1,184 @@
+<story-context id="4-2-natural-language-layout-changes" v="1.0">
+  <metadata>
+    <epicId>4</epicId>
+    <storyId>2</storyId>
+    <title>Natural Language Layout Changes</title>
+    <status>ready-for-dev</status>
+    <generatedAt>2026-01-27</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>notes/sprint-artifacts/4-2-natural-language-layout-changes.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>user</asA>
+    <iWant>to describe layout changes in plain English</iWant>
+    <soThat>I can modify slide structure without technical knowledge</soThat>
+    <tasks>
+      <task id="1" name="Implement Layout Regenerator Module" acs="3,5">
+        <subtask id="1.1">Load theme.json for style consistency during regeneration</subtask>
+        <subtask id="1.2">Prepare frontend-design skill invocation with current HTML, instruction, theme, constraints, preserve_fields list</subtask>
+        <subtask id="1.3">Invoke frontend-design skill with prepared context</subtask>
+        <subtask id="1.4">Receive new HTML layout from skill</subtask>
+        <subtask id="1.5">Validate response has contenteditable, data-field, theme CSS variables, 1920x1080 dimensions</subtask>
+      </task>
+      <task id="2" name="Implement Current Slide Reading" acs="1,2">
+        <subtask id="2.1">Read current slide HTML from target path (determined in Story 4.1)</subtask>
+        <subtask id="2.2">Parse HTML to extract all data-field values and their current content</subtask>
+        <subtask id="2.3">Read slide-state.json to get all saved text edits</subtask>
+        <subtask id="2.4">Merge browser localStorage edits with state file (if applicable)</subtask>
+        <subtask id="2.5">Build complete edit collection: [{selector, content, lastModified}]</subtask>
+      </task>
+      <task id="3" name="Implement Edit Reapplicator Module" acs="4,6,7">
+        <subtask id="3.1">For each saved edit, search new HTML for element matching data-field selector</subtask>
+        <subtask id="3.2">If matching element found: replace innerHTML with saved content, mark "applied"</subtask>
+        <subtask id="3.3">If no matching element found: mark as "orphaned", preserve in state file</subtask>
+        <subtask id="3.4">Ensure auto-save JavaScript is present in final HTML</subtask>
+        <subtask id="3.5">Test multiple edit cycles preserve accumulated edits</subtask>
+      </task>
+      <task id="4" name="Implement Slide Persister Module" acs="8,9">
+        <subtask id="4.1">Write final HTML to original slide file location</subtask>
+        <subtask id="4.2">Update slide-state.json with edits, lastModified, regenerationCount</subtask>
+        <subtask id="4.3">Update status.yaml with last_action and history entry</subtask>
+      </task>
+      <task id="5" name="Update Edit Workflow Instructions" acs="1-9">
+        <subtask id="5.1">Extend instructions.md: Add Phase 4 (Layout Regeneration), Phase 5 (Edit Reapplication), Phase 6 (Save and Report)</subtask>
+        <subtask id="5.2">Update workflow.yaml if needed for new phase configuration</subtask>
+        <subtask id="5.3">Ensure workflow handles both single mode and deck mode consistently</subtask>
+      </task>
+      <task id="6" name="Testing - Edit Preservation Verification" acs="4,6,7">
+        <subtask id="6.1">Test: Edit slide title, regenerate layout, verify title edit preserved</subtask>
+        <subtask id="6.2">Test: Edit 3 different fields, regenerate, verify all 3 preserved</subtask>
+        <subtask id="6.3">Test: Multiple sequential /edit commands, verify cumulative edits preserved</subtask>
+        <subtask id="6.4">Test: Verify theme CSS variables present in regenerated slide</subtask>
+        <subtask id="6.5">Test: Verify status.yaml updated with edit action</subtask>
+        <subtask id="6.6">Run Frontend Test Gate checklist</subtask>
+      </task>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <ac id="AC4.2.1">Given a slide is loaded for editing, when the user describes a layout change (e.g., "Move the diagram to the right"), then the system reads current slide HTML</ac>
+    <ac id="AC4.2.2">The system reads existing text edits from slide-state.json before regeneration</ac>
+    <ac id="AC4.2.3">The system regenerates the layout based on the instruction using frontend-design skill</ac>
+    <ac id="AC4.2.4">The system preserves all user text edits by reapplying them to matching data-field selectors</ac>
+    <ac id="AC4.2.5">The regenerated slide maintains theme consistency (uses theme CSS variables)</ac>
+    <ac id="AC4.2.6">The user text content is not lost during layout regeneration</ac>
+    <ac id="AC4.2.7">Given the user makes multiple edit requests, when each request is processed, then previous text edits continue to persist</ac>
+    <ac id="AC4.2.8">The regenerated slide is saved to the original slide file location</ac>
+    <ac id="AC4.2.9">status.yaml is updated with last_action describing the edit operation</ac>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc path="notes/sprint-artifacts/tech-spec-epic-4.md" title="Epic 4 Technical Specification" section="Story 4.2: Natural Language Layout Changes">
+        Complete technical specification including Layout Regenerator module, Edit Reapplicator module, data models (slide-state.json schema, edit_context schema), and complete /edit workflow Phases 4-6.
+      </doc>
+      <doc path="notes/architecture.md" title="Slide Builder Architecture" section="Pattern 3: Text Edit Persistence">
+        Defines the edit preservation pattern: read state → generate → reapply edits → save. Uses data-field selectors to match content across layouts. Never delete state entries, only add/update.
+      </doc>
+      <doc path="notes/architecture.md" title="Slide Builder Architecture" section="ADR-002: Hybrid Template + Skill Generation">
+        Layout regeneration uses frontend-design skill for novel layouts. Skill receives full theme.json for brand consistency.
+      </doc>
+      <doc path="notes/architecture.md" title="Slide Builder Architecture" section="HTML Slide Pattern">
+        Required HTML structure: contenteditable="true" on all text elements, data-field attributes, theme CSS variables in :root, 1920x1080 dimensions.
+      </doc>
+      <doc path="notes/sprint-artifacts/4-1-edit-command-invocation.md" title="Story 4.1: Edit Command Invocation" section="Dev Agent Record">
+        Previous story implementation learnings: edit workflow structure, mode detection pattern, slide loader pattern, state file schema.
+      </doc>
+    </docs>
+
+    <code>
+      <file path=".slide-builder/workflows/edit/workflow.yaml" kind="workflow-config" reason="Edit workflow configuration v2.0 - defines all path variables and command interface. Story 4.2 extends this workflow.">
+        <symbol>edit workflow</symbol>
+        <lines>1-44</lines>
+      </file>
+      <file path=".slide-builder/workflows/edit/instructions.md" kind="workflow-instructions" reason="Current edit workflow instructions implementing Phases 1-7. Story 4.2 enhances Phase 5 (Apply Edit) with actual frontend-design skill invocation and edit reapplication.">
+        <symbol>edit workflow phases</symbol>
+        <lines>1-322</lines>
+      </file>
+      <file path=".slide-builder/single/slide.html" kind="html-slide" reason="Test slide with contenteditable elements and data-field attributes. Story 4.2 regenerates this file while preserving edits.">
+        <symbol>single slide HTML</symbol>
+        <lines>1-217</lines>
+        <notes>Has 3 contenteditable fields: title, subtitle, logo. Has auto-save JavaScript script. Uses theme colors (#CCFF00 primary, #5DBAB6 secondary, #1A1A1A dark bg).</notes>
+      </file>
+      <file path=".slide-builder/single/slide-state.json" kind="state-file" reason="Test state file with 2 saved edits. Story 4.2 reads this before regeneration and preserves edits after.">
+        <symbol>slide-state.json schema</symbol>
+        <lines>1-15</lines>
+        <notes>Schema: { slide, edits: [{selector, content}], lastModified }. Story 4.2 adds orphanedEdits array and regenerationCount.</notes>
+      </file>
+      <file path=".slide-builder/theme.json" kind="theme-config" reason="Complete brand theme with colors, typography, shapes, components. Required for style consistency during regeneration.">
+        <symbol>theme.json</symbol>
+        <lines>1-230</lines>
+        <notes>Amperity brand: primary=#CCFF00 (lime), secondary=#5DBAB6 (teal), font=Outfit. Bold-minimal personality.</notes>
+      </file>
+      <file path=".slide-builder/status.yaml" kind="state-file" reason="Global status tracking. Story 4.2 updates last_action and history after edit operation.">
+        <symbol>status.yaml</symbol>
+        <lines>1-75</lines>
+        <notes>Current mode: single. built_count: 1. Contains action history array.</notes>
+      </file>
+    </code>
+
+    <dependencies>
+      <npm>
+        <package name="puppeteer" version="^23.0.0" purpose="HTML-to-image conversion (Epic 7, not used in Story 4.2)" />
+        <package name="googleapis" version="^140.0.0" purpose="Google Slides API (Epic 7, not used in Story 4.2)" />
+      </npm>
+      <claude-code>
+        <tool name="frontend-design skill" purpose="Regenerate slide layouts based on natural language instruction. CRITICAL for Story 4.2." />
+        <tool name="File System (Read)" purpose="Load slides, state, theme, status" />
+        <tool name="File System (Write)" purpose="Save regenerated slides, updated state" />
+      </claude-code>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint source="tech-spec" critical="true">Regenerated slides MUST maintain all contenteditable and data-field attributes on text elements</constraint>
+    <constraint source="tech-spec" critical="true">State file edits MUST be preserved even if no matching selector exists (mark as orphaned, do not delete)</constraint>
+    <constraint source="tech-spec" critical="true">Regenerated slides MUST use theme CSS variables consistently (inject from theme.json)</constraint>
+    <constraint source="tech-spec" critical="true">Layout changes MUST be processed by frontend-design skill for quality assurance</constraint>
+    <constraint source="prd-nfr5">Regeneration should feel responsive (target less than 30 seconds)</constraint>
+    <constraint source="architecture">Slide dimensions MUST be 1920x1080</constraint>
+    <constraint source="architecture">Auto-save JavaScript MUST be present in final HTML</constraint>
+    <constraint source="architecture">All file operations are local-first (no external API calls except skill invocation)</constraint>
+  </constraints>
+
+  <interfaces>
+    <interface name="frontend-design skill invocation" kind="skill-call">
+      <signature>Invoke frontend-design skill with edit_context object containing: slide_path, current_html, instruction, theme, constraints (dimensions, required_attributes, preserve_fields)</signature>
+      <path>.slide-builder/single/slide.html (single mode) or .slide-builder/deck/slides/slide-{n}.html (deck mode)</path>
+    </interface>
+    <interface name="slide-state.json" kind="file-schema">
+      <signature>{ slide: string, edits: [{selector: string, content: string, lastModified?: string}], orphanedEdits?: [{selector, content, orphanedAt, reason}], lastModified: string, regenerationCount?: number }</signature>
+      <path>.slide-builder/single/slide-state.json or .slide-builder/deck/slides/slide-{n}-state.json</path>
+    </interface>
+    <interface name="status.yaml history entry" kind="file-schema">
+      <signature>{ action: string, timestamp: string, preserved_edits?: number, orphaned_edits?: number, regeneration_duration_ms?: number }</signature>
+      <path>.slide-builder/status.yaml</path>
+    </interface>
+    <interface name="Edit Reapplicator Algorithm" kind="algorithm">
+      <signature>For each edit in saved_edits: find element by data-field selector → if found: replace innerHTML, mark applied → if not found: mark orphaned, preserve in state</signature>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>
+      Per Architecture test strategy and Tech Spec test approach: Story 4.2 uses Frontend Test Gate pattern with manual browser testing. No automated unit tests - validation through functional testing of the complete edit workflow. Test scenarios cover edit preservation, layout regeneration, theme consistency, and status updates.
+    </standards>
+    <locations>
+      <location>Manual browser testing at file://.slide-builder/single/slide.html</location>
+      <location>State file inspection at .slide-builder/single/slide-state.json</location>
+      <location>Status verification at .slide-builder/status.yaml</location>
+    </locations>
+    <ideas>
+      <idea ac="AC4.2.1">Test: Run /sb:edit on existing slide, verify current HTML is read before regeneration (check console output)</idea>
+      <idea ac="AC4.2.2">Test: Create 3 text edits in browser, run /sb:edit, verify all 3 edits read from state file before regeneration</idea>
+      <idea ac="AC4.2.3">Test: Request "add subtitle" via /sb:edit, verify frontend-design skill is invoked and returns new HTML</idea>
+      <idea ac="AC4.2.4">Test: Edit title in browser to "My Custom Title", regenerate layout, verify title still shows "My Custom Title"</idea>
+      <idea ac="AC4.2.5">Test: Inspect regenerated slide HTML for :root CSS variables matching theme.json (--color-primary: #CCFF00, etc.)</idea>
+      <idea ac="AC4.2.6">Test: Edit 3 fields, regenerate, inspect HTML - all 3 custom texts must be present</idea>
+      <idea ac="AC4.2.7">Test: Run /sb:edit twice with different instructions, verify all edits from both sessions preserved</idea>
+      <idea ac="AC4.2.8">Test: After /sb:edit, verify .slide-builder/single/slide.html file is updated (check file timestamp)</idea>
+      <idea ac="AC4.2.9">Test: After /sb:edit, verify status.yaml has new history entry with "Layout edited:" action</idea>
+    </ideas>
+  </tests>
+</story-context>
