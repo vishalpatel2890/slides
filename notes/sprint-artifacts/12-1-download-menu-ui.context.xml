@@ -1,0 +1,215 @@
+<story-context id=".bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>12</epicId>
+    <storyId>1</storyId>
+    <title>Download Menu UI</title>
+    <status>drafted</status>
+    <generatedAt>2026-01-28</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>notes/sprint-artifacts/12-1-download-menu-ui.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>presenter</asA>
+    <iWant>a download button in the presentation header</iWant>
+    <soThat>I can access export options while viewing slides</soThat>
+    <tasks>
+      <task n="1">Add CSS styles for download UI (~line 200 in viewer-template.html)
+        <subtask>.download-btn - Button styling matching existing controls</subtask>
+        <subtask>.download-menu - Dropdown container (absolute positioned)</subtask>
+        <subtask>.download-menu-item - Menu item with icon and text</subtask>
+        <subtask>.download-menu.hidden - Hidden state</subtask>
+      </task>
+      <task n="2">Add download button HTML (~line 443)
+        <subtask>Button with download SVG icon (down arrow with line)</subtask>
+        <subtask>Button positioned between next-btn and close-btn</subtask>
+        <subtask>onclick="toggleDownloadMenu()"</subtask>
+        <subtask>title="Download (D)"</subtask>
+      </task>
+      <task n="3">Add dropdown menu HTML (after download button)
+        <subtask>Menu container with three items</subtask>
+        <subtask>Each item has icon + label</subtask>
+        <subtask>Items call respective download functions</subtask>
+      </task>
+      <task n="4">Add JavaScript functions (~line 825)
+        <subtask>toggleDownloadMenu() - Show/hide dropdown</subtask>
+        <subtask>Click-outside handler to close menu</subtask>
+        <subtask>'D' keyboard shortcut handler</subtask>
+      </task>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <criterion id="AC1">Given I am viewing slides in presentation mode, when I look at the presentation header, then I see a download button next to the close button</criterion>
+    <criterion id="AC2">When I click the download button, a dropdown menu opens with three options: Download Current Slide (PNG), Download All Slides (ZIP), Download as PDF (PDF)</criterion>
+    <criterion id="AC3">Clicking outside the menu closes it</criterion>
+    <criterion id="AC4">Pressing 'D' on keyboard opens/closes the menu</criterion>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>notes/tech-spec.md</path>
+        <title>Today - Technical Specification</title>
+        <section>Implementation Details - Source Tree Changes</section>
+        <snippet>Add download menu HTML, CSS, JavaScript to viewer-template.html. CSS at ~line 200 for .download-btn, .download-menu, .download-menu-item. HTML at ~line 443 in .presentation-controls.</snippet>
+      </doc>
+      <doc>
+        <path>notes/tech-spec.md</path>
+        <title>Today - Technical Specification</title>
+        <section>Existing Patterns to Follow</section>
+        <snippet>Code Style: Functions use camelCase, DOM queries use getElementById/querySelector, Event handlers inline on HTML elements, CSS variables for theming (var(--amp-lime), var(--amp-dark-alt)).</snippet>
+      </doc>
+      <doc>
+        <path>notes/tech-spec.md</path>
+        <title>Today - Technical Specification</title>
+        <section>UX/UI Considerations</section>
+        <snippet>Download Button: Same size as close button (36x36px), download icon, same border/hover styling. Dropdown Menu: Dark background (var(--amp-dark-alt)), border 1px solid var(--amp-mid-gray), items with icons on left, hover state lime accent.</snippet>
+      </doc>
+      <doc>
+        <path>notes/epics.md</path>
+        <title>Epic 12: Slide Download and Export</title>
+        <section>Story 12.1: Download Menu UI</section>
+        <snippet>First story in epic - no prerequisites. Modify viewer-template.html to add download dropdown menu in presentation header. Menu follows existing styling patterns (dark background, lime accent on hover).</snippet>
+      </doc>
+      <doc>
+        <path>notes/architecture.md</path>
+        <title>Slide Builder Architecture</title>
+        <section>Technology Stack</section>
+        <snippet>Frontend: Vanilla HTML/CSS/JavaScript, no framework, single HTML file with inline CSS and JavaScript, slide dimensions 1920x1080px (16:9).</snippet>
+      </doc>
+    </docs>
+    <code>
+      <file>
+        <path>.slide-builder/config/templates/viewer-template.html</path>
+        <kind>template</kind>
+        <symbol>.nav-btn</symbol>
+        <lines>202-221</lines>
+        <reason>Button styling pattern to follow for download button - transparent background, border styling, hover states with lime accent</reason>
+      </file>
+      <file>
+        <path>.slide-builder/config/templates/viewer-template.html</path>
+        <kind>template</kind>
+        <symbol>.close-btn</symbol>
+        <lines>223-240</lines>
+        <reason>Close button styling to match - 36x36px dimensions, flexbox centering, same border/hover pattern</reason>
+      </file>
+      <file>
+        <path>.slide-builder/config/templates/viewer-template.html</path>
+        <kind>template</kind>
+        <symbol>.presentation-controls</symbol>
+        <lines>188-192</lines>
+        <reason>Container where download button will be added - flex layout with 16px gap</reason>
+      </file>
+      <file>
+        <path>.slide-builder/config/templates/viewer-template.html</path>
+        <kind>template</kind>
+        <symbol>presentation-controls HTML</symbol>
+        <lines>439-444</lines>
+        <reason>HTML location where download button should be inserted between next-btn and close-btn</reason>
+      </file>
+      <file>
+        <path>.slide-builder/config/templates/viewer-template.html</path>
+        <kind>template</kind>
+        <symbol>keyboard handler</symbol>
+        <lines>770-825</lines>
+        <reason>Keyboard navigation pattern - switch statement on e.key, only handles in presentation mode. Add 'D' case here.</reason>
+      </file>
+      <file>
+        <path>.slide-builder/config/templates/viewer-template.html</path>
+        <kind>template</kind>
+        <symbol>CSS variables</symbol>
+        <lines>11-21</lines>
+        <reason>Theme variables to use: --amp-dark-alt (#1a1a1a), --amp-mid-gray (#2a2a2a), --amp-lime (#d4e94c), --amp-white (#ffffff)</reason>
+      </file>
+    </code>
+    <dependencies>
+      <node>
+        <package>puppeteer</package>
+        <version>^23.0.0</version>
+        <note>Not used for this story - browser-based rendering instead</note>
+      </node>
+      <node>
+        <package>googleapis</package>
+        <version>^140.0.0</version>
+        <note>Not used for this story</note>
+      </node>
+      <browser>
+        <library>html2canvas</library>
+        <version>1.4.1</version>
+        <note>Will be added in Story 12.2 - not needed for UI story</note>
+      </browser>
+      <browser>
+        <library>jsPDF</library>
+        <version>2.5.1</version>
+        <note>Will be added in Story 12.4 - not needed for UI story</note>
+      </browser>
+      <browser>
+        <library>JSZip</library>
+        <version>3.10.1</version>
+        <note>Will be added in Story 12.3 - not needed for UI story</note>
+      </browser>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint type="pattern">Follow camelCase for function names (toggleDownloadMenu, not toggle_download_menu)</constraint>
+    <constraint type="pattern">Use inline onclick handlers on HTML elements (onclick="toggleDownloadMenu()")</constraint>
+    <constraint type="pattern">CSS variables for all colors (var(--amp-lime) not #d4e94c directly)</constraint>
+    <constraint type="pattern">No external files - all CSS inline in style block, all JS in script block</constraint>
+    <constraint type="layer">Single file modification only - viewer-template.html</constraint>
+    <constraint type="style">Button dimensions: 36x36px to match close-btn</constraint>
+    <constraint type="style">Use existing transition patterns (transition: all 0.2s ease)</constraint>
+    <constraint type="protocol">Must work with file:// protocol - no server required</constraint>
+    <constraint type="testing">Manual browser testing only - no automated test framework</constraint>
+  </constraints>
+
+  <interfaces>
+    <interface>
+      <name>toggleDownloadMenu</name>
+      <kind>function</kind>
+      <signature>function toggleDownloadMenu() - toggles .download-menu visibility via .hidden class</signature>
+      <path>.slide-builder/config/templates/viewer-template.html</path>
+    </interface>
+    <interface>
+      <name>downloadCurrentSlide</name>
+      <kind>function</kind>
+      <signature>function downloadCurrentSlide() - placeholder for Story 12.2, logs message for now</signature>
+      <path>.slide-builder/config/templates/viewer-template.html</path>
+    </interface>
+    <interface>
+      <name>downloadAllSlidesPNG</name>
+      <kind>function</kind>
+      <signature>function downloadAllSlidesPNG() - placeholder for Story 12.3, logs message for now</signature>
+      <path>.slide-builder/config/templates/viewer-template.html</path>
+    </interface>
+    <interface>
+      <name>downloadDeckPDF</name>
+      <kind>function</kind>
+      <signature>function downloadDeckPDF() - placeholder for Story 12.4, logs message for now</signature>
+      <path>.slide-builder/config/templates/viewer-template.html</path>
+    </interface>
+    <interface>
+      <name>presentation-view state check</name>
+      <kind>DOM pattern</kind>
+      <signature>document.getElementById('presentation-view').classList.contains('hidden')</signature>
+      <path>.slide-builder/config/templates/viewer-template.html:772</path>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>Manual browser testing in Chrome, Safari, and Firefox. Open viewer index.html directly via file:// protocol. Test all UI interactions (click, keyboard) in presentation mode. Verify styling matches existing controls.</standards>
+    <locations>
+      <location>output/{deck-slug}/index.html - Generated viewer for testing</location>
+      <location>Manual browser DevTools inspection</location>
+    </locations>
+    <ideas>
+      <idea acId="AC1">Open viewer in presentation mode, visually verify download button appears in header between navigation controls and close button</idea>
+      <idea acId="AC2">Click download button, verify dropdown opens with three menu items visible with correct labels and icons</idea>
+      <idea acId="AC3">With menu open, click outside menu area, verify menu closes</idea>
+      <idea acId="AC4">Press 'D' key in presentation mode, verify menu toggles open/closed</idea>
+      <idea acId="AC1">Verify button styling matches close-btn (36x36px, same border, hover turns lime)</idea>
+      <idea acId="AC2">Verify menu styling: dark background, gray border, lime hover on items</idea>
+    </ideas>
+  </tests>
+</story-context>

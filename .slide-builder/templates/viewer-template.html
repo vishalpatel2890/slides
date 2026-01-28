@@ -1,0 +1,1521 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{DECK_NAME}} - Slide Viewer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --amp-black: #0a0a0a;
+            --amp-dark-alt: #1a1a1a;
+            --amp-mid-gray: #2a2a2a;
+            --amp-light-gray: #888888;
+            --amp-lime: #d4e94c;
+            --amp-teal: #4ecdc4;
+            --amp-white: #ffffff;
+            --font-heading: 'Outfit', system-ui, sans-serif;
+            --font-body: 'Outfit', system-ui, sans-serif;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-body);
+            background: var(--amp-black);
+            min-height: 100vh;
+            color: var(--amp-white);
+        }
+
+        /* ═══════════════════════════════════════════════════════════════════════ */
+        /* GALLERY VIEW                                                             */
+        /* ═══════════════════════════════════════════════════════════════════════ */
+        #gallery-view {
+            padding: 60px;
+        }
+
+        #gallery-view.hidden {
+            display: none;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 60px;
+            padding-bottom: 40px;
+            border-bottom: 1px solid var(--amp-mid-gray);
+            position: relative;
+        }
+
+        .header::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 120px;
+            height: 2px;
+            background: var(--amp-lime);
+        }
+
+        .deck-badge {
+            display: inline-block;
+            font-family: var(--font-body);
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--amp-lime);
+            background: rgba(212, 233, 76, 0.1);
+            padding: 6px 16px;
+            margin-bottom: 16px;
+        }
+
+        .title {
+            font-family: var(--font-heading);
+            font-size: 36px;
+            font-weight: 400;
+            color: var(--amp-white);
+            margin-bottom: 12px;
+        }
+
+        .subtitle {
+            font-family: var(--font-body);
+            font-size: 16px;
+            color: var(--amp-light-gray);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 32px;
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background: var(--amp-dark-alt);
+            border: 1px solid var(--amp-mid-gray);
+            overflow: hidden;
+            transition: transform 0.3s ease, border-color 0.3s ease;
+            cursor: pointer;
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+            border-color: var(--amp-lime);
+        }
+
+        .card-preview {
+            width: 100%;
+            aspect-ratio: 16/9;
+            background: var(--amp-black);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .card-preview iframe {
+            width: 480%;
+            height: 480%;
+            border: none;
+            pointer-events: none;
+            transform: scale(0.208);
+            transform-origin: top left;
+        }
+
+        .card-info {
+            padding: 24px;
+            border-top: 1px solid var(--amp-mid-gray);
+        }
+
+        .card-number {
+            font-family: var(--font-body);
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--amp-lime);
+            margin-bottom: 8px;
+        }
+
+        .card-title {
+            font-family: var(--font-heading);
+            font-size: 18px;
+            font-weight: 400;
+            color: var(--amp-white);
+        }
+
+        /* ═══════════════════════════════════════════════════════════════════════ */
+        /* PRESENTATION VIEW                                                        */
+        /* ═══════════════════════════════════════════════════════════════════════ */
+        #presentation-view {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: var(--amp-black);
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #presentation-view.hidden {
+            display: none;
+        }
+
+        .presentation-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 24px;
+            background: var(--amp-dark-alt);
+            border-bottom: 1px solid var(--amp-mid-gray);
+        }
+
+        .presentation-title {
+            font-family: var(--font-heading);
+            font-size: 18px;
+            font-weight: 400;
+            color: var(--amp-white);
+        }
+
+        .presentation-controls {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .slide-counter {
+            font-family: var(--font-body);
+            font-size: 14px;
+            color: var(--amp-light-gray);
+            min-width: 80px;
+            text-align: center;
+        }
+
+        .nav-btn {
+            background: transparent;
+            border: 1px solid var(--amp-mid-gray);
+            color: var(--amp-white);
+            padding: 8px 16px;
+            font-family: var(--font-body);
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .nav-btn:hover:not(:disabled) {
+            border-color: var(--amp-lime);
+            color: var(--amp-lime);
+        }
+
+        .nav-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .close-btn {
+            background: transparent;
+            border: 1px solid var(--amp-mid-gray);
+            color: var(--amp-white);
+            width: 36px;
+            height: 36px;
+            font-size: 20px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .close-btn:hover {
+            border-color: var(--amp-lime);
+            color: var(--amp-lime);
+        }
+
+        /* ═══════════════════════════════════════════════════════════════════════ */
+        /* DOWNLOAD MENU                                                            */
+        /* ═══════════════════════════════════════════════════════════════════════ */
+        .download-btn {
+            background: transparent;
+            border: 1px solid var(--amp-mid-gray);
+            color: var(--amp-white);
+            width: 36px;
+            height: 36px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .download-btn:hover {
+            border-color: var(--amp-lime);
+            color: var(--amp-lime);
+        }
+
+        .download-btn svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        .download-menu {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            margin-top: 8px;
+            background: var(--amp-dark-alt);
+            border: 1px solid var(--amp-mid-gray);
+            min-width: 220px;
+            z-index: 1002;
+        }
+
+        .download-menu.hidden {
+            display: none;
+        }
+
+        .download-menu-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            color: var(--amp-white);
+            font-family: var(--font-body);
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: none;
+            background: transparent;
+            width: 100%;
+            text-align: left;
+        }
+
+        .download-menu-item:hover {
+            background: var(--amp-mid-gray);
+            color: var(--amp-lime);
+        }
+
+        .download-menu-item svg {
+            width: 16px;
+            height: 16px;
+            flex-shrink: 0;
+        }
+
+        .download-menu-item span {
+            flex: 1;
+        }
+
+        .download-wrapper {
+            position: relative;
+        }
+
+        .presentation-content {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            overflow: hidden;
+        }
+
+        .slide-container {
+            position: relative;
+            background: var(--amp-black);
+            border: 1px solid var(--amp-mid-gray);
+            overflow: hidden;
+            /* Dimensions set by JavaScript based on available space */
+        }
+
+        .slide-container iframe {
+            width: 1920px;
+            height: 1080px;
+            border: none;
+            transform-origin: top left;
+            /* Scale set by JavaScript */
+        }
+
+        /* Keyboard hint */
+        .keyboard-hint {
+            position: fixed;
+            bottom: 20px;
+            left: calc(200px + 50%);
+            transform: translateX(-50%);
+            font-family: var(--font-body);
+            font-size: 12px;
+            color: var(--amp-light-gray);
+            background: var(--amp-dark-alt);
+            padding: 8px 16px;
+            border: 1px solid var(--amp-mid-gray);
+            opacity: 0.7;
+            z-index: 1001;
+        }
+
+        .keyboard-hint kbd {
+            background: var(--amp-mid-gray);
+            padding: 2px 6px;
+            margin: 0 4px;
+            font-family: var(--font-body);
+        }
+
+        /* ═══════════════════════════════════════════════════════════════════════ */
+        /* PRESENTATION SIDEBAR                                                     */
+        /* ═══════════════════════════════════════════════════════════════════════ */
+        .presentation-sidebar {
+            position: fixed;
+            left: 0;
+            top: 57px;
+            width: 200px;
+            height: calc(100vh - 57px);
+            background: var(--amp-dark-alt);
+            border-right: 1px solid var(--amp-mid-gray);
+            overflow-y: auto;
+            padding: 16px;
+            z-index: 1001;
+        }
+
+        .presentation-sidebar::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .presentation-sidebar::-webkit-scrollbar-track {
+            background: var(--amp-dark-alt);
+        }
+
+        .presentation-sidebar::-webkit-scrollbar-thumb {
+            background: var(--amp-mid-gray);
+        }
+
+        .presentation-sidebar::-webkit-scrollbar-thumb:hover {
+            background: var(--amp-light-gray);
+        }
+
+        .sidebar-item {
+            width: 100%;
+            aspect-ratio: 16/9;
+            margin-bottom: 12px;
+            border: 2px solid transparent;
+            cursor: pointer;
+            overflow: hidden;
+            position: relative;
+            background: var(--amp-black);
+            transition: border-color 0.2s ease;
+        }
+
+        .sidebar-item:hover {
+            border-color: var(--amp-mid-gray);
+        }
+
+        .sidebar-item.active {
+            border-color: var(--amp-lime);
+        }
+
+        .sidebar-item iframe {
+            width: 1000%;
+            height: 1000%;
+            transform: scale(0.1);
+            transform-origin: top left;
+            pointer-events: none;
+            border: none;
+        }
+
+        .sidebar-number {
+            position: absolute;
+            bottom: 4px;
+            right: 4px;
+            background: rgba(10, 10, 10, 0.8);
+            color: var(--amp-white);
+            font-family: var(--font-body);
+            font-size: 10px;
+            font-weight: 600;
+            padding: 2px 6px;
+        }
+
+        /* Adjust presentation content for sidebar */
+        .presentation-body {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .presentation-main {
+            flex: 1;
+            margin-left: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            overflow: hidden;
+        }
+
+        /* Slide transition effect */
+        .slide-container iframe {
+            width: 1920px;
+            height: 1080px;
+            border: none;
+            transform-origin: top left;
+            transition: opacity 0.3s ease;
+        }
+
+        .slide-container iframe.transitioning {
+            opacity: 0;
+        }
+
+        /* ═══════════════════════════════════════════════════════════════════════ */
+        /* PROGRESS MODAL                                                           */
+        /* ═══════════════════════════════════════════════════════════════════════ */
+        .progress-modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(10, 10, 10, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+
+        .progress-modal.hidden {
+            display: none;
+        }
+
+        .progress-modal-card {
+            background: var(--amp-dark-alt);
+            border: 1px solid var(--amp-mid-gray);
+            padding: 40px;
+            min-width: 400px;
+            text-align: center;
+        }
+
+        .progress-title {
+            font-family: var(--font-heading);
+            font-size: 18px;
+            font-weight: 400;
+            color: var(--amp-white);
+            margin: 0 0 8px 0;
+        }
+
+        .progress-bar-container {
+            height: 8px;
+            background: var(--amp-mid-gray);
+            margin: 20px 0;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: var(--amp-lime);
+            width: 0%;
+            transition: width 0.2s ease;
+        }
+
+        .progress-text {
+            font-family: var(--font-body);
+            font-size: 14px;
+            color: var(--amp-light-gray);
+            margin: 0;
+        }
+
+        /* ═══════════════════════════════════════════════════════════════════════ */
+        /* FULLSCREEN MODE - Hide sidebar for distraction-free presentation        */
+        /* ═══════════════════════════════════════════════════════════════════════ */
+        #presentation-view:fullscreen .presentation-sidebar,
+        #presentation-view:-webkit-full-screen .presentation-sidebar {
+            display: none;
+        }
+
+        #presentation-view:fullscreen .presentation-main,
+        #presentation-view:-webkit-full-screen .presentation-main {
+            margin-left: 0;
+        }
+
+        #presentation-view:fullscreen .keyboard-hint,
+        #presentation-view:-webkit-full-screen .keyboard-hint {
+            left: 50%;
+        }
+
+        #presentation-view:fullscreen .presentation-header,
+        #presentation-view:-webkit-full-screen .presentation-header {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- ═══════════════════════════════════════════════════════════════════════ -->
+    <!-- GALLERY VIEW                                                             -->
+    <!-- ═══════════════════════════════════════════════════════════════════════ -->
+    <div id="gallery-view">
+        <header class="header">
+            <div class="deck-badge">{{TOTAL_SLIDES}} Slides</div>
+            <h1 class="title">{{DECK_NAME}}</h1>
+            <p class="subtitle">Click any slide to enter presentation mode</p>
+        </header>
+
+        <div class="grid" id="slide-grid">
+            <!-- Slides will be inserted here by JavaScript -->
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════════════════ -->
+    <!-- PRESENTATION VIEW                                                        -->
+    <!-- ═══════════════════════════════════════════════════════════════════════ -->
+    <div id="presentation-view" class="hidden">
+        <div class="presentation-header">
+            <span class="presentation-title">{{DECK_NAME}}</span>
+            <div class="presentation-controls">
+                <button class="nav-btn" id="prev-btn" onclick="prevSlide()">← Previous</button>
+                <span class="slide-counter" id="slide-counter">1 / {{TOTAL_SLIDES}}</span>
+                <button class="nav-btn" id="next-btn" onclick="nextSlide()">Next →</button>
+                <div class="download-wrapper">
+                    <button class="download-btn" onclick="toggleDownloadMenu(event)" title="Download (D)">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                            <polyline points="7 10 12 15 17 10"/>
+                            <line x1="12" y1="15" x2="12" y2="3"/>
+                        </svg>
+                    </button>
+                    <div class="download-menu hidden" id="download-menu">
+                        <button class="download-menu-item" onclick="downloadCurrentSlide()">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                                <circle cx="8.5" cy="8.5" r="1.5"/>
+                                <polyline points="21 15 16 10 5 21"/>
+                            </svg>
+                            <span>Download Current Slide (PNG)</span>
+                        </button>
+                        <button class="download-menu-item" onclick="downloadAllSlidesPNG()">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+                                <line x1="12" y1="11" x2="12" y2="17"/>
+                                <polyline points="9 14 12 17 15 14"/>
+                            </svg>
+                            <span>Download All Slides (ZIP)</span>
+                        </button>
+                        <button class="download-menu-item" onclick="downloadDeckPDF()">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                                <polyline points="14 2 14 8 20 8"/>
+                                <line x1="16" y1="13" x2="8" y2="13"/>
+                                <line x1="16" y1="17" x2="8" y2="17"/>
+                                <polyline points="10 9 9 9 8 9"/>
+                            </svg>
+                            <span>Download as PDF</span>
+                        </button>
+                    </div>
+                </div>
+                <button class="close-btn" onclick="exitToGallery()" title="Close (Esc)">×</button>
+            </div>
+        </div>
+        <div class="presentation-body">
+            <!-- Thumbnail Sidebar -->
+            <div class="presentation-sidebar" id="sidebar">
+                <!-- Sidebar items will be rendered by JavaScript -->
+            </div>
+            <!-- Main Content Area -->
+            <div class="presentation-main">
+                <div class="slide-container">
+                    <iframe id="presentation-iframe" src=""></iframe>
+                </div>
+            </div>
+        </div>
+        <div class="keyboard-hint">
+            <kbd>←</kbd><kbd>→</kbd> Navigate
+            <kbd>1-9</kbd> Jump
+            <kbd>Home</kbd><kbd>End</kbd> First/Last
+            <kbd>F</kbd> Fullscreen
+            <kbd>D</kbd> Download
+            <kbd>Esc</kbd> Exit
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════════════════ -->
+    <!-- PROGRESS MODAL                                                           -->
+    <!-- ═══════════════════════════════════════════════════════════════════════ -->
+    <div id="progress-modal" class="progress-modal hidden">
+        <div class="progress-modal-card">
+            <h3 class="progress-title" id="progress-title">Exporting...</h3>
+            <div class="progress-bar-container">
+                <div class="progress-bar" id="progress-bar"></div>
+            </div>
+            <p class="progress-text" id="progress-text">Processing slide 1 of 14...</p>
+        </div>
+    </div>
+
+    <!-- External libraries loaded from CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+
+    <script>
+        // ═══════════════════════════════════════════════════════════════════════
+        // SLIDE DATA
+        // Fallback data injected at build time (works with file:// protocol)
+        // Dynamic manifest loading attempted for server deployments
+        // ═══════════════════════════════════════════════════════════════════════
+        const FALLBACK_SLIDES = {{SLIDE_LIST}};
+        const SLIDE_HTML_BASE64 = {{SLIDE_HTML_BASE64}};
+        let slides = FALLBACK_SLIDES;
+        let deckName = '{{DECK_NAME}}';
+        let totalSlides = {{TOTAL_SLIDES}};
+
+        // ═══════════════════════════════════════════════════════════════════════
+        // STATE
+        // ═══════════════════════════════════════════════════════════════════════
+        let currentSlide = 1;
+
+        // ═══════════════════════════════════════════════════════════════════════
+        // DYNAMIC MANIFEST LOADING
+        // Attempts to load fresh data from manifest.json (for server deployments)
+        // Falls back to injected data if fetch fails (file:// protocol)
+        // ═══════════════════════════════════════════════════════════════════════
+        async function loadManifest() {
+            try {
+                const cacheBuster = `?t=${Date.now()}`;
+                const response = await fetch(`slides/manifest.json${cacheBuster}`);
+                if (!response.ok) throw new Error('Manifest not found');
+                const manifest = await response.json();
+
+                // Update global state from manifest
+                slides = manifest.slides;
+                deckName = manifest.deckName;
+                totalSlides = manifest.slides.length;
+
+                // Update UI elements
+                document.querySelector('.title').textContent = deckName;
+                document.querySelector('.deck-badge').textContent = `${totalSlides} Slides`;
+                document.querySelector('.presentation-title').textContent = deckName;
+
+                console.log('Loaded slides from manifest.json');
+                return true;
+            } catch (error) {
+                // fetch() fails with file:// protocol - use fallback data
+                if (FALLBACK_SLIDES && FALLBACK_SLIDES.length > 0) {
+                    console.log('Using fallback slide data (file:// protocol or manifest unavailable)');
+                    return true;
+                }
+                // No fallback data available - show error
+                showError('Unable to load slides. Please ensure slides/manifest.json exists.');
+                return false;
+            }
+        }
+
+        function showError(message) {
+            const grid = document.getElementById('slide-grid');
+            grid.innerHTML = `
+                <div style="grid-column: 1 / -1; text-align: center; padding: 60px;">
+                    <div style="font-size: 48px; margin-bottom: 24px;">⚠️</div>
+                    <h2 style="color: var(--amp-lime); margin-bottom: 16px;">Error Loading Slides</h2>
+                    <p style="color: var(--amp-light-gray);">${message}</p>
+                    <p style="color: var(--amp-light-gray); margin-top: 16px; font-size: 14px;">
+                        Run <code style="background: var(--amp-mid-gray); padding: 2px 8px;">node scripts/generate-manifest.js [deck-slug]</code> to generate the manifest.
+                    </p>
+                </div>
+            `;
+            // Update header to show error state
+            document.querySelector('.deck-badge').textContent = 'Error';
+        }
+
+        // ═══════════════════════════════════════════════════════════════════════
+        // GALLERY RENDERING
+        // ═══════════════════════════════════════════════════════════════════════
+        function renderGallery() {
+            const grid = document.getElementById('slide-grid');
+            grid.innerHTML = '';
+
+            const cacheBuster = `?t=${Date.now()}`;
+
+            slides.forEach((slide, index) => {
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.onclick = () => enterPresentation(index + 1);
+                card.innerHTML = `
+                    <div class="card-preview">
+                        <iframe src="slides/${slide.filename}${cacheBuster}" loading="lazy"></iframe>
+                    </div>
+                    <div class="card-info">
+                        <div class="card-number">Slide ${slide.number}</div>
+                        <div class="card-title">${slide.title || 'Slide ' + slide.number}</div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        // ═══════════════════════════════════════════════════════════════════════
+        // PRESENTATION MODE
+        // ═══════════════════════════════════════════════════════════════════════
+        const SLIDE_WIDTH = 1920;
+        const SLIDE_HEIGHT = 1080;
+        const TRANSITION_DURATION = 150; // Half of 300ms total transition
+
+        function calculateScale() {
+            const content = document.querySelector('.presentation-main');
+            const container = document.querySelector('.slide-container');
+            const iframe = document.getElementById('presentation-iframe');
+
+            if (!content || !container || !iframe) return;
+
+            // Get available space (subtract padding)
+            const availableWidth = content.clientWidth - 48;
+            const availableHeight = content.clientHeight - 48;
+
+            // Calculate scale to fit while maintaining aspect ratio
+            const scaleX = availableWidth / SLIDE_WIDTH;
+            const scaleY = availableHeight / SLIDE_HEIGHT;
+            const scale = Math.min(scaleX, scaleY);
+
+            // Apply scale to iframe (preserve transition class if present)
+            const currentTransform = iframe.classList.contains('transitioning') ? 'transitioning' : '';
+            iframe.style.transform = `scale(${scale})`;
+
+            // Size container to match scaled dimensions
+            container.style.width = `${SLIDE_WIDTH * scale}px`;
+            container.style.height = `${SLIDE_HEIGHT * scale}px`;
+        }
+
+        // ═══════════════════════════════════════════════════════════════════════
+        // SIDEBAR RENDERING
+        // ═══════════════════════════════════════════════════════════════════════
+        function renderSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.innerHTML = '';
+
+            const cacheBuster = `?t=${Date.now()}`;
+
+            slides.forEach((slide, index) => {
+                const item = document.createElement('div');
+                item.className = 'sidebar-item' + (index + 1 === currentSlide ? ' active' : '');
+                item.onclick = () => goToSlide(index + 1);
+                item.innerHTML = `
+                    <iframe src="slides/${slide.filename}${cacheBuster}" loading="lazy"></iframe>
+                    <span class="sidebar-number">${slide.number}</span>
+                `;
+                item.id = `sidebar-item-${index + 1}`;
+                sidebar.appendChild(item);
+            });
+        }
+
+        function updateSidebarHighlight() {
+            // Remove active from all items
+            document.querySelectorAll('.sidebar-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            // Add active to current slide
+            const activeItem = document.getElementById(`sidebar-item-${currentSlide}`);
+            if (activeItem) {
+                activeItem.classList.add('active');
+                // Auto-scroll sidebar to keep current slide visible
+                activeItem.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+        }
+
+        // ═══════════════════════════════════════════════════════════════════════
+        // SLIDE TRANSITIONS
+        // ═══════════════════════════════════════════════════════════════════════
+        function updatePresentationSlideWithTransition() {
+            const slide = slides[currentSlide - 1];
+            if (!slide) return;
+
+            const iframe = document.getElementById('presentation-iframe');
+            const cacheBuster = `?t=${Date.now()}`;
+
+            // Fade out
+            iframe.classList.add('transitioning');
+
+            setTimeout(() => {
+                // Update source while invisible (with cache-busting)
+                iframe.src = `slides/${slide.filename}${cacheBuster}`;
+
+                // Fade in after src is set (onload for smoother transition)
+                iframe.onload = () => {
+                    iframe.classList.remove('transitioning');
+                };
+            }, TRANSITION_DURATION);
+
+            // Update counter and button states
+            document.getElementById('slide-counter').textContent = `${currentSlide} / ${totalSlides}`;
+            document.getElementById('prev-btn').disabled = currentSlide <= 1;
+            document.getElementById('next-btn').disabled = currentSlide >= totalSlides;
+
+            // Update sidebar highlight
+            updateSidebarHighlight();
+        }
+
+        function enterPresentation(slideNumber) {
+            currentSlide = slideNumber;
+            document.getElementById('gallery-view').classList.add('hidden');
+            document.getElementById('presentation-view').classList.remove('hidden');
+
+            // Render sidebar
+            renderSidebar();
+
+            // Initial slide load (no transition needed for first load)
+            const slide = slides[currentSlide - 1];
+            if (slide) {
+                const cacheBuster = `?t=${Date.now()}`;
+                document.getElementById('presentation-iframe').src = `slides/${slide.filename}${cacheBuster}`;
+                document.getElementById('slide-counter').textContent = `${currentSlide} / ${totalSlides}`;
+                document.getElementById('prev-btn').disabled = currentSlide <= 1;
+                document.getElementById('next-btn').disabled = currentSlide >= totalSlides;
+            }
+
+            // Recalculate scale after showing presentation view
+            setTimeout(calculateScale, 10);
+        }
+
+        function exitToGallery() {
+            // Exit fullscreen first if active
+            if (document.fullscreenElement || document.webkitFullscreenElement) {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                } else if (document.webkitExitFullscreen) {
+                    document.webkitExitFullscreen();
+                }
+            }
+            document.getElementById('presentation-view').classList.add('hidden');
+            document.getElementById('gallery-view').classList.remove('hidden');
+        }
+
+        function updatePresentationSlide() {
+            // Use transition version
+            updatePresentationSlideWithTransition();
+        }
+
+        // Recalculate scale on window resize
+        window.addEventListener('resize', () => {
+            if (!document.getElementById('presentation-view').classList.contains('hidden')) {
+                calculateScale();
+            }
+        });
+
+        // ═══════════════════════════════════════════════════════════════════════
+        // NAVIGATION FUNCTIONS
+        // ═══════════════════════════════════════════════════════════════════════
+        function nextSlide() {
+            if (currentSlide < totalSlides) {
+                currentSlide++;
+                updatePresentationSlide();
+            }
+        }
+
+        function prevSlide() {
+            if (currentSlide > 1) {
+                currentSlide--;
+                updatePresentationSlide();
+            }
+        }
+
+        function goToSlide(n) {
+            if (n >= 1 && n <= totalSlides && n !== currentSlide) {
+                currentSlide = n;
+                updatePresentationSlide();
+            }
+        }
+
+        // ═══════════════════════════════════════════════════════════════════════
+        // FULLSCREEN SUPPORT
+        // ═══════════════════════════════════════════════════════════════════════
+        function toggleFullscreen() {
+            const viewer = document.getElementById('presentation-view');
+
+            if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+                // Enter fullscreen
+                if (viewer.requestFullscreen) {
+                    viewer.requestFullscreen();
+                } else if (viewer.webkitRequestFullscreen) {
+                    viewer.webkitRequestFullscreen();
+                } else if (viewer.msRequestFullscreen) {
+                    viewer.msRequestFullscreen();
+                }
+            } else {
+                // Exit fullscreen
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                } else if (document.webkitExitFullscreen) {
+                    document.webkitExitFullscreen();
+                } else if (document.msExitFullscreen) {
+                    document.msExitFullscreen();
+                }
+            }
+        }
+
+        // Recalculate scale when fullscreen changes
+        document.addEventListener('fullscreenchange', () => {
+            setTimeout(calculateScale, 50);
+        });
+        document.addEventListener('webkitfullscreenchange', () => {
+            setTimeout(calculateScale, 50);
+        });
+
+        // ═══════════════════════════════════════════════════════════════════════
+        // DOWNLOAD MENU
+        // ═══════════════════════════════════════════════════════════════════════
+        function toggleDownloadMenu(event) {
+            if (event) {
+                event.stopPropagation();
+            }
+            const menu = document.getElementById('download-menu');
+            menu.classList.toggle('hidden');
+        }
+
+        function closeDownloadMenu() {
+            const menu = document.getElementById('download-menu');
+            if (menu && !menu.classList.contains('hidden')) {
+                menu.classList.add('hidden');
+            }
+        }
+
+        // Click outside handler to close menu
+        document.addEventListener('click', (e) => {
+            const menu = document.getElementById('download-menu');
+            const wrapper = e.target.closest('.download-wrapper');
+            if (!wrapper && menu && !menu.classList.contains('hidden')) {
+                menu.classList.add('hidden');
+            }
+        });
+
+        // ═══════════════════════════════════════════════════════════════════════
+        // SLIDE EXPORT FUNCTIONS
+        // ═══════════════════════════════════════════════════════════════════════
+
+        /**
+         * Sanitize a string to be used as a filename
+         * Replaces non-alphanumeric characters with hyphens
+         */
+        function sanitizeFilename(name) {
+            return name.replace(/[^a-z0-9]/gi, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
+        }
+
+        /**
+         * Download a blob as a file
+         * @param {Blob} blob - The blob to download
+         * @param {string} filename - The filename for the download
+         */
+        function downloadBlob(blob, filename) {
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        /**
+         * Capture the current slide as a canvas using html2canvas
+         * Uses embedded HTML content for file:// protocol support
+         * @returns {Promise<HTMLCanvasElement>} The rendered canvas
+         */
+        async function captureSlide() {
+            const slide = slides[currentSlide - 1];
+            if (!slide) {
+                throw new Error('Current slide not found');
+            }
+
+            // For http(s):// protocol, try direct iframe access (faster)
+            // For file:// protocol, skip directly to blob URL fallback (avoids CORS errors)
+            const isFileProtocol = window.location.protocol === 'file:';
+
+            if (!isFileProtocol) {
+                const presentationIframe = document.getElementById('presentation-iframe');
+                try {
+                    const slideDoc = presentationIframe.contentDocument || presentationIframe.contentWindow.document;
+                    const slideElement = slideDoc.querySelector('.slide');
+                    if (slideElement) {
+                        // Direct access works - use it (fastest method)
+                        const canvas = await html2canvas(slideElement, {
+                            width: SLIDE_WIDTH,
+                            height: SLIDE_HEIGHT,
+                            scale: 1,
+                            useCORS: true,
+                            allowTaint: true,
+                            backgroundColor: null,
+                            logging: false
+                        });
+                        return canvas;
+                    }
+                } catch (e) {
+                    console.log('Direct iframe access failed, using embedded HTML fallback');
+                }
+            }
+
+            // Use srcdoc fallback: embeds HTML directly in iframe (no URL, no CORS)
+            const slideIndex = currentSlide - 1;
+            if (!SLIDE_HTML_BASE64 || !SLIDE_HTML_BASE64[slideIndex]) {
+                throw new Error('Slide HTML content not embedded. Please regenerate the viewer.');
+            }
+
+            // Decode base64 HTML content (proper UTF-8 handling)
+            const binaryString = atob(SLIDE_HTML_BASE64[slideIndex]);
+            const bytes = Uint8Array.from(binaryString, c => c.charCodeAt(0));
+            const htmlContent = new TextDecoder('utf-8').decode(bytes);
+
+            // Create hidden container
+            const container = document.createElement('div');
+            container.style.cssText = 'position:fixed;left:-9999px;top:0;width:1920px;height:1080px;overflow:hidden;';
+            document.body.appendChild(container);
+
+            // Create iframe with srcdoc (direct HTML embedding - no origin/CORS issues)
+            const captureFrame = document.createElement('iframe');
+            captureFrame.style.cssText = 'width:1920px;height:1080px;border:none;';
+            container.appendChild(captureFrame);
+
+            try {
+                // Use srcdoc to embed HTML directly (avoids all cross-origin issues)
+                await new Promise((resolve, reject) => {
+                    captureFrame.onload = resolve;
+                    captureFrame.onerror = reject;
+                    captureFrame.srcdoc = htmlContent;
+                });
+
+                // Access the iframe document (same-origin via srcdoc)
+                const slideDoc = captureFrame.contentDocument;
+
+                // Inject CSS to disable animations and force final state for capture
+                // NOTE: Do NOT override transform - it's used for layout (e.g., translateY(-50%) for vertical centering)
+                const captureStyles = slideDoc.createElement('style');
+                captureStyles.textContent = `
+                    *, *::before, *::after {
+                        animation: none !important;
+                        animation-delay: 0s !important;
+                        animation-fill-mode: none !important;
+                        transition: none !important;
+                        opacity: 1 !important;
+                        visibility: visible !important;
+                    }
+                `;
+                slideDoc.head.appendChild(captureStyles);
+
+                // Wait for fonts to load (Google Fonts may take time)
+                await new Promise(resolve => setTimeout(resolve, 500));
+
+                const slideElement = slideDoc.querySelector('.slide');
+
+                if (!slideElement) {
+                    throw new Error('Slide element not found in captured content');
+                }
+
+                // Capture with html2canvas
+                const canvas = await html2canvas(slideElement, {
+                    width: SLIDE_WIDTH,
+                    height: SLIDE_HEIGHT,
+                    scale: 1,
+                    useCORS: true,
+                    allowTaint: true,
+                    backgroundColor: null,
+                    logging: false
+                });
+
+                return canvas;
+            } finally {
+                // Clean up
+                document.body.removeChild(container);
+            }
+        }
+
+        /**
+         * Download the current slide as a PNG image
+         */
+        async function downloadCurrentSlide() {
+            closeDownloadMenu();
+
+            try {
+                // Capture the slide
+                const canvas = await captureSlide();
+
+                // Convert canvas to PNG blob
+                canvas.toBlob((blob) => {
+                    if (!blob) {
+                        console.error('Failed to create PNG blob');
+                        alert('Failed to create PNG image');
+                        return;
+                    }
+
+                    // Generate filename: {deckName}-slide-{N}.png
+                    const safeDeckName = sanitizeFilename(deckName);
+                    const filename = `${safeDeckName}-slide-${currentSlide}.png`;
+
+                    // Trigger download
+                    downloadBlob(blob, filename);
+
+                    console.log(`Downloaded: ${filename}`);
+                }, 'image/png');
+            } catch (error) {
+                console.error('Error capturing slide:', error);
+                alert('Error capturing slide: ' + error.message);
+            }
+        }
+
+        // ═══════════════════════════════════════════════════════════════════════
+        // PROGRESS MODAL FUNCTIONS
+        // ═══════════════════════════════════════════════════════════════════════
+
+        /**
+         * Show the progress modal with a title
+         * @param {string} title - The title to display
+         */
+        function showProgressModal(title) {
+            const modal = document.getElementById('progress-modal');
+            const titleEl = document.getElementById('progress-title');
+            const progressBar = document.getElementById('progress-bar');
+            const progressText = document.getElementById('progress-text');
+
+            titleEl.textContent = title;
+            progressBar.style.width = '0%';
+            progressText.textContent = 'Initializing...';
+            modal.classList.remove('hidden');
+        }
+
+        /**
+         * Update the progress bar and text
+         * @param {number} current - Current slide number
+         * @param {number} total - Total slides
+         */
+        function updateProgress(current, total) {
+            const progressBar = document.getElementById('progress-bar');
+            const progressText = document.getElementById('progress-text');
+
+            const percent = Math.round((current / total) * 100);
+            progressBar.style.width = `${percent}%`;
+            progressText.textContent = `Processing slide ${current} of ${total}...`;
+        }
+
+        /**
+         * Hide the progress modal
+         */
+        function hideProgressModal() {
+            const modal = document.getElementById('progress-modal');
+            modal.classList.add('hidden');
+        }
+
+        /**
+         * Capture a specific slide as a PNG blob (for batch export)
+         * @param {number} slideIndex - Zero-based slide index
+         * @returns {Promise<Blob>} PNG blob of the slide
+         */
+        async function captureSlideForExport(slideIndex) {
+            const slide = slides[slideIndex];
+            if (!slide) {
+                throw new Error(`Slide at index ${slideIndex} not found`);
+            }
+
+            // For http(s):// protocol, try direct iframe access (faster)
+            // For file:// protocol, skip directly to blob URL fallback (avoids CORS errors)
+            const isFileProtocol = window.location.protocol === 'file:';
+
+            if (!isFileProtocol) {
+                // Create temporary iframe for this slide
+                const container = document.createElement('div');
+                container.style.cssText = 'position:fixed;left:-9999px;top:0;width:1920px;height:1080px;overflow:hidden;';
+                document.body.appendChild(container);
+
+                const tempFrame = document.createElement('iframe');
+                tempFrame.style.cssText = 'width:1920px;height:1080px;border:none;';
+                container.appendChild(tempFrame);
+
+                try {
+                    // Load slide via src
+                    await new Promise((resolve, reject) => {
+                        tempFrame.onload = resolve;
+                        tempFrame.onerror = reject;
+                        tempFrame.src = `slides/${slide.filename}`;
+                    });
+
+                    const slideDoc = tempFrame.contentDocument || tempFrame.contentWindow.document;
+                    const slideElement = slideDoc.querySelector('.slide');
+
+                    if (slideElement) {
+                        const canvas = await html2canvas(slideElement, {
+                            width: SLIDE_WIDTH,
+                            height: SLIDE_HEIGHT,
+                            scale: 1,
+                            useCORS: true,
+                            allowTaint: true,
+                            backgroundColor: null,
+                            logging: false
+                        });
+
+                        return new Promise((resolve, reject) => {
+                            canvas.toBlob((blob) => {
+                                if (blob) resolve(blob);
+                                else reject(new Error('Failed to create blob'));
+                            }, 'image/png');
+                        });
+                    }
+                } catch (e) {
+                    console.log('Direct iframe access failed, using embedded HTML fallback');
+                } finally {
+                    document.body.removeChild(container);
+                }
+            }
+
+            // Use srcdoc fallback: embeds HTML directly in iframe (no URL, no CORS)
+            if (!SLIDE_HTML_BASE64 || !SLIDE_HTML_BASE64[slideIndex]) {
+                throw new Error('Slide HTML content not embedded. Please regenerate the viewer.');
+            }
+
+            // Decode base64 HTML content (proper UTF-8 handling)
+            const binaryString = atob(SLIDE_HTML_BASE64[slideIndex]);
+            const bytes = Uint8Array.from(binaryString, c => c.charCodeAt(0));
+            const htmlContent = new TextDecoder('utf-8').decode(bytes);
+
+            // Create hidden container
+            const container = document.createElement('div');
+            container.style.cssText = 'position:fixed;left:-9999px;top:0;width:1920px;height:1080px;overflow:hidden;';
+            document.body.appendChild(container);
+
+            // Create iframe with srcdoc (direct HTML embedding - no origin/CORS issues)
+            const captureFrame = document.createElement('iframe');
+            captureFrame.style.cssText = 'width:1920px;height:1080px;border:none;';
+            container.appendChild(captureFrame);
+
+            try {
+                // Use srcdoc to embed HTML directly (avoids all cross-origin issues)
+                await new Promise((resolve, reject) => {
+                    captureFrame.onload = resolve;
+                    captureFrame.onerror = reject;
+                    captureFrame.srcdoc = htmlContent;
+                });
+
+                // Access the iframe document (same-origin via srcdoc)
+                const slideDoc = captureFrame.contentDocument;
+
+                // Inject CSS to disable animations and force final state for capture
+                // NOTE: Do NOT override transform - it's used for layout (e.g., translateY(-50%) for vertical centering)
+                const captureStyles = slideDoc.createElement('style');
+                captureStyles.textContent = `
+                    *, *::before, *::after {
+                        animation: none !important;
+                        animation-delay: 0s !important;
+                        animation-fill-mode: none !important;
+                        transition: none !important;
+                        opacity: 1 !important;
+                        visibility: visible !important;
+                    }
+                `;
+                slideDoc.head.appendChild(captureStyles);
+
+                // Wait for fonts to load (Google Fonts may take time)
+                await new Promise(resolve => setTimeout(resolve, 300));
+
+                const slideElement = slideDoc.querySelector('.slide');
+
+                if (!slideElement) {
+                    throw new Error('Slide element not found in captured content');
+                }
+
+                // Capture with html2canvas
+                const canvas = await html2canvas(slideElement, {
+                    width: SLIDE_WIDTH,
+                    height: SLIDE_HEIGHT,
+                    scale: 1,
+                    useCORS: true,
+                    allowTaint: true,
+                    backgroundColor: null,
+                    logging: false
+                });
+
+                // Convert to blob
+                return new Promise((resolve, reject) => {
+                    canvas.toBlob((blob) => {
+                        if (blob) resolve(blob);
+                        else reject(new Error('Failed to create PNG blob'));
+                    }, 'image/png');
+                });
+            } finally {
+                // Clean up
+                document.body.removeChild(container);
+            }
+        }
+
+        /**
+         * Download all slides as a ZIP file containing PNGs
+         */
+        async function downloadAllSlidesPNG() {
+            closeDownloadMenu();
+
+            try {
+                showProgressModal('Exporting slides as PNG...');
+
+                const zip = new JSZip();
+                const total = totalSlides;
+
+                // Process slides sequentially to manage memory
+                for (let i = 0; i < total; i++) {
+                    updateProgress(i + 1, total);
+
+                    // Capture slide as PNG blob
+                    const blob = await captureSlideForExport(i);
+
+                    // Add to ZIP with numbered filename
+                    zip.file(`slide-${i + 1}.png`, blob);
+
+                    // Small delay between slides to prevent UI freezing
+                    await new Promise(resolve => setTimeout(resolve, 50));
+                }
+
+                // Generate ZIP file
+                updateProgress(total, total);
+                const zipBlob = await zip.generateAsync({
+                    type: 'blob',
+                    compression: 'DEFLATE',
+                    compressionOptions: { level: 6 }
+                });
+
+                // Download the ZIP
+                const safeDeckName = sanitizeFilename(deckName);
+                downloadBlob(zipBlob, `${safeDeckName}-slides.zip`);
+
+                console.log(`Downloaded: ${safeDeckName}-slides.zip with ${total} slides`);
+            } catch (error) {
+                console.error('Error creating ZIP:', error);
+                alert('Error creating ZIP file: ' + error.message);
+            } finally {
+                hideProgressModal();
+            }
+        }
+
+        /**
+         * Download entire deck as a single PDF file
+         * Each slide becomes a separate page at 1920x1080 landscape
+         */
+        async function downloadDeckPDF() {
+            closeDownloadMenu();
+
+            try {
+                showProgressModal('Generating PDF...');
+
+                // Initialize jsPDF with custom page size matching slides
+                const { jsPDF } = window.jspdf;
+                const pdf = new jsPDF({
+                    orientation: 'landscape',
+                    unit: 'px',
+                    format: [SLIDE_WIDTH, SLIDE_HEIGHT],
+                    hotfixes: ['px_scaling']
+                });
+
+                const total = totalSlides;
+
+                // Process slides sequentially to manage memory
+                for (let i = 0; i < total; i++) {
+                    updateProgress(i + 1, total);
+
+                    // Add new page for slides after the first
+                    if (i > 0) {
+                        pdf.addPage([SLIDE_WIDTH, SLIDE_HEIGHT], 'landscape');
+                    }
+
+                    // Capture slide as PNG blob
+                    const blob = await captureSlideForExport(i);
+
+                    // Convert blob to data URL for jsPDF
+                    const dataUrl = await new Promise((resolve, reject) => {
+                        const reader = new FileReader();
+                        reader.onloadend = () => resolve(reader.result);
+                        reader.onerror = reject;
+                        reader.readAsDataURL(blob);
+                    });
+
+                    // Add image to current PDF page (full page coverage)
+                    pdf.addImage(dataUrl, 'PNG', 0, 0, SLIDE_WIDTH, SLIDE_HEIGHT);
+
+                    // Small delay between slides to prevent UI freezing
+                    await new Promise(resolve => setTimeout(resolve, 50));
+                }
+
+                // Save the PDF
+                const safeDeckName = sanitizeFilename(deckName);
+                pdf.save(`${safeDeckName}.pdf`);
+
+                console.log(`Downloaded: ${safeDeckName}.pdf with ${total} slides`);
+            } catch (error) {
+                console.error('Error creating PDF:', error);
+                alert('Error creating PDF file: ' + error.message);
+            } finally {
+                hideProgressModal();
+            }
+        }
+
+        // ═══════════════════════════════════════════════════════════════════════
+        // KEYBOARD NAVIGATION
+        // ═══════════════════════════════════════════════════════════════════════
+        document.addEventListener('keydown', (e) => {
+            // Only handle keys in presentation mode
+            if (document.getElementById('presentation-view').classList.contains('hidden')) {
+                return;
+            }
+
+            switch(e.key) {
+                case 'ArrowRight':
+                case 'ArrowDown':
+                case ' ':
+                    e.preventDefault();
+                    nextSlide();
+                    break;
+                case 'ArrowLeft':
+                case 'ArrowUp':
+                    e.preventDefault();
+                    prevSlide();
+                    break;
+                case 'Escape':
+                    e.preventDefault();
+                    // If in fullscreen, exit fullscreen first (stay in presentation)
+                    if (document.fullscreenElement || document.webkitFullscreenElement) {
+                        if (document.exitFullscreen) {
+                            document.exitFullscreen();
+                        } else if (document.webkitExitFullscreen) {
+                            document.webkitExitFullscreen();
+                        }
+                    } else {
+                        // Not in fullscreen, exit to gallery
+                        exitToGallery();
+                    }
+                    break;
+                case 'f':
+                case 'F':
+                    e.preventDefault();
+                    toggleFullscreen();
+                    break;
+                case 'd':
+                case 'D':
+                    e.preventDefault();
+                    toggleDownloadMenu();
+                    break;
+                case 'Home':
+                    e.preventDefault();
+                    goToSlide(1);
+                    break;
+                case 'End':
+                    e.preventDefault();
+                    goToSlide(totalSlides);
+                    break;
+                default:
+                    // Number keys 1-9 jump to that slide
+                    if (e.key >= '1' && e.key <= '9') {
+                        e.preventDefault();
+                        const num = parseInt(e.key);
+                        if (num <= totalSlides) {
+                            goToSlide(num);
+                        }
+                    }
+            }
+        });
+
+        // ═══════════════════════════════════════════════════════════════════════
+        // INITIALIZATION
+        // ═══════════════════════════════════════════════════════════════════════
+        document.addEventListener('DOMContentLoaded', async () => {
+            const loaded = await loadManifest();
+            if (loaded) {
+                renderGallery();
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1502,4 +1502,529 @@ So that **I don't need to manually regenerate the viewer when slides are added o
 
 ---
 
+## Epic 11: Template Catalog System
+
+**Goal:** Unify samples and templates into a catalog with manifest-based discovery, enabling agent-driven template selection and user-driven template creation.
+
+**User Value:** User can leverage existing templates intelligently and create new reusable templates on demand.
+
+**Slug:** catalog-system
+
+**FRs Covered:** Enhancement to FR3, FR4, FR26, FR27 (theme and template management)
+
+### Epic Scope
+
+**In Scope:**
+- Create `config/catalog/` directory structure with manifest
+- Define catalog.json schema with template metadata
+- Refactor setup workflow to populate initial catalog (6 starter templates)
+- Create `/sb:add-template` skill with deep conversational discovery
+- Update build-one, plan-one, plan-deck, edit workflows to use catalog
+- Remove deprecated `config/samples/` and `config/templates/` directories
+
+**Out of Scope:**
+- Template versioning/history
+- Template sharing between projects
+- Visual template browser UI
+- Automatic template recommendations based on content analysis
+
+### Success Criteria
+
+1. `config/catalog/` exists with catalog.json and 6 HTML template files
+2. catalog.json follows defined schema with all metadata fields
+3. `/sb:setup` populates catalog instead of samples/templates
+4. `/sb:add-template` creates new templates via conversational discovery
+5. `/sb:build-one` reads catalog.json for template selection
+6. Old directories (`config/samples/`, `config/templates/`) removed
+7. CONVENTIONS.md documents new catalog structure
+
+### Dependencies
+
+- Epic 2 (Theme Creation) - Setup workflow refactoring
+- Epic 3 (Single Slide) - Build workflow integration
+- Epic 8 (Viewer) - Output path awareness
+
+---
+
+### Story 11.1: Core Catalog Infrastructure
+
+As a **system**,
+I want **a catalog directory with a structured manifest file**,
+So that **templates are discoverable and have rich metadata for agent decision-making**.
+
+**Acceptance Criteria:**
+
+**AC #1:** Given the catalog infrastructure is created, when I check `.slide-builder/config/catalog/`, then it exists with a `catalog.json` file
+
+**AC #2:** Given catalog.json exists, when I read it, then it follows schema:
+```json
+{
+  "version": "1.0",
+  "generated": "ISO-date",
+  "lastModified": "ISO-timestamp",
+  "templates": [{
+    "id": "string",
+    "name": "string",
+    "description": "string",
+    "use_cases": ["array"],
+    "file": "string",
+    "preview": null,
+    "created_at": "ISO-timestamp",
+    "source": "setup|add-template"
+  }]
+}
+```
+
+**AC #3:** Given CONVENTIONS.md is updated, when I read it, then it documents the catalog structure and replaces samples/templates references
+
+**Prerequisites:** None (foundation story)
+
+**Technical Notes:**
+- Create `config/catalog/` directory
+- Initialize catalog.json with empty templates array
+- Update CONVENTIONS.md file structure section
+- No template files created yet (Story 10.2 populates)
+
+---
+
+### Story 11.2: Refactor Setup Workflow for Catalog
+
+As a **user running /sb:setup**,
+I want **the workflow to generate starter templates directly into the catalog**,
+So that **I have a unified template system from the start**.
+
+**Acceptance Criteria:**
+
+**AC #1:** Given I run `/sb:setup` and approve the theme, when sample generation completes, then 6 templates exist in `config/catalog/`:
+- title.html, agenda.html, process-flow.html, comparison.html, callout.html, technical.html
+
+**AC #2:** Given templates are generated, when I read catalog.json, then it contains 6 entries with:
+- Unique IDs matching filenames
+- Descriptive names and descriptions
+- Relevant use_cases arrays
+- source: "setup"
+
+**AC #3:** Given setup completes, when I check status.yaml, then it reflects catalog structure (not templates/samples)
+
+**AC #4:** Given the old directories exist, when setup completes successfully, then `config/samples/` and `config/templates/` are removed
+
+**Prerequisites:** Story 10.1
+
+**Technical Notes:**
+- Modify setup/instructions.md Phase 4 to output to catalog/
+- Generate catalog.json alongside templates
+- Update status.yaml schema for catalog tracking
+- Delete old directories at end of setup
+
+---
+
+### Story 11.3: Create /sb:add-template Skill
+
+As a **user**,
+I want **to create new templates via `/sb:add-template` with conversational discovery**,
+So that **I can expand my template library for specific use cases**.
+
+**Acceptance Criteria:**
+
+**AC #1:** Given I run `/sb:add-template`, when the workflow starts, then I'm warmly welcomed and asked what kind of template I need
+
+**AC #2:** Given I describe a template need, when the agent explores my requirements, then it asks about:
+- Content type (data viz, text-heavy, mixed)
+- Visual elements needed (charts, icons, columns)
+- Reference examples or inspiration
+
+**AC #3:** Given discovery is complete, when I confirm the spec, then:
+- HTML template is generated via frontend-design skill
+- Template file is saved to catalog/
+- catalog.json is updated with new entry
+- source is set to "add-template"
+
+**AC #4:** Given template generation completes, when I'm offered a preview, then I can open it in browser
+
+**Prerequisites:** Story 10.1
+
+**Technical Notes:**
+- Create `workflows/add-template/workflow.yaml` and `instructions.md`
+- Create `.claude/commands/sb/add-template.md` skill registration
+- Use frontend-design skill for HTML generation
+- Deep conversational discovery (5+ exchange minimum)
+
+---
+
+### Story 11.4: Update Dependent Workflows for Catalog
+
+As a **system**,
+I want **build-one, plan-one, plan-deck, and edit workflows to use the catalog**,
+So that **template selection is metadata-driven and consistent**.
+
+**Acceptance Criteria:**
+
+**AC #1:** Given I run `/sb:build-one` with a template type, when the workflow selects a template, then it:
+- Reads catalog.json
+- Matches against template `id` or `use_cases`
+- Uses the matched template file
+
+**AC #2:** Given I run `/sb:plan-one`, when I'm shown template options, then they come from catalog.json with names and descriptions
+
+**AC #3:** Given I run `/sb:plan-deck`, when templates are suggested for slides, then suggestions reference catalog entries
+
+**AC #4:** Given I run `/sb:edit`, when template info is needed, then it reads from catalog manifest
+
+**AC #5:** Given a template type has no catalog match, when selection fails, then fallback to custom generation via frontend-design skill
+
+**Prerequisites:** Stories 10.1, 10.2
+
+**Technical Notes:**
+- Modify build-one/instructions.md template mapping section
+- Modify plan-one/instructions.md template display
+- Modify plan-deck/instructions.md template suggestions
+- Modify edit/instructions.md template awareness
+- Add catalog_path variables to workflow.yaml files
+
+---
+
+## Epic 11 Story Map
+
+```
+Epic 11: Template Catalog System (10 points)
+│
+├── Story 11.1: Core Catalog Infrastructure (2 points)
+│   Dependencies: None
+│   └── Create catalog/ directory, catalog.json schema, update CONVENTIONS.md
+│
+├── Story 11.2: Refactor Setup Workflow (3 points)
+│   Dependencies: Story 11.1
+│   └── Setup generates to catalog/, removes old directories
+│
+├── Story 11.3: Create /sb:add-template Skill (3 points)
+│   Dependencies: Story 11.1
+│   └── New workflow with conversational template creation
+│
+└── Story 11.4: Update Dependent Workflows (2 points)
+    Dependencies: Stories 11.1, 11.2
+    └── build-one, plan-one, plan-deck, edit use catalog
+```
+
+**Total Points:** 10
+**Implementation Sequence:** 11.1 → 11.2 (and 11.3 in parallel) → 11.4
+
+---
+
+## Epic 12: Slide Download & Export
+
+**Slug:** download-export
+**Date Added:** 2026-01-28
+**Tech Spec:** [tech-spec.md](./tech-spec.md)
+
+### Goal
+
+Enable users to download slides as PNG images and PDF documents directly from the viewer, supporting both single slide and batch export with full offline (`file://` protocol) capability.
+
+### Scope
+
+**In Scope:**
+- Download dropdown menu in presentation header
+- Single slide PNG export
+- All slides PNG export (bundled as ZIP)
+- Deck PDF export (all slides as pages)
+- Progress modal with progress bar for batch operations
+- Inline library bundling for offline support
+
+**Out of Scope:**
+- Gallery view download options
+- Server-side rendering
+- Customizable export settings
+- Cloud storage integration
+
+### Success Criteria
+
+1. Download button visible in presentation header with dropdown menu
+2. Single slide downloads as 1920x1080 PNG
+3. All slides download as ZIP containing individual PNGs
+4. PDF export creates multi-page landscape PDF
+5. All features work with `file://` protocol (true offline)
+6. Progress bar updates during batch operations
+
+### Dependencies
+
+- Epic 8 (Slide Viewer) must be complete - viewer template exists
+- Epic 9 (Dynamic Viewer Loading) complete - manifest system in place
+
+---
+
+## Epic 12 Stories
+
+### Story 12.1: Download Menu UI
+
+**User Story:**
+As a presenter,
+I want a download button in the presentation header,
+So that I can access export options while viewing slides.
+
+**Acceptance Criteria:**
+- [ ] Download button visible in presentation header (next to close button)
+- [ ] Dropdown menu opens on click
+- [ ] Menu shows three options with icons (PNG, ZIP, PDF)
+- [ ] Menu closes when clicking outside
+- [ ] Keyboard shortcut 'D' opens menu
+- [ ] Styling matches existing nav buttons
+
+**Technical Notes:**
+- Modify `.slide-builder/config/templates/viewer-template.html`
+- Add CSS for `.download-btn`, `.download-menu`, `.download-menu-item`
+- Add `toggleDownloadMenu()` JavaScript function
+- Follow existing button styling patterns
+
+---
+
+### Story 12.2: Single Slide PNG Export
+
+**User Story:**
+As a presenter,
+I want to download the current slide as a PNG image,
+So that I can share it in documents or emails.
+
+**Acceptance Criteria:**
+- [ ] Clicking "Download Current Slide" triggers download
+- [ ] Downloaded PNG is named `{deckName}-slide-{N}.png`
+- [ ] PNG dimensions are 1920x1080
+- [ ] PNG accurately captures slide content (text, SVGs, backgrounds)
+- [ ] Works with `file://` protocol
+
+**Technical Notes:**
+- Inline html2canvas v1.4.1 library
+- Implement `captureSlide(slideNumber)` helper function
+- Implement `downloadCurrentSlide()` function
+- Access slide via `iframe.contentDocument.querySelector('.slide')`
+
+---
+
+### Story 12.3: Batch PNG Export (ZIP)
+
+**User Story:**
+As a presenter,
+I want to download all slides as PNG images in a ZIP file,
+So that I can archive the deck or use slides individually.
+
+**Acceptance Criteria:**
+- [ ] Clicking "Download All as PNG" shows progress modal
+- [ ] Progress bar updates as slides are processed
+- [ ] ZIP file downloads when complete
+- [ ] ZIP contains all slides as numbered PNGs
+- [ ] Modal dismisses after download
+- [ ] Works with `file://` protocol
+
+**Technical Notes:**
+- Inline JSZip v3.10.1 library
+- Add progress modal HTML/CSS
+- Implement `showProgressModal()`, `updateProgress()`, `hideProgressModal()`
+- Implement `downloadAllSlidesPNG()` function
+- Process slides sequentially to manage memory
+
+---
+
+### Story 12.4: PDF Export
+
+**User Story:**
+As a presenter,
+I want to download the entire deck as a PDF,
+So that I can share a complete document version.
+
+**Acceptance Criteria:**
+- [ ] Clicking "Download as PDF" shows progress modal
+- [ ] Progress bar updates during generation
+- [ ] PDF file downloads when complete
+- [ ] PDF contains all slides as pages
+- [ ] PDF pages are landscape 1920x1080
+- [ ] PDF file size is reasonable (<50MB for 14 slides)
+- [ ] Works with `file://` protocol
+
+**Technical Notes:**
+- Inline jsPDF v2.5.1 library
+- Implement `downloadDeckPDF()` function
+- Use jsPDF with custom page size [1920, 1080] in landscape
+- Render each slide as PNG, then embed in PDF
+
+---
+
+## Epic 12 Story Map
+
+```
+Epic 12: Slide Download & Export (8 points)
+│
+├── Story 12.1: Download Menu UI (2 points)
+│   Dependencies: None
+│   └── Add download button, dropdown menu, keyboard shortcut
+│
+├── Story 12.2: Single Slide PNG Export (2 points)
+│   Dependencies: Story 12.1
+│   └── html2canvas integration, single PNG download
+│
+├── Story 12.3: Batch PNG Export (ZIP) (2 points)
+│   Dependencies: Story 12.1, 12.2
+│   └── JSZip integration, progress modal, batch processing
+│
+└── Story 12.4: PDF Export (2 points)
+    Dependencies: Story 12.1, 12.2
+    └── jsPDF integration, multi-page PDF generation
+```
+
+**Total Points:** 8
+**Implementation Sequence:** 12.1 → 12.2 → 12.3 (and 12.4 in parallel)
+
+---
+
+## Epic 13: Enhanced Planning Sessions
+
+**Slug:** enhanced-planning
+**Date Added:** 2026-01-28
+**Tech Spec:** [tech-spec-enhanced-planning.md](./tech-spec-enhanced-planning.md)
+
+### Goal
+
+Enable deeper planning during planning sessions by transforming `/sb:plan-deck` from a single-pass flow into a two-phase model with agenda structure generation and per-section deep discovery using Claude Code's multi-select UI.
+
+### Scope
+
+**In Scope:**
+- Agenda structure generation with 4-8 proposed sections
+- Multi-select section confirmation via AskUserQuestion
+- Per-section deep discovery loop (message options, content types, visual treatment)
+- On-demand web research integration via WebSearch
+- Enhanced plan.yaml schema with agenda and discovery data
+- Lighter discovery pattern for plan-one
+
+**Out of Scope:**
+- AI-generated images or mockups
+- Automatic slide generation from agenda
+- Third-party integrations
+- Persistent research database
+
+### Success Criteria
+
+1. After context collection, agent proposes 4-8 agenda sections with narrative roles
+2. User can select/deselect sections via Claude Code multi-select UI
+3. For each section, structured discovery presents message, content, and visual options
+4. Research available on-demand via WebSearch
+5. plan.yaml contains full agenda and discovery data per section
+6. Existing modification loop and save functionality unchanged
+
+### Dependencies
+
+- Epic 5 (Full Deck Mode) - plan-deck workflow exists
+- Claude Code AskUserQuestion tool available
+- WebSearch tool available
+
+---
+
+## Epic 13 Stories
+
+### Story 13.1: Agenda Structure Generation
+
+**User Story:**
+As a presentation planner,
+I want the agent to propose a high-level agenda with 4-8 sections after I provide my purpose and audience,
+So that I can structure my presentation around clear narrative stages before diving into details.
+
+**Acceptance Criteria:**
+- [ ] After context collection, agent proposes 4-8 agenda sections
+- [ ] Each section has: id, title, narrative_role, estimated_slides, description
+- [ ] User can select/deselect sections via multi-select
+- [ ] User can add custom sections via "Other" option
+- [ ] Confirmed agenda stored for Phase 2
+
+**Technical Notes:**
+- Insert new step 2.5 after context collection in plan-deck/instructions.md
+- Use AskUserQuestion with multiSelect: true, up to 4 options per call
+- Generate sections based on purpose/audience/key_points analysis
+
+---
+
+### Story 13.2: Section Message Discovery
+
+**User Story:**
+As a presentation planner,
+I want to choose from multiple message framing options for each agenda section,
+So that I can find the most compelling way to communicate each part of my story.
+
+**Acceptance Criteria:**
+- [ ] For each section, 3-4 message framings presented
+- [ ] Options include: direct, question, story, data framings
+- [ ] Single-select UI (not multi-select) for message choice
+- [ ] Selection stored in section.discovery.key_message
+
+**Technical Notes:**
+- Add step 2.6 with for-each loop over agenda_sections
+- Use AskUserQuestion with multiSelect: false
+- Message options should be contextual to section.title and narrative_role
+
+---
+
+### Story 13.3: Content & Visual Discovery
+
+**User Story:**
+As a presentation planner,
+I want to select supporting content types and visual treatment options for each section, with optional research,
+So that each part of my presentation has rich context for slide generation.
+
+**Acceptance Criteria:**
+- [ ] Content type multi-select with 4 options
+- [ ] Visual treatment multi-select with diagram/metaphor/imagery options
+- [ ] On-demand research via WebSearch when requested
+- [ ] Research results presented as selectable findings
+- [ ] Single refinement opportunity before advancing
+
+**Technical Notes:**
+- Continue step 2.6 with additional AskUserQuestion calls
+- Research uses WebSearch tool, results presented via AskUserQuestion
+- Store all selections in section.discovery object
+
+---
+
+### Story 13.4: Schema & Integration
+
+**User Story:**
+As a slide builder system,
+I want the enhanced plan.yaml schema to include all agenda and discovery data,
+So that slide generation can use the rich context gathered during planning.
+
+**Acceptance Criteria:**
+- [ ] plan.yaml schema includes agenda and discovery data
+- [ ] Slide generation uses section context
+- [ ] CONVENTIONS.md documents new patterns
+- [ ] plan-one has lighter discovery option
+
+**Technical Notes:**
+- Modify step 3 (narrative generation) to use agenda sections
+- Update plan.yaml write in step 5
+- Update CONVENTIONS.md with AskUserQuestion patterns
+
+---
+
+## Epic 13 Story Map
+
+```
+Epic 13: Enhanced Planning Sessions (8 points)
+│
+├── Story 13.1: Agenda Structure Generation (2 points)
+│   Dependencies: None
+│   └── Add agenda proposal and multi-select confirmation after context collection
+│
+├── Story 13.2: Section Message Discovery (2 points)
+│   Dependencies: Story 13.1
+│   └── Per-section key message options with single-select UI
+│
+├── Story 13.3: Content & Visual Discovery (2 points)
+│   Dependencies: Story 13.2
+│   └── Content types, visual treatment multi-select, on-demand research
+│
+└── Story 13.4: Schema & Integration (2 points)
+    Dependencies: Stories 13.1, 13.2, 13.3
+    └── Enhanced plan.yaml, slide generation from sections, CONVENTIONS.md
+```
+
+**Total Points:** 8
+**Implementation Sequence:** 13.1 → 13.2 → 13.3 → 13.4
+
+---
 

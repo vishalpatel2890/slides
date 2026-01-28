@@ -1,6 +1,6 @@
 {
   "deckName": "Claude Code Fundamentals",
-  "generatedAt": "2026-01-28T11:29:40.564Z",
+  "generatedAt": "2026-01-28T23:01:52.534Z",
   "slides": [
     {
       "number": 1,
@@ -10,42 +10,42 @@
     {
       "number": 2,
       "filename": "slide-2.html",
-      "title": "The AI Evolution - From Chatbot to Agent"
+      "title": "Why Claude Code?"
     },
     {
       "number": 3,
       "filename": "slide-3.html",
-      "title": "What is Claude Code?"
+      "title": "Claude Code vs The Rest"
     },
     {
       "number": 4,
       "filename": "slide-4.html",
-      "title": "Claude Code vs Claude.ai vs API — When to Use Each"
+      "title": "Why Agentic CLI Wins"
     },
     {
       "number": 5,
       "filename": "slide-5.html",
-      "title": "The Capability Model"
+      "title": "Quick Check: AWS CLI"
     },
     {
       "number": 6,
       "filename": "slide-6.html",
-      "title": "Installation & Setup"
+      "title": "Install Claude Code"
     },
     {
       "number": 7,
       "filename": "slide-7.html",
-      "title": "Authentication"
+      "title": "AWS Config — SRE Profile"
     },
     {
       "number": 8,
       "filename": "slide-8.html",
-      "title": "CLI Navigation Basics"
+      "title": "Environment Variables & Helper Script"
     },
     {
       "number": 9,
       "filename": "slide-9.html",
-      "title": "The Interaction Pattern"
+      "title": "First Run — The Magic Moment"
     },
     {
       "number": 10,
@@ -55,17 +55,17 @@
     {
       "number": 11,
       "filename": "slide-11.html",
-      "title": "Trust & Control — When to Guide vs Let It Run"
+      "title": "This Exercise is Impossible in Chat UIs"
     },
     {
       "number": 12,
       "filename": "slide-12.html",
-      "title": "SE Application - Demo Script Generation"
+      "title": "Getting Help"
     },
     {
       "number": 13,
       "filename": "slide-13.html",
-      "title": "Your Turn"
+      "title": "Your 12-Week Journey"
     },
     {
       "number": 14,

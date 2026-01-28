@@ -1,0 +1,449 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<story-context story-id="13-2-section-message-discovery" generated="2026-01-28">
+  <metadata>
+    <title>Section Message Discovery</title>
+    <epic>Epic 13: Enhanced Planning Sessions</epic>
+    <status>ready-for-dev</status>
+    <dependencies>
+      <dependency type="story">13-1-agenda-structure-generation (done)</dependency>
+    </dependencies>
+  </metadata>
+
+  <!-- ════════════════════════════════════════════════════════════════════════ -->
+  <!-- DOCUMENTATION ARTIFACTS                                                   -->
+  <!-- ════════════════════════════════════════════════════════════════════════ -->
+
+  <documentation-artifacts>
+    <artifact name="Tech Spec - Enhanced Planning" path="notes/tech-spec-enhanced-planning.md">
+      <relevant-sections>
+        <section lines="152-207" topic="Phase 2 Implementation: Section Discovery Loop">
+          <content><![CDATA[
+After agenda confirmation, iterate through each section:
+
+```xml
+<step n="2.6" goal="Deep discovery for each agenda section" for-each="section in agenda_sections">
+
+  <!-- Sub-step A: Key Message Discovery -->
+  <action>Generate 3-4 key message options for {{section.title}}:
+    - Option 1: Direct/assertive framing
+    - Option 2: Question-based framing
+    - Option 3: Story-based framing
+    - Option 4: Data-driven framing
+  </action>
+
+  <action>Use AskUserQuestion tool to present message options (single-select)</action>
+  <action>Store selection as {{section.key_message}}</action>
+```
+          ]]></content>
+        </section>
+
+        <section lines="210-246" topic="AskUserQuestion Integration Pattern">
+          <content><![CDATA[
+// Example: Key message selection
+{
+  "questions": [{
+    "question": "Which message framing resonates best for 'The Problem' section?",
+    "header": "Key Message",
+    "options": [
+      {"label": "Direct Challenge", "description": "\"Most teams waste 40% of meeting time on slides\""},
+      {"label": "Question Hook", "description": "\"What if your slides could build themselves?\""},
+      {"label": "Story Setup", "description": "\"Last month, a SC spent 6 hours on one deck...\""},
+      {"label": "Data Lead", "description": "\"73% of deals are won or lost at the presentation stage\""}
+    ],
+    "multiSelect": false
+  }]
+}
+          ]]></content>
+        </section>
+
+        <section lines="310-326" topic="AskUserQuestion Tool Constraints">
+          <content><![CDATA[
+The tool accepts this structure:
+{
+  "questions": [{
+    "question": "string (the question to ask)",
+    "header": "string (short label, max 12 chars)",
+    "options": [
+      {"label": "string", "description": "string"}
+    ],
+    "multiSelect": boolean
+  }]
+}
+- Maximum 4 questions per call
+- Maximum 4 options per question
+- User can always select "Other" for custom input
+          ]]></content>
+        </section>
+
+        <section lines="453-491" topic="Discovery Flow State Machine">
+          <content><![CDATA[
+INIT → CONTEXT_COLLECTION → AGENDA_GENERATION → AGENDA_SELECTION →
+  ↓
+  For each section (state = SECTION_DISCOVERY):
+    MESSAGE_OPTIONS → CONTENT_SELECTION → VISUAL_TREATMENT →
+    RESEARCH_OFFER → [RESEARCH_RESULTS] → SECTION_REFINEMENT → SECTION_COMPLETE
+  ↓
+→ SLIDE_GENERATION → MODIFICATION_LOOP → SAVE
+
+**Message Options (Phase 2a):**
+- 1 question per section
+- multiSelect: false
+- Options: 3-4 message framings
+          ]]></content>
+        </section>
+
+        <section lines="589-594" topic="Story 2 Acceptance Criteria">
+          <content><![CDATA[
+**Story 2 - Message Discovery:**
+- [ ] For each section, 3-4 message framings presented
+- [ ] Options include: direct, question, story, data framings
+- [ ] Single-select UI (not multi-select) for message choice
+- [ ] Selection stored in section.discovery.key_message
+          ]]></content>
+        </section>
+      </relevant-sections>
+    </artifact>
+
+    <artifact name="CONVENTIONS.md" path=".slide-builder/CONVENTIONS.md">
+      <relevant-sections>
+        <section lines="24-31" topic="Workflow Execution Pattern">
+          <content><![CDATA[
+All workflows follow the BMAD pattern:
+
+1. **Load** `workflow.yaml` from the workflow directory
+2. **Read** `instructions.md` for step-by-step execution
+3. **Execute** steps in numerical order
+4. **Pause** at `<template-output>` and `<ask>` tags for user interaction
+5. **Update** `.slide-builder/status.yaml` with progress
+          ]]></content>
+        </section>
+      </relevant-sections>
+    </artifact>
+  </documentation-artifacts>
+
+  <!-- ════════════════════════════════════════════════════════════════════════ -->
+  <!-- CODE REFERENCES                                                           -->
+  <!-- ════════════════════════════════════════════════════════════════════════ -->
+
+  <code-references>
+    <reference file=".slide-builder/workflows/plan-deck/instructions.md" description="Target file for Step 2.6 insertion">
+      <section lines="146-309" topic="Step 2.5 - Agenda Structure Generation (Source of {{agenda_sections}})">
+        <notes>
+          - Step 2.5 generates and confirms agenda_sections array
+          - Each section has: id, title, narrative_role, estimated_slides, description
+          - Uses AskUserQuestion with multiSelect: true for section selection
+          - Custom sections handled via "Other" option parsing
+          - Outputs "Proceeding to generate detailed slide breakdown..." at end
+          - INSERT Step 2.6 AFTER line 309 (after the closing output tag)
+        </notes>
+        <key-code><![CDATA[
+<!-- From lines 287-308 -->
+<action>Store confirmed sections as {{agenda_sections}} array with full structure:
+  - Each section includes: id, title, narrative_role, estimated_slides, description
+  - Preserve selection order as presentation order
+  - This variable is available for Phase 2 discovery (Story 13.2)
+</action>
+
+<output>
+**Agenda Confirmed**
+
+Your presentation will follow this structure:
+
+{{for each section in agenda_sections}}
+{{loop_index}}. **{{section.title}}** ({{section.narrative_role}}) - ~{{section.estimated_slides}} slide(s)
+{{end for}}
+
+Total estimated slides: {{sum of estimated_slides}}
+
+Proceeding to generate detailed slide breakdown...
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+</output>
+</step>
+        ]]></key-code>
+      </section>
+
+      <section lines="311-391" topic="Step 3 - Slide Generation (Comes AFTER new Step 2.6)">
+        <notes>
+          - Step 3 generates individual slides from agenda structure
+          - Uses catalog.json for template matching
+          - Storyline structure generated from collected context
+          - This step should use discovery.key_message from Step 2.6
+        </notes>
+      </section>
+    </reference>
+
+    <reference file=".slide-builder/workflows/plan-deck/workflow.yaml" description="Workflow variables">
+      <section lines="42-45" topic="Phase 2 Discovery Variables">
+        <key-code><![CDATA[
+# Generated - Step 2.5 (Epic 13: Enhanced Planning)
+proposed_agenda: []      # Generated agenda sections before user selection
+agenda_sections: []      # User-confirmed agenda sections for Phase 2 discovery
+        ]]></key-code>
+        <notes>
+          - agenda_sections already exists in workflow variables
+          - Discovery data stored IN each section object (section.discovery.key_message)
+          - No new top-level variables needed for Story 13.2
+        </notes>
+      </section>
+    </reference>
+  </code-references>
+
+  <!-- ════════════════════════════════════════════════════════════════════════ -->
+  <!-- INTERFACES AND CONTRACTS                                                  -->
+  <!-- ════════════════════════════════════════════════════════════════════════ -->
+
+  <interfaces>
+    <interface name="agenda_sections Array Structure" type="data">
+      <description>Input structure from Story 13.1, to be enhanced with discovery data</description>
+      <schema><![CDATA[
+agenda_sections: [
+  {
+    id: "agenda-1",                    // Unique identifier
+    title: "Opening Hook",             // Section name
+    narrative_role: "opening",         // One of: opening | context | problem | solution | evidence | cta
+    estimated_slides: 1,               // 1-3 slides per section
+    description: "Grab attention...",  // 1-sentence purpose
+
+    // NEW: Added by Story 13.2
+    discovery: {
+      key_message: "Most teams waste 40% of meeting time on slides"  // Selected framing text
+    }
+  }
+]
+      ]]></schema>
+    </interface>
+
+    <interface name="AskUserQuestion Tool" type="tool">
+      <description>Claude Code's structured question tool for single-select message framings</description>
+      <contract><![CDATA[
+{
+  "questions": [{
+    "question": "Which message framing resonates best for '{{section.title}}'?",
+    "header": "Message",           // Max 12 chars
+    "options": [
+      {"label": "Direct Challenge", "description": "{{direct_framing_text}}"},
+      {"label": "Question Hook", "description": "{{question_framing_text}}"},
+      {"label": "Story Setup", "description": "{{story_framing_text}}"},
+      {"label": "Data Lead", "description": "{{data_framing_text}}"}
+    ],
+    "multiSelect": false           // CRITICAL: Single-select for message framings
+  }]
+}
+
+Constraints:
+- Max 4 questions per call
+- Max 4 options per question
+- "Other" option automatically available for custom input
+- Returns selected option label or custom text
+      ]]></contract>
+    </interface>
+
+    <interface name="Narrative Role to Framing Style Mapping" type="logic">
+      <description>Map section narrative_role to appropriate message framing styles</description>
+      <mapping><![CDATA[
+narrative_role → framing_styles:
+
+opening:
+  - direct: "{{provocative_statement_about_audience_situation}}"
+  - question: "What if {{desirable_outcome}}?"
+  - story: "{{time_reference}}, {{relatable_scenario}}..."
+  - data: "{{surprising_statistic}} of {{audience_group}} {{situation}}"
+
+context:
+  - direct: "The landscape has shifted..."
+  - question: "What's driving this change?"
+  - story: "Here's where we are today..."
+  - data: "{{market_data}} shows {{trend}}"
+
+problem:
+  - direct: "{{pain_point}} is costing you {{consequence}}"
+  - question: "Why do {{audience_group}} struggle with {{challenge}}?"
+  - story: "Meet {{persona}}, who faces {{challenge}} every day"
+  - data: "{{statistic}} shows the impact of {{problem}}"
+
+solution:
+  - direct: "{{solution}} delivers {{key_benefit}}"
+  - question: "What would {{desirable_outcome}} mean for your team?"
+  - story: "Here's how {{customer}} achieved {{result}}"
+  - data: "{{solution}} reduces {{metric}} by {{percentage}}"
+
+evidence:
+  - direct: "The results speak for themselves"
+  - question: "How do we know this works?"
+  - story: "{{customer_name}}'s transformation"
+  - data: "{{metric_improvement}} across {{number}} implementations"
+
+cta:
+  - direct: "Let's start with {{specific_next_step}}"
+  - question: "Ready to {{action}}?"
+  - story: "Join {{number}} teams who have already {{action}}"
+  - data: "{{time_to_value}} to see first results"
+      ]]></mapping>
+    </interface>
+  </interfaces>
+
+  <!-- ════════════════════════════════════════════════════════════════════════ -->
+  <!-- CONSTRAINTS AND RULES                                                     -->
+  <!-- ════════════════════════════════════════════════════════════════════════ -->
+
+  <constraints>
+    <constraint type="tool-limitation">
+      AskUserQuestion has maximum 4 options per question.
+      Story 13.2 requires exactly 3-4 message framings per section, which fits within this limit.
+    </constraint>
+
+    <constraint type="selection-mode">
+      Message framing selection MUST use multiSelect: false (single-select).
+      This is explicitly required by AC #3.
+    </constraint>
+
+    <constraint type="iteration-pattern">
+      Step 2.6 uses for-each pattern: `for-each="section in agenda_sections"`
+      Each section is processed sequentially, not in parallel.
+    </constraint>
+
+    <constraint type="storage-location">
+      Key message stored in `section.discovery.key_message`, NOT a separate array.
+      The discovery object is nested within each section object.
+    </constraint>
+
+    <constraint type="custom-input">
+      When user selects "Other" and provides custom text, store that exact text as key_message.
+      Do not attempt to categorize or transform custom input.
+    </constraint>
+
+    <constraint type="contextual-generation">
+      Message framings must be contextual to:
+      1. section.title - The specific section being processed
+      2. section.narrative_role - Determines framing style (opening vs problem vs cta etc)
+      3. section.description - Additional context for relevance
+    </constraint>
+  </constraints>
+
+  <!-- ════════════════════════════════════════════════════════════════════════ -->
+  <!-- DEPENDENCIES                                                              -->
+  <!-- ════════════════════════════════════════════════════════════════════════ -->
+
+  <dependencies>
+    <dependency type="story" status="done">
+      <name>Story 13.1: Agenda Structure Generation</name>
+      <provides>
+        - {{agenda_sections}} variable with confirmed sections
+        - Each section has: id, title, narrative_role, estimated_slides, description
+        - Step 2.5 implementation pattern and XML structure
+      </provides>
+    </dependency>
+
+    <dependency type="tool" status="available">
+      <name>AskUserQuestion</name>
+      <documentation>Built-in Claude Code tool for structured user input</documentation>
+    </dependency>
+
+    <dependency type="file" status="exists">
+      <name>.slide-builder/workflows/plan-deck/instructions.md</name>
+      <purpose>Target file for Step 2.6 insertion (after line 309)</purpose>
+    </dependency>
+  </dependencies>
+
+  <!-- ════════════════════════════════════════════════════════════════════════ -->
+  <!-- TESTING GUIDANCE                                                          -->
+  <!-- ════════════════════════════════════════════════════════════════════════ -->
+
+  <testing-guidance>
+    <approach>Manual testing via workflow execution</approach>
+
+    <test-scenario id="1" name="Happy Path - All Sections">
+      <steps>
+        1. Run `/sb:plan-deck`
+        2. Complete steps 1-2.5 (context collection, agenda confirmation)
+        3. For first section, verify 3-4 message framings appear
+        4. Select a framing (not "Other")
+        5. Repeat for all remaining sections
+        6. Verify all sections have discovery.key_message populated
+      </steps>
+      <expected>Each section's AskUserQuestion shows contextual framings based on narrative_role</expected>
+    </test-scenario>
+
+    <test-scenario id="2" name="Custom Message via Other">
+      <steps>
+        1. Run `/sb:plan-deck` through step 2.5
+        2. When message options appear, select "Other"
+        3. Enter custom message text
+        4. Proceed to next section
+        5. Verify custom text stored in discovery.key_message
+      </steps>
+      <expected>Custom text preserved exactly as entered</expected>
+    </test-scenario>
+
+    <test-scenario id="3" name="Single-Select Enforcement">
+      <steps>
+        1. Run workflow to step 2.6
+        2. Observe the AskUserQuestion UI
+        3. Verify only one option can be selected (radio buttons, not checkboxes)
+      </steps>
+      <expected>UI shows single-select mode, not multi-select</expected>
+    </test-scenario>
+
+    <test-scenario id="4" name="Narrative Role Contextuality">
+      <steps>
+        1. Run workflow with mixed narrative_role sections (opening, problem, solution, cta)
+        2. For each section, observe the message framing options
+        3. Verify framings match the narrative_role guidance
+      </steps>
+      <expected>
+        - Opening sections → Hook-style framings
+        - Problem sections → Pain-point framings
+        - Solution sections → Value-proposition framings
+        - CTA sections → Action-oriented framings
+      </expected>
+    </test-scenario>
+
+    <verification-checklist>
+      <item>Message framing options appear for each agenda section</item>
+      <item>Options are contextual to the section's narrative role</item>
+      <item>Single-select UI (not checkboxes)</item>
+      <item>"Other" option available for custom input</item>
+      <item>No console errors during workflow execution</item>
+      <item>All sections have discovery.key_message after completion</item>
+    </verification-checklist>
+  </testing-guidance>
+
+  <!-- ════════════════════════════════════════════════════════════════════════ -->
+  <!-- IMPLEMENTATION NOTES                                                      -->
+  <!-- ════════════════════════════════════════════════════════════════════════ -->
+
+  <implementation-notes>
+    <note topic="Insertion Point">
+      Insert Step 2.6 AFTER the closing `</step>` tag of Step 2.5 (line 309).
+      The new step comes BEFORE Step 3 (narrative structure generation).
+    </note>
+
+    <note topic="XML Structure Pattern">
+      Follow the same XML pattern established in Step 2.5:
+      - Use `<step n="2.6" goal="..." for-each="section in agenda_sections">`
+      - Use `<action>` for instructions
+      - Use `<output>` for formatted messages showing progress
+      - Use section markers with `<!-- ═══════ -->` for readability
+    </note>
+
+    <note topic="Progress Output">
+      Display which section is being processed:
+      ```
+      **Section Discovery: {{section.title}}** ({{loop_index}} of {{total_sections}})
+      ```
+    </note>
+
+    <note topic="Error Handling">
+      No explicit error handling needed - AskUserQuestion tool handles empty responses
+      and provides "Other" option automatically.
+    </note>
+
+    <note topic="Future Stories">
+      This story only adds key_message discovery. Stories 13.3 and 13.4 will add:
+      - section.discovery.content_types (13.3)
+      - section.discovery.visual_treatment (13.3)
+      - Integration with slide generation schema (13.4)
+    </note>
+  </implementation-notes>
+</story-context>

@@ -1,0 +1,177 @@
+<story-context id=".bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>13</epicId>
+    <storyId>1</storyId>
+    <title>Agenda Structure Generation</title>
+    <status>drafted</status>
+    <generatedAt>2026-01-28</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>notes/sprint-artifacts/story-13-1-agenda-structure-generation.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>presentation planner</asA>
+    <iWant>the agent to propose a high-level agenda with 4-8 sections after I provide my purpose and audience</iWant>
+    <soThat>I can structure my presentation around clear narrative stages before diving into details</soThat>
+    <tasks>
+      <task n="1">Add step 2.5 to plan-deck/instructions.md (~line 145, after context collection)
+        - Insert new step with goal "Generate and refine agenda structure"
+        - Move before step 3 (narrative generation)</task>
+      <task n="2">Implement agenda proposal logic
+        - Analyze purpose, audience, key_points, desired_length
+        - Generate 4-8 sections based on content analysis
+        - Map each section to a narrative_role</task>
+      <task n="3">Add AskUserQuestion tool call for section selection
+        - Use multiSelect: true
+        - Present sections in groups of 4 (tool limit)
+        - Include section title as label, description as description
+        - Store selections in agenda_sections variable</task>
+      <task n="4">Handle custom section input via "Other"
+        - If user provides custom text, parse into new section
+        - Generate id, title, narrative_role, estimated_slides, description</task>
+      <task n="5">Add validation for minimum sections
+        - If fewer than 3 sections selected, display warning
+        - Allow user to proceed anyway or select more</task>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <criterion id="AC1">Given I have provided purpose, audience, key points, and length via the existing plan-deck prompts, When the agent analyzes my input, Then it proposes 4-8 agenda sections with: unique id (agenda-1, etc.), title, narrative_role (opening|context|problem|solution|evidence|cta), estimated_slides (1-3 per section), brief description (1 sentence)</criterion>
+    <criterion id="AC2">And I can select/deselect sections via Claude Code's AskUserQuestion multi-select UI</criterion>
+    <criterion id="AC3">And I can add custom sections via the "Other" option</criterion>
+    <criterion id="AC4">And confirmed sections are stored in the workflow variable agenda_sections for Phase 2 discovery</criterion>
+    <criterion id="AC5">And if I select fewer than 3 sections, I receive a warning that the presentation may be too brief</criterion>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>notes/tech-spec-enhanced-planning.md</path>
+        <title>Enhanced Planning Sessions - Technical Specification</title>
+        <section>Complete document</section>
+        <snippet>Primary context document containing brownfield codebase analysis, AskUserQuestion tool patterns, enhanced plan.yaml schema, and complete implementation guidance for the two-phase planning model.</snippet>
+      </doc>
+      <doc>
+        <path>notes/sprint-artifacts/epic-13-enhanced-planning.md</path>
+        <title>Epic 13: Enhanced Planning Sessions</title>
+        <section>Story 13.1 definition</section>
+        <snippet>Epic defining the goal of transforming plan-deck from single-pass to two-phase planning with agenda structure generation and per-section deep discovery.</snippet>
+      </doc>
+      <doc>
+        <path>.slide-builder/CONVENTIONS.md</path>
+        <title>Slide Builder Conventions</title>
+        <section>Workflow Execution Pattern, State Management</section>
+        <snippet>Documents BMAD workflow patterns including instructions.md format, status.yaml state management, and template catalog system conventions.</snippet>
+      </doc>
+      <doc>
+        <path>notes/tech-spec.md</path>
+        <title>Today - Technical Specification</title>
+        <section>Project Stack</section>
+        <snippet>Documents overall project architecture: Node.js runtime, vanilla HTML/CSS/JS frontend, BMAD workflow system, and file structure conventions.</snippet>
+      </doc>
+    </docs>
+
+    <code>
+      <artifact>
+        <path>.slide-builder/workflows/plan-deck/instructions.md</path>
+        <kind>workflow instructions</kind>
+        <symbol>Step 2: Collect presentation context</symbol>
+        <lines>74-144</lines>
+        <reason>Primary modification target - insert new step 2.5 after context collection. Contains existing prompts for purpose, audience, key_points, desired_length that provide input for agenda generation.</reason>
+      </artifact>
+      <artifact>
+        <path>.slide-builder/workflows/plan-deck/instructions.md</path>
+        <kind>workflow instructions</kind>
+        <symbol>Step 3: Generate narrative structure</symbol>
+        <lines>146-227</lines>
+        <reason>Follows the new step 2.5 - will need to consume agenda_sections variable. Contains storyline generation and slide breakdown logic.</reason>
+      </artifact>
+      <artifact>
+        <path>.slide-builder/workflows/plan-deck/workflow.yaml</path>
+        <kind>workflow config</kind>
+        <symbol>variables section</symbol>
+        <lines>33-45</lines>
+        <reason>Add agenda_sections variable to track selected agenda items for Phase 2.</reason>
+      </artifact>
+      <artifact>
+        <path>.slide-builder/config/catalog/catalog.json</path>
+        <kind>data file</kind>
+        <symbol>templates array</symbol>
+        <lines>1-77</lines>
+        <reason>Reference for template matching - agenda sections eventually map to template use_cases during slide generation.</reason>
+      </artifact>
+    </code>
+
+    <dependencies>
+      <ecosystem name="node">
+        <package name="puppeteer" version="^23.0.0" />
+        <package name="googleapis" version="^140.0.0" />
+      </ecosystem>
+      <note>No new dependencies required - uses existing Claude Code AskUserQuestion tool infrastructure</note>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint type="pattern">Workflow instructions use XML tags: step, action, check, ask, goto, output, template-output</constraint>
+    <constraint type="pattern">Variables use double braces: {{variable_name}}</constraint>
+    <constraint type="tool-limit">AskUserQuestion tool allows maximum 4 questions per call, maximum 4 options per question</constraint>
+    <constraint type="tool-limit">Each option needs "label" (short display text) and "description" (explanation)</constraint>
+    <constraint type="tool-feature">multiSelect: true enables checkbox selection; false enables radio button single-select</constraint>
+    <constraint type="tool-feature">User can always select "Other" for custom input - tool handles this automatically</constraint>
+    <constraint type="code-style">Functions use camelCase, XML tags use kebab-case</constraint>
+    <constraint type="state">Save plan.yaml after each modification (AC5.2.7 pattern)</constraint>
+    <constraint type="structure">Insert step 2.5 after line 144 in instructions.md, before step 3</constraint>
+  </constraints>
+
+  <interfaces>
+    <interface>
+      <name>AskUserQuestion</name>
+      <kind>Claude Code tool</kind>
+      <signature>{
+  "questions": [{
+    "question": "string (the question to ask)",
+    "header": "string (short label, max 12 chars)",
+    "options": [
+      {"label": "string", "description": "string"}
+    ],
+    "multiSelect": boolean
+  }]
+}</signature>
+      <path>Claude Code native tool</path>
+    </interface>
+    <interface>
+      <name>Agenda Section Schema</name>
+      <kind>data structure</kind>
+      <signature>{
+  id: "agenda-N",
+  title: "string",
+  narrative_role: "opening|context|problem|solution|evidence|cta",
+  estimated_slides: 1-3,
+  description: "string (1 sentence)"
+}</signature>
+      <path>notes/tech-spec-enhanced-planning.md:129-139</path>
+    </interface>
+    <interface>
+      <name>Workflow variables</name>
+      <kind>state variables</kind>
+      <signature>{{purpose}}, {{audience}}, {{key_points}}, {{desired_length}} - inputs from step 2
+{{agenda_sections}} - array output from step 2.5</signature>
+      <path>.slide-builder/workflows/plan-deck/workflow.yaml:33-45</path>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>No automated testing framework in place. Testing is manual via workflow execution. Run `/sb:plan-deck` in Claude Code and observe multi-select prompts and verify flow.</standards>
+    <locations>
+      <location>Manual testing via /sb:plan-deck command</location>
+      <location>Inspect output/{deck-slug}/plan.yaml for agenda structure</location>
+    </locations>
+    <ideas>
+      <idea ac="AC1">Test agenda proposal with sample purposes: "Partnership pitch", "Product demo", "Quarterly review" - verify 4-8 sections generated with all required fields</idea>
+      <idea ac="AC2">Verify AskUserQuestion multi-select UI appears correctly with sections as options</idea>
+      <idea ac="AC3">Test "Other" custom input - enter custom section text, verify it's parsed into proper section structure</idea>
+      <idea ac="AC4">Verify agenda_sections variable contains all selected sections after confirmation</idea>
+      <idea ac="AC5">Test minimum sections warning - select only 2 sections, verify warning displayed about presentation being too brief</idea>
+    </ideas>
+  </tests>
+</story-context>

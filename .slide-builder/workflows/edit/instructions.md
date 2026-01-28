@@ -2,10 +2,6 @@
 
 This workflow enables slide layout editing via natural language while preserving user text edits.
 
-**Story 4.1: Edit Command Invocation** - Implements AC4.1.1-AC4.1.6
-**Story 4.2: Natural Language Layout Changes** - Implements AC4.2.1-AC4.2.9
-**Story 4.3: Edit Preservation Across Regenerations** - Implements AC4.3.1-AC4.3.9
-
 ```xml
 <critical>This workflow modifies slide layout while preserving text edits</critical>
 <critical>Always read state file before regenerating to preserve user edits</critical>
@@ -246,10 +242,11 @@ No problem. Let's try again.
   </step>
 
   <!-- ═══════════════════════════════════════════════════════════════════════ -->
-  <!-- PHASE 5A: Layout Regeneration (AC4.2.3, AC4.2.5)                        -->
+  <!-- PHASE 5A: Layout Regeneration (AC4.2.3, AC4.2.5) - Catalog-Aware        -->
   <!-- Story 4.2: Natural Language Layout Changes                              -->
+  <!-- Story 11.4: Catalog integration for template awareness                  -->
   <!-- ═══════════════════════════════════════════════════════════════════════ -->
-  <step n="5" goal="Regenerate slide layout via frontend-design skill">
+  <step n="5" goal="Regenerate slide layout via frontend-design skill (catalog-aware)">
     <output>
 **Regenerating layout...**
     </output>
@@ -258,6 +255,14 @@ No problem. Let's try again.
     <action>Read .slide-builder/config/theme.json</action>
     <action>Parse theme JSON to extract colors, typography, shapes, components, and personality</action>
 
+    <!-- Story 11.4: Load catalog for template awareness -->
+    <action>Read .slide-builder/config/catalog/catalog.json</action>
+    <action>Parse catalog to understand available template patterns:
+      - Extract template IDs, names, and descriptions
+      - Note use_cases for each template
+      - This context helps frontend-design skill understand established patterns
+    </action>
+
     <!-- Prepare frontend-design skill invocation -->
     <action>Construct edit_context object:
       edit_context:
@@ -265,6 +270,7 @@ No problem. Let's try again.
         current_html: "{{current_slide_html}}"
         instruction: "{{edit_request}}"
         theme: (full theme.json contents)
+        catalog_templates: (list of available templates from catalog.json for pattern reference)
         constraints:
           dimensions: "1920x1080"
           required_attributes:
@@ -276,6 +282,7 @@ No problem. Let's try again.
             - "Use theme colors consistently"
             - "Use theme typography (font-family, sizes, weights)"
             - "Maintain brand personality: {{theme.personality.classification}}"
+            - "Reference catalog templates for layout patterns when applicable"
     </action>
 
     <!-- AC4.2.3: Invoke frontend-design skill -->

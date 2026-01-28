@@ -1,0 +1,144 @@
+<story-context id="story-catalog-system-1" v="1.0">
+  <metadata>
+    <epicId>11</epicId>
+    <storyId>1</storyId>
+    <title>Core Catalog Infrastructure</title>
+    <status>drafted</status>
+    <generatedAt>2026-01-28</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>notes/sprint-artifacts/story-catalog-system-1.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>system</asA>
+    <iWant>a catalog directory with a structured manifest file</iWant>
+    <soThat>templates are discoverable and have rich metadata for agent decision-making</soThat>
+    <tasks>
+      <task id="1" ac="1">Create `.slide-builder/config/catalog/` directory</task>
+      <task id="2" ac="2">Create initial `catalog.json` with empty templates array and metadata</task>
+      <task id="3" ac="3">Update `.slide-builder/CONVENTIONS.md` to document catalog structure</task>
+      <task id="4" ac="3">Remove references to `config/samples/` and `config/templates/` in CONVENTIONS.md</task>
+      <task id="5" ac="2">Verify catalog.json validates against schema</task>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <criterion id="1">Given the catalog infrastructure is created, when I check `.slide-builder/config/catalog/`, then it exists with a `catalog.json` file</criterion>
+    <criterion id="2">Given catalog.json exists, when I read it, then it follows the defined schema with version, generated, lastModified, and templates array</criterion>
+    <criterion id="3">Given CONVENTIONS.md is updated, when I read it, then it documents the catalog structure and replaces samples/templates references</criterion>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>notes/tech-spec-catalog.md</path>
+        <title>Technical Specification: Template Catalog System</title>
+        <section>Implementation Details</section>
+        <snippet>Defines catalog.json schema with id, name, description, use_cases, file, preview, created_at, source fields. Template IDs use kebab-case slugs.</snippet>
+      </doc>
+      <doc>
+        <path>notes/architecture.md</path>
+        <title>Slide Builder Architecture</title>
+        <section>Project Structure</section>
+        <snippet>Documents current config/ structure with samples/ and templates/ directories. Follows BMAD-mirror pattern with workflow.yaml + instructions.md.</snippet>
+      </doc>
+      <doc>
+        <path>.slide-builder/CONVENTIONS.md</path>
+        <title>Slide Builder Conventions</title>
+        <section>File Structure</section>
+        <snippet>Current structure shows config/samples/ and config/templates/ directories. This file needs updating to document new catalog structure.</snippet>
+      </doc>
+    </docs>
+    <code>
+      <artifact>
+        <path>.slide-builder/config/samples/</path>
+        <kind>directory</kind>
+        <symbol>samples</symbol>
+        <lines>N/A</lines>
+        <reason>Contains 8 sample HTML files to be consolidated into catalog. Will be deprecated.</reason>
+      </artifact>
+      <artifact>
+        <path>.slide-builder/config/templates/</path>
+        <kind>directory</kind>
+        <symbol>templates</symbol>
+        <lines>N/A</lines>
+        <reason>Contains layout templates including viewer-template.html and layout-rocd-initiative.html. To be deprecated.</reason>
+      </artifact>
+      <artifact>
+        <path>.slide-builder/status.yaml</path>
+        <kind>config</kind>
+        <symbol>templates section</symbol>
+        <lines>40-49</lines>
+        <reason>Current templates tracking section will need updating in future stories to reference catalog.</reason>
+      </artifact>
+      <artifact>
+        <path>.slide-builder/CONVENTIONS.md</path>
+        <kind>documentation</kind>
+        <symbol>File Structure section</symbol>
+        <lines>34-77</lines>
+        <reason>Documents current directory structure with samples/ and templates/. Must be updated to show new catalog/ structure.</reason>
+      </artifact>
+    </code>
+    <dependencies>
+      <node>
+        <package>puppeteer</package>
+        <version>^23.0.0</version>
+      </node>
+      <node>
+        <package>googleapis</package>
+        <version>^140.0.0</version>
+      </node>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint type="schema">catalog.json must follow exact schema: version (string), generated (ISO date), lastModified (ISO timestamp), templates array</constraint>
+    <constraint type="naming">Template IDs use kebab-case slugs (e.g., "process-flow", not "processFlow" or "Process Flow")</constraint>
+    <constraint type="timestamp">Use ISO 8601 timestamps for dates (YYYY-MM-DD for dates, full ISO for timestamps)</constraint>
+    <constraint type="pattern">Follow BMAD workflow patterns - YAML config, Markdown instructions</constraint>
+    <constraint type="scope">This story creates infrastructure ONLY - no templates or migration. Empty templates array is expected.</constraint>
+  </constraints>
+
+  <interfaces>
+    <interface>
+      <name>catalog.json schema</name>
+      <kind>JSON schema</kind>
+      <signature>{
+  "version": "1.0",
+  "generated": "YYYY-MM-DD",
+  "lastModified": "ISO-timestamp",
+  "templates": [{
+    "id": "string",
+    "name": "string",
+    "description": "string",
+    "use_cases": ["array"],
+    "file": "string",
+    "preview": null,
+    "created_at": "ISO-timestamp",
+    "source": "setup|add-template"
+  }]
+}</signature>
+      <path>.slide-builder/config/catalog/catalog.json</path>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>No automated test framework. Manual validation via file inspection and JSON schema compliance. Verify files exist, JSON parses correctly, and CONVENTIONS.md accurately documents new structure.</standards>
+    <locations>
+      <location>Manual inspection of .slide-builder/config/catalog/</location>
+      <location>JSON validation of catalog.json schema</location>
+      <location>Review of CONVENTIONS.md changes</location>
+    </locations>
+    <ideas>
+      <idea ac="1">Verify .slide-builder/config/catalog/ directory exists after implementation</idea>
+      <idea ac="1">Verify catalog.json file exists in catalog directory</idea>
+      <idea ac="2">Parse catalog.json and verify all required fields present: version, generated, lastModified, templates</idea>
+      <idea ac="2">Verify templates array is empty (no templates yet - infrastructure only)</idea>
+      <idea ac="2">Verify version is "1.0"</idea>
+      <idea ac="2">Verify timestamps use ISO 8601 format</idea>
+      <idea ac="3">Verify CONVENTIONS.md contains catalog documentation section</idea>
+      <idea ac="3">Verify no references to config/samples/ remain in CONVENTIONS.md</idea>
+      <idea ac="3">Verify no references to config/templates/ remain in CONVENTIONS.md</idea>
+    </ideas>
+  </tests>
+</story-context>

@@ -58,7 +58,7 @@ function main() {
     // Paths
     const outputFolder = path.join(PROJECT_ROOT, 'output', deckSlug);
     const slidesFolder = path.join(outputFolder, 'slides');
-    const templatePath = path.join(PROJECT_ROOT, '.slide-builder', 'config', 'templates', 'viewer-template.html');
+    const templatePath = path.join(PROJECT_ROOT, '.slide-builder', 'templates', 'viewer-template.html');
     const planPath = path.join(outputFolder, 'plan.yaml');
     const outputPath = path.join(outputFolder, 'index.html');
 
@@ -96,6 +96,12 @@ function main() {
         return { number: num, filename, title };
     });
 
+    // Build separate HTML content map for export (base64 encoded to avoid JSON escaping issues)
+    const slideHtmlContent = slideFiles.map(filename => {
+        const htmlContent = fs.readFileSync(path.join(slidesFolder, filename), 'utf-8');
+        return Buffer.from(htmlContent).toString('base64');
+    });
+
     // Get deck name from plan.yaml if exists
     let deckName = deckSlug;
     if (fs.existsSync(planPath)) {
@@ -118,6 +124,7 @@ function main() {
     template = template.replace(/\{\{DECK_NAME\}\}/g, deckName);
     template = template.replace(/\{\{TOTAL_SLIDES\}\}/g, slideList.length.toString());
     template = template.replace(/\{\{SLIDE_LIST\}\}/g, JSON.stringify(slideList, null, 2));
+    template = template.replace(/\{\{SLIDE_HTML_BASE64\}\}/g, JSON.stringify(slideHtmlContent));
 
     // Write viewer
     fs.writeFileSync(outputPath, template);

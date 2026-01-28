@@ -1,0 +1,471 @@
+<story-context id="13-4-schema-integration" v="1.1">
+  <metadata>
+    <epicId>13</epicId>
+    <storyId>4</storyId>
+    <title>Schema &amp; Integration</title>
+    <status>in-progress</status>
+    <generatedAt>2026-01-28</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>notes/sprint-artifacts/13-4-schema-integration.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>slide builder system</asA>
+    <iWant>the enhanced plan.yaml schema to include all agenda and discovery data</iWant>
+    <soThat>slide generation can use the rich context gathered during planning</soThat>
+    <tasks>
+      <task id="1" ac="1">Update plan.yaml save in Step 3 - Modify slide generation to use agenda_sections as input, add agenda_section_id to each slide</task>
+      <task id="2" ac="1">Update plan.yaml save in Step 5 - Ensure agenda section is written with full schema including discovery object</task>
+      <task id="3" ac="2">Update build-one to use section context - Read plan.yaml, find agenda section matching slide's agenda_section_id, pass visual_treatment and content_types</task>
+      <task id="4" ac="3">Update CONVENTIONS.md - Document AskUserQuestion patterns, agenda structure schema, discovery object schema</task>
+      <task id="5" ac="4">Add lighter discovery to plan-one - Add optional discovery step after intent confirmation</task>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <criterion id="1">
+      <title>Enhanced plan.yaml Schema</title>
+      <given>the planning workflow completes</given>
+      <when>plan.yaml is saved</when>
+      <then>it includes: agenda section with total_sections and sections array; each section contains id, title, narrative_role, estimated_slides, description; each section contains discovery object with key_message, key_message_framing, content_types, visual_treatment, research_findings</then>
+    </criterion>
+    <criterion id="2">
+      <title>Slide Generation Context</title>
+      <given>plan.yaml contains agenda and discovery data</given>
+      <when>/sb:build-one or /sb:build-all builds a slide</when>
+      <then>slide is linked to its agenda_section_id; visual guidance is derived from section.discovery.visual_treatment; content types inform content suggestions; key message informs slide messaging</then>
+    </criterion>
+    <criterion id="3">
+      <title>CONVENTIONS.md Update</title>
+      <given>the enhanced planning patterns are implemented</given>
+      <when>I read CONVENTIONS.md</when>
+      <then>it documents: AskUserQuestion tool usage patterns; agenda structure schema; discovery object schema; how slide generation uses section context</then>
+    </criterion>
+    <criterion id="4">
+      <title>plan-one Lighter Discovery</title>
+      <given>I run /sb:plan-one</given>
+      <when>planning completes</when>
+      <then>optional lighter discovery is available (message options only); discovery data stored in same format as plan-deck; can skip discovery entirely for quick single slides</then>
+    </criterion>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>notes/tech-spec-enhanced-planning.md</path>
+        <title>Enhanced Planning Sessions - Technical Specification</title>
+        <section>Enhanced plan.yaml Schema</section>
+        <snippet>Defines the complete schema with agenda structure, discovery object containing key_message, content_types, visual_treatment, and research_findings. Shows slide-to-section linking via agenda_section_id.</snippet>
+      </doc>
+      <doc>
+        <path>notes/architecture.md</path>
+        <title>Slide Builder - Architecture</title>
+        <section>State File Patterns - plan.yaml</section>
+        <snippet>Documents existing plan.yaml structure with deck metadata, audience context, storyline, and slides array. Shows key_points, visual_guidance, tone per slide - foundation for discovery integration.</snippet>
+      </doc>
+      <doc>
+        <path>notes/epics.md</path>
+        <title>Epics &amp; Stories</title>
+        <section>Epic 13 - Enhanced Planning Sessions</section>
+        <snippet>Story 13.4 definition: Schema &amp; Integration - Update plan.yaml schema with agenda and discovery data. Modify slide generation to use section context.</snippet>
+      </doc>
+    </docs>
+
+    <code>
+      <file>
+        <path>.slide-builder/workflows/plan-deck/instructions.md</path>
+        <kind>workflow</kind>
+        <symbol>Step 2.5 - Agenda Structure Generation</symbol>
+        <lines>146-309</lines>
+        <reason>Contains agenda proposal logic and AskUserQuestion integration. Sections stored in {{agenda_sections}} array with id, title, narrative_role, estimated_slides, description.</reason>
+        <currentState>Agenda sections confirmed and stored but discovery object not yet persisted to plan.yaml</currentState>
+      </file>
+      <file>
+        <path>.slide-builder/workflows/plan-deck/instructions.md</path>
+        <kind>workflow</kind>
+        <symbol>Step 2.6 - Section Discovery Loop</symbol>
+        <lines>311-620</lines>
+        <reason>Contains discovery data collection. Currently captures: key_message (required), diagram_requirements (optional), visual_metaphor (optional), research_findings (optional). Uses streamlined single multi-select to choose which discovery areas to explore.</reason>
+        <currentState>Discovery data stored in section.discovery object but NOT persisted to plan.yaml yet. This is the primary integration point.</currentState>
+        <note>Discovery fields: key_message (string), diagram_requirements (array|null), visual_metaphor (array|null), research_findings (array)</note>
+      </file>
+      <file>
+        <path>.slide-builder/workflows/plan-deck/instructions.md</path>
+        <kind>workflow</kind>
+        <symbol>Step 3 - Generate Narrative Structure</symbol>
+        <lines>630-711</lines>
+        <reason>TASK 1 TARGET: Currently generates slides array WITHOUT agenda_section_id. Need to modify to use agenda_sections as input and link slides to sections.</reason>
+        <currentState>Generates storyline and slides array but does not link slides to agenda sections</currentState>
+      </file>
+      <file>
+        <path>.slide-builder/workflows/plan-deck/instructions.md</path>
+        <kind>workflow</kind>
+        <symbol>Step 5 - Save Plan</symbol>
+        <lines>1171-1281</lines>
+        <reason>TASK 2 TARGET: Currently saves plan.yaml WITHOUT agenda section. Need to add agenda with full schema including discovery objects.</reason>
+        <currentState>Writes deck metadata, audience context, storyline, and slides array - but missing agenda section entirely</currentState>
+        <note>The YAML template at lines 1192-1239 needs to be extended with agenda section</note>
+      </file>
+      <file>
+        <path>.slide-builder/workflows/build-one/instructions.md</path>
+        <kind>workflow</kind>
+        <symbol>Phase 1A: Deck Mode Setup</symbol>
+        <lines>228-253</lines>
+        <reason>TASK 3 TARGET: Currently extracts slide context but does NOT read agenda_section_id or discovery data. Need to add step to load section context.</reason>
+        <currentState>Extracts number, intent, template, key_points, visual_guidance, tone, storyline_role - but not agenda_section_id</currentState>
+      </file>
+      <file>
+        <path>.slide-builder/workflows/build-one/instructions.md</path>
+        <kind>workflow</kind>
+        <symbol>Phase 3A: Template Build</symbol>
+        <lines>336-386</lines>
+        <reason>TASK 3 TARGET: Content generation step that should use discovery data for visual guidance and content suggestions.</reason>
+        <currentState>Uses plan fields (intent, key_points, visual_guidance, tone) but not discovery data</currentState>
+      </file>
+      <file>
+        <path>.slide-builder/workflows/plan-one/instructions.md</path>
+        <kind>workflow</kind>
+        <symbol>Phase 4: Confirmation</symbol>
+        <lines>126-153</lines>
+        <reason>TASK 5 TARGET: Add optional discovery step after confirmation. Currently goes directly from confirmation to save.</reason>
+        <currentState>After user confirms intent, proceeds directly to Phase 5 (save). No discovery opportunity.</currentState>
+      </file>
+      <file>
+        <path>.slide-builder/workflows/plan-one/instructions.md</path>
+        <kind>workflow</kind>
+        <symbol>Phase 5: State Persistence</symbol>
+        <lines>156-227</lines>
+        <reason>TASK 5 TARGET: plan.yaml schema needs to support discovery data if user engages with optional discovery.</reason>
+        <currentState>Saves intent, suggested_template, key_points - no discovery fields in schema</currentState>
+      </file>
+      <file>
+        <path>.slide-builder/CONVENTIONS.md</path>
+        <kind>documentation</kind>
+        <symbol>Slide Builder Conventions</symbol>
+        <lines>1-173</lines>
+        <reason>TASK 4 TARGET: Currently documents workflow patterns, file structure, state management, and catalog system. Missing: AskUserQuestion patterns, agenda schema, discovery schema, section context usage.</reason>
+        <currentState>173 lines covering commands, workflow execution, file structure, state management, catalog system</currentState>
+      </file>
+    </code>
+
+    <dependencies>
+      <node>
+        <package>puppeteer</package>
+        <version>^23.0.0</version>
+        <purpose>Headless browser for HTML-to-image conversion</purpose>
+      </node>
+      <node>
+        <package>googleapis</package>
+        <version>^140.0.0</version>
+        <purpose>Google Slides API integration</purpose>
+      </node>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint type="pattern">Workflow instructions use XML-style tags: &lt;step&gt;, &lt;action&gt;, &lt;check&gt;, &lt;ask&gt;, &lt;output&gt;</constraint>
+    <constraint type="pattern">Variables use {{double_braces}} for template substitution</constraint>
+    <constraint type="pattern">YAML for data storage (plan.yaml, status.yaml)</constraint>
+    <constraint type="tool">AskUserQuestion tool limited to 4 questions max, 4 options per question max</constraint>
+    <constraint type="tool">AskUserQuestion always provides "Other" option for custom input</constraint>
+    <constraint type="architecture">plan.yaml stored in output/{deck-slug}/plan.yaml for deck mode</constraint>
+    <constraint type="architecture">Slides reference agenda sections via agenda_section_id</constraint>
+    <constraint type="existing">Step 2.6 captures discovery data - need to persist it in Step 5</constraint>
+    <constraint type="existing">Step 3 generates slides - need to link to agenda sections</constraint>
+    <constraint type="existing">build-one extracts slide context - need to also extract section context</constraint>
+  </constraints>
+
+  <interfaces>
+    <interface>
+      <name>AskUserQuestion Tool</name>
+      <kind>Claude Code native tool</kind>
+      <signature>{questions: [{question: string, header: string (max 12 chars), options: [{label: string, description: string}], multiSelect: boolean}]}</signature>
+      <path>Claude Code built-in</path>
+    </interface>
+    <interface>
+      <name>plan.yaml Schema (Current)</name>
+      <kind>YAML data structure</kind>
+      <signature>deck_name, audience, purpose, storyline, recurring_themes, slides[]</signature>
+      <path>output/{deck-slug}/plan.yaml</path>
+    </interface>
+    <interface>
+      <name>plan.yaml Schema (Target)</name>
+      <kind>YAML data structure</kind>
+      <signature>deck_name, audience, purpose, agenda: {total_sections, sections[{id, title, narrative_role, estimated_slides, description, discovery}]}, storyline, slides[{...existing, agenda_section_id}]</signature>
+      <path>output/{deck-slug}/plan.yaml</path>
+    </interface>
+    <interface>
+      <name>discovery Object (Current in Memory)</name>
+      <kind>Runtime variable</kind>
+      <signature>{key_message: string, diagram_requirements: array|null, visual_metaphor: array|null, research_findings: array}</signature>
+      <path>section.discovery in plan-deck workflow</path>
+    </interface>
+    <interface>
+      <name>discovery Object (Target in YAML)</name>
+      <kind>YAML nested structure</kind>
+      <signature>{key_message, key_message_framing, content_types[], visual_treatment: {diagram_type[], visual_metaphor[], imagery_theme[]}, research_findings[]}</signature>
+      <path>Inside agenda.sections[].discovery</path>
+    </interface>
+  </interfaces>
+
+  <implementationGuidance>
+    <task id="1" title="Update Step 3 to use agenda_sections">
+      <location>.slide-builder/workflows/plan-deck/instructions.md lines 630-711</location>
+      <changes>
+        <change>Modify slide generation to iterate over agenda_sections instead of generating independently</change>
+        <change>For each agenda section, generate estimated_slides number of slides</change>
+        <change>Add agenda_section_id to each generated slide linking to parent section</change>
+        <change>Derive storyline from sections with narrative_role (opening->opening_hook, problem->tension, solution->resolution, cta->call_to_action)</change>
+      </changes>
+      <example>
+```xml
+&lt;action&gt;Generate slide breakdown from agenda_sections:
+  For each section in agenda_sections:
+    Generate {{section.estimated_slides}} slides where each slide has:
+    - number: Sequential (continuing from previous section)
+    - intent: Derived from section.description + section.discovery.key_message
+    - template: Match using catalog
+    - agenda_section_id: "{{section.id}}"
+    - storyline_role: Map from section.narrative_role
+    - visual_guidance: From section.discovery.visual_metaphor or section.discovery.diagram_requirements
+    - key_points: Extract from section context
+&lt;/action&gt;
+```
+      </example>
+    </task>
+
+    <task id="2" title="Update Step 5 to save agenda with discovery">
+      <location>.slide-builder/workflows/plan-deck/instructions.md lines 1192-1239</location>
+      <changes>
+        <change>Add agenda section to plan.yaml template</change>
+        <change>Include full discovery object for each section</change>
+        <change>Ensure slides array includes agenda_section_id for each slide</change>
+      </changes>
+      <example>
+```yaml
+# Add after "key_message" field in existing template:
+
+# Agenda Structure with Discovery
+agenda:
+  total_sections: {{agenda_sections.length}}
+  sections:
+{{for each section in agenda_sections}}
+    - id: "{{section.id}}"
+      title: "{{section.title}}"
+      narrative_role: "{{section.narrative_role}}"
+      estimated_slides: {{section.estimated_slides}}
+      description: "{{section.description}}"
+      discovery:
+        key_message: "{{section.discovery.key_message}}"
+        key_message_framing: "{{section.discovery.key_message_framing | default: 'direct'}}"
+        diagram_requirements: {{section.discovery.diagram_requirements | default: []}}
+        visual_metaphor: {{section.discovery.visual_metaphor | default: []}}
+        research_findings: {{section.discovery.research_findings | default: []}}
+{{end for}}
+
+# Modify slides array to include agenda_section_id:
+slides:
+{{for each slide in slides}}
+  - number: {{slide.number}}
+    intent: "{{slide.intent}}"
+    template: "{{slide.template}}"
+    status: pending
+    storyline_role: "{{slide.storyline_role}}"
+    agenda_section_id: "{{slide.agenda_section_id}}"
+    # ... rest of slide fields
+{{end for}}
+```
+      </example>
+    </task>
+
+    <task id="3" title="Update build-one to use section context">
+      <location>.slide-builder/workflows/build-one/instructions.md after line 250</location>
+      <changes>
+        <change>Add step to read agenda_section_id from current slide</change>
+        <change>Find matching section in plan.yaml.agenda.sections</change>
+        <change>Extract discovery data for use in slide generation</change>
+        <change>Pass visual_treatment to inform visual guidance</change>
+        <change>Pass key_message to inform slide messaging</change>
+      </changes>
+      <example>
+```markdown
+### Phase 1A.5: Load Section Context (if available)
+
+&lt;steps&gt;
+1. Check if slide has `agenda_section_id` field
+2. If present, find matching section in `agenda.sections` array
+3. Extract section discovery data:
+   - `key_message`: Core message for this section's slides
+   - `diagram_requirements`: Preferred diagram styles
+   - `visual_metaphor`: Visual themes to incorporate
+   - `research_findings`: Supporting data to reference
+4. Enhance slide context with section data:
+   - Override or supplement `visual_guidance` with discovery info
+   - Use `key_message` to inform title/content generation
+&lt;/steps&gt;
+```
+      </example>
+    </task>
+
+    <task id="4" title="Update CONVENTIONS.md">
+      <location>.slide-builder/CONVENTIONS.md after line 173</location>
+      <changes>
+        <change>Add "Enhanced Planning Patterns" section</change>
+        <change>Document AskUserQuestion tool usage with examples</change>
+        <change>Document agenda structure schema</change>
+        <change>Document discovery object schema</change>
+        <change>Document how build workflows use section context</change>
+      </changes>
+      <example>
+```markdown
+## Enhanced Planning Patterns
+
+### AskUserQuestion Tool Usage
+
+The AskUserQuestion tool enables structured user input during planning workflows.
+
+**Constraints:**
+- Maximum 4 questions per call
+- Maximum 4 options per question
+- User can always select "Other" for custom input
+- Use `multiSelect: true` for selections where multiple apply
+- Use `multiSelect: false` for single-choice decisions
+
+**Example (single-select):**
+```json
+{
+  "questions": [{
+    "question": "Which message framing resonates best?",
+    "header": "Message",
+    "options": [
+      {"label": "Direct", "description": "Statement about audience's situation"},
+      {"label": "Question", "description": "Engage with a thought-provoking question"},
+      {"label": "Story", "description": "Open with a relatable scenario"},
+      {"label": "Data", "description": "Lead with a surprising statistic"}
+    ],
+    "multiSelect": false
+  }]
+}
+```
+
+### Agenda Structure Schema
+
+After context collection, the planning workflow generates an agenda structure stored in plan.yaml:
+
+```yaml
+agenda:
+  total_sections: 5
+  sections:
+    - id: "agenda-1"
+      title: "Opening Hook"
+      narrative_role: "opening"
+      estimated_slides: 1
+      description: "Grab attention with key insight"
+      discovery:
+        key_message: "..."
+        # ... discovery fields
+```
+
+### Discovery Object Schema
+
+Each agenda section includes a discovery object:
+
+```yaml
+discovery:
+  key_message: "The main message for this section"
+  key_message_framing: "direct | question | story | data"
+  diagram_requirements:
+    - "Flowchart"
+    - "Timeline"
+  visual_metaphor:
+    - "Journey"
+    - "Growth"
+  research_findings:
+    - source: "https://..."
+      content: "Supporting statistic or quote"
+      selected: true
+```
+
+### Slide Generation Integration
+
+When building slides, the build-one workflow:
+1. Reads `agenda_section_id` from the slide plan
+2. Finds matching section in `agenda.sections`
+3. Uses discovery data to enhance generation:
+   - `key_message` informs slide title/messaging
+   - `diagram_requirements` guides layout choice
+   - `visual_metaphor` influences imagery
+   - `research_findings` provides content to include
+```
+      </example>
+    </task>
+
+    <task id="5" title="Add optional discovery to plan-one">
+      <location>.slide-builder/workflows/plan-one/instructions.md after Phase 4 (line 153)</location>
+      <changes>
+        <change>Add optional Phase 4.5 for quick discovery</change>
+        <change>Offer single AskUserQuestion for message framing</change>
+        <change>Allow user to skip for quick planning</change>
+        <change>Update Phase 5 schema to include discovery if provided</change>
+      </changes>
+      <example>
+```xml
+  &lt;!-- PHASE 4.5: Optional Quick Discovery --&gt;
+  &lt;step n="4.5" goal="Optional message discovery"&gt;
+    &lt;ask&gt;
+Would you like to refine the message approach? (Optional - speeds up generation)
+
+**[y]es** - Choose a message framing style
+**[n]o** - Skip and proceed to build
+    &lt;/ask&gt;
+
+    &lt;check if="user chooses yes"&gt;
+      &lt;action&gt;Use AskUserQuestion to present framing options:
+        {
+          "questions": [{
+            "question": "What message approach works best?",
+            "header": "Message",
+            "options": [
+              {"label": "Direct", "description": "Clear statement of value"},
+              {"label": "Question", "description": "Engage with inquiry"},
+              {"label": "Story", "description": "Narrative approach"},
+              {"label": "Data", "description": "Lead with evidence"}
+            ],
+            "multiSelect": false
+          }]
+        }
+      &lt;/action&gt;
+      &lt;action&gt;Store selection in {{discovery.key_message_framing}}&lt;/action&gt;
+    &lt;/check&gt;
+
+    &lt;check if="user chooses no"&gt;
+      &lt;action&gt;Set {{discovery}} = null&lt;/action&gt;
+    &lt;/check&gt;
+  &lt;/step&gt;
+```
+      </example>
+    </task>
+  </implementationGuidance>
+
+  <tests>
+    <standards>No automated testing framework. Manual testing via workflow execution and plan.yaml inspection.</standards>
+    <locations>
+      <location>Manual: Run /sb:plan-deck, complete full flow, inspect output/{deck-slug}/plan.yaml</location>
+      <location>Manual: Run /sb:build-one, verify slide uses section context</location>
+      <location>Manual: Run /sb:plan-one, verify optional discovery offered</location>
+    </locations>
+    <ideas>
+      <idea ac="1">Execute /sb:plan-deck fully, open plan.yaml, verify agenda section exists with all sections</idea>
+      <idea ac="1">Verify each section in agenda has discovery object with key_message</idea>
+      <idea ac="1">Check each slide in slides array has agenda_section_id pointing to valid section</idea>
+      <idea ac="2">Run /sb:build-one after plan-deck, check if visual guidance reflects discovery selections</idea>
+      <idea ac="2">Verify slide title/content incorporates key_message from section</idea>
+      <idea ac="3">Read CONVENTIONS.md, verify AskUserQuestion section exists with examples</idea>
+      <idea ac="3">Verify agenda structure schema documented</idea>
+      <idea ac="3">Verify discovery object schema documented</idea>
+      <idea ac="4">Run /sb:plan-one, verify optional discovery step appears after confirmation</idea>
+      <idea ac="4">Skip discovery in plan-one, verify plan.yaml valid without discovery</idea>
+      <idea ac="4">Complete discovery in plan-one, verify discovery data saved</idea>
+    </ideas>
+  </tests>
+</story-context>

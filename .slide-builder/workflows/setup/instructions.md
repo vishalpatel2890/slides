@@ -1301,16 +1301,19 @@ Please ensure Phase 3 (theme generation) completed successfully.</output>
       - personality: classification for tone guidance
     </action>
 
-    <action>Create .slide-builder/config/samples/ directory if it does not exist</action>
+    <action>Create .slide-builder/config/catalog/ directory if it does not exist</action>
   </step>
 
   <step n="4.1" goal="Define slide specifications">
-    <action>Define the 6 sample slide specifications:
+    <action>Define the 6 catalog template specifications:
 
       {{slide_specs}} = [
         {
-          number: 1,
-          filename: "01-title.html",
+          id: "title",
+          filename: "title.html",
+          name: "Title Slide",
+          description: "Full-bleed title slide with hero typography for opening presentations",
+          use_cases: ["title", "opening", "hero", "intro"],
           type: "Title",
           primitives: ["hero typography", "primary color", "default background"],
           content: {
@@ -1320,8 +1323,11 @@ Please ensure Phase 3 (theme generation) completed successfully.</output>
           }
         },
         {
-          number: 2,
-          filename: "02-agenda.html",
+          id: "agenda",
+          filename: "agenda.html",
+          name: "Agenda/List",
+          description: "Structured list layout for agendas, bullet points, and overview content",
+          use_cases: ["agenda", "list", "bullets", "overview"],
           type: "List/Agenda",
           primitives: ["body text", "bullets", "spacing", "alt background"],
           content: {
@@ -1331,8 +1337,11 @@ Please ensure Phase 3 (theme generation) completed successfully.</output>
           }
         },
         {
-          number: 3,
-          filename: "03-flow.html",
+          id: "process-flow",
+          filename: "process-flow.html",
+          name: "Process Flow",
+          description: "Connected steps with arrows showing process, timeline, or workflow",
+          use_cases: ["flow", "process", "steps", "timeline"],
           type: "Process Flow",
           primitives: ["arrows", "boxes", "connectors", "secondary color"],
           content: {
@@ -1342,8 +1351,11 @@ Please ensure Phase 3 (theme generation) completed successfully.</output>
           }
         },
         {
-          number: 4,
-          filename: "04-comparison.html",
+          id: "comparison",
+          filename: "comparison.html",
+          name: "Comparison",
+          description: "Side-by-side comparison layout for before/after or versus content",
+          use_cases: ["comparison", "versus", "before-after", "columns"],
           type: "Comparison",
           primitives: ["multiple box styles", "alignment", "semantic colors"],
           content: {
@@ -1353,8 +1365,11 @@ Please ensure Phase 3 (theme generation) completed successfully.</output>
           }
         },
         {
-          number: 5,
-          filename: "05-callout.html",
+          id: "callout",
+          filename: "callout.html",
+          name: "Key Insight",
+          description: "High-impact callout for statistics, quotes, or key takeaways",
+          use_cases: ["callout", "statistic", "quote", "highlight"],
           type: "Key Insight",
           primitives: ["callout box", "accent color", "emphasis"],
           content: {
@@ -1365,8 +1380,11 @@ Please ensure Phase 3 (theme generation) completed successfully.</output>
           }
         },
         {
-          number: 6,
-          filename: "06-technical.html",
+          id: "technical",
+          filename: "technical.html",
+          name: "Technical/Code",
+          description: "Code-focused layout with syntax highlighting for technical content",
+          use_cases: ["code", "technical", "api", "syntax"],
           type: "Technical/Code",
           primitives: ["mono font", "alt background", "code syntax"],
           content: {
@@ -1426,7 +1444,7 @@ Please ensure Phase 3 (theme generation) completed successfully.</output>
         - Apply brand personality: {{theme.personality.classification}}
       </action>
 
-      <action>Save slide to {config_path}/samples/{{slide_spec.filename}}</action>
+      <action>Save slide to {config_path}/catalog/{{slide_spec.filename}}</action>
 
       <check if="Write fails">
         <output>⚠️ Failed to save {{slide_spec.filename}}: {{error_message}}</output>
@@ -1434,55 +1452,136 @@ Please ensure Phase 3 (theme generation) completed successfully.</output>
     </for-each>
   </step>
 
-  <step n="4.3" goal="Verify sample generation and update status">
-    <action>Verify all 6 files exist in .slide-builder/config/samples/:
-      - 01-title.html
-      - 02-agenda.html
-      - 03-flow.html
-      - 04-comparison.html
-      - 05-callout.html
-      - 06-technical.html
+  <step n="4.3" goal="Generate catalog.json and update status">
+    <action>Verify all 6 files exist in .slide-builder/config/catalog/:
+      - title.html
+      - agenda.html
+      - process-flow.html
+      - comparison.html
+      - callout.html
+      - technical.html
     </action>
 
     <check if="any files missing">
-      <output>⚠️ Warning: Some sample slides failed to generate.
+      <output>⚠️ Warning: Some catalog templates failed to generate.
 Missing: {{missing_files}}
 Attempting to regenerate...</output>
       <action>Retry generation for missing files</action>
     </check>
 
+    <action>Generate catalog.json manifest at {config_path}/catalog/catalog.json with:
+      ```json
+      {
+        "version": "1.0",
+        "generated": "[current date YYYY-MM-DD]",
+        "lastModified": "[current ISO 8601 timestamp]",
+        "templates": [
+          {
+            "id": "title",
+            "name": "Title Slide",
+            "description": "Full-bleed title slide with hero typography for opening presentations",
+            "use_cases": ["title", "opening", "hero", "intro"],
+            "file": "title.html",
+            "preview": null,
+            "created_at": "[current ISO 8601 timestamp]",
+            "source": "setup"
+          },
+          {
+            "id": "agenda",
+            "name": "Agenda/List",
+            "description": "Structured list layout for agendas, bullet points, and overview content",
+            "use_cases": ["agenda", "list", "bullets", "overview"],
+            "file": "agenda.html",
+            "preview": null,
+            "created_at": "[current ISO 8601 timestamp]",
+            "source": "setup"
+          },
+          {
+            "id": "process-flow",
+            "name": "Process Flow",
+            "description": "Connected steps with arrows showing process, timeline, or workflow",
+            "use_cases": ["flow", "process", "steps", "timeline"],
+            "file": "process-flow.html",
+            "preview": null,
+            "created_at": "[current ISO 8601 timestamp]",
+            "source": "setup"
+          },
+          {
+            "id": "comparison",
+            "name": "Comparison",
+            "description": "Side-by-side comparison layout for before/after or versus content",
+            "use_cases": ["comparison", "versus", "before-after", "columns"],
+            "file": "comparison.html",
+            "preview": null,
+            "created_at": "[current ISO 8601 timestamp]",
+            "source": "setup"
+          },
+          {
+            "id": "callout",
+            "name": "Key Insight",
+            "description": "High-impact callout for statistics, quotes, or key takeaways",
+            "use_cases": ["callout", "statistic", "quote", "highlight"],
+            "file": "callout.html",
+            "preview": null,
+            "created_at": "[current ISO 8601 timestamp]",
+            "source": "setup"
+          },
+          {
+            "id": "technical",
+            "name": "Technical/Code",
+            "description": "Code-focused layout with syntax highlighting for technical content",
+            "use_cases": ["code", "technical", "api", "syntax"],
+            "file": "technical.html",
+            "preview": null,
+            "created_at": "[current ISO 8601 timestamp]",
+            "source": "setup"
+          }
+        ]
+      }
+      ```
+    </action>
+
     <action>Update status.yaml with:
       phase: "sample-review"
-      samples:
-        directory: .slide-builder/config/samples/
+      catalog:
+        directory: .slide-builder/config/catalog/
+        manifest: .slide-builder/config/catalog/catalog.json
         count: 6
-        files:
-          - 01-title.html
-          - 02-agenda.html
-          - 03-flow.html
-          - 04-comparison.html
-          - 05-callout.html
-          - 06-technical.html
-      last_action: "Sample slides generated for review"
+        templates:
+          - id: title
+            name: Title Slide
+          - id: agenda
+            name: Agenda/List
+          - id: process-flow
+            name: Process Flow
+          - id: comparison
+            name: Comparison
+          - id: callout
+            name: Key Insight
+          - id: technical
+            name: Technical/Code
+      last_action: "Catalog templates generated for review"
     </action>
 
     <output>
 ═══════════════════════════════════════════════════════════════════════════════
-✅ **SAMPLE DECK GENERATED**
+✅ **CATALOG TEMPLATES GENERATED**
 ═══════════════════════════════════════════════════════════════════════════════
 
-📁 **Location:** .slide-builder/config/samples/
+📁 **Location:** .slide-builder/config/catalog/
 
-**Generated Slides:**
+**Generated Templates:**
 
-| # | File | Type | Primitives Demonstrated |
-|---|------|------|-------------------------|
-| 1 | 01-title.html | Title | Hero typography, primary color, background |
-| 2 | 02-agenda.html | Agenda/List | Body text, bullets, spacing |
-| 3 | 03-flow.html | Process Flow | Arrows, boxes, connectors |
-| 4 | 04-comparison.html | Comparison | Multiple box styles, alignment |
-| 5 | 05-callout.html | Key Insight | Callout box, accent color, emphasis |
-| 6 | 06-technical.html | Technical | Mono font, code syntax, alt background |
+| ID | File | Name | Use Cases |
+|----|------|------|-----------|
+| title | title.html | Title Slide | title, opening, hero, intro |
+| agenda | agenda.html | Agenda/List | agenda, list, bullets, overview |
+| process-flow | process-flow.html | Process Flow | flow, process, steps, timeline |
+| comparison | comparison.html | Comparison | comparison, versus, before-after, columns |
+| callout | callout.html | Key Insight | callout, statistic, quote, highlight |
+| technical | technical.html | Technical/Code | code, technical, api, syntax |
+
+**📄 Manifest:** .slide-builder/config/catalog/catalog.json
 
 **🔍 How to Preview:**
 1. Open each .html file directly in your browser
@@ -1531,7 +1630,7 @@ Target: 1-3 feedback rounds to get it right.
     <ask>
 **Theme Validation** (Round {{feedback_iteration}})
 
-How do the sample slides look? Open .slide-builder/config/samples/*.html in your browser and provide feedback:
+How do the catalog templates look? Open .slide-builder/config/catalog/*.html in your browser and provide feedback:
 
 - "Too corporate" - I'll soften colors, add warmth, increase corner radius
 - "Not bold enough" - I'll increase contrast, reduce corner radius, use heavier weights
@@ -1689,19 +1788,19 @@ Please check file permissions and try again.</output>
     <output>✅ Theme updated successfully</output>
   </step>
 
-  <step n="5.5" goal="Regenerate sample slides with updated theme">
-    <output>🎨 Regenerating sample slides with updated theme...</output>
+  <step n="5.5" goal="Regenerate catalog templates with updated theme">
+    <output>🎨 Regenerating catalog templates with updated theme...</output>
 
-    <action>Update status.yaml with: last_action: "Regenerating samples (iteration {{feedback_iteration}})"</action>
+    <action>Update status.yaml with: last_action: "Regenerating catalog templates (iteration {{feedback_iteration}})"</action>
 
-    <critical>INVOKE FRONTEND-DESIGN SKILL for slide regeneration</critical>
+    <critical>INVOKE FRONTEND-DESIGN SKILL for template regeneration</critical>
 
     <action n="5.5.0">Execute Skill tool call:
       ```
       Skill(skill="frontend-design")
       ```
       This loads professional design expertise for creating visually appealing slides.
-      YOU MUST MAKE THIS TOOL CALL NOW BEFORE REGENERATING SLIDES.
+      YOU MUST MAKE THIS TOOL CALL NOW BEFORE REGENERATING TEMPLATES.
     </action>
 
     <action>Read updated theme.json to get new CSS variable values</action>
@@ -1729,12 +1828,12 @@ Please check file permissions and try again.</output>
       ```
     </action>
 
-    <for-each item="slide_file" in="['01-title.html', '02-agenda.html', '03-flow.html', '04-comparison.html', '05-callout.html', '06-technical.html']">
+    <for-each item="slide_file" in="['title.html', 'agenda.html', 'process-flow.html', 'comparison.html', 'callout.html', 'technical.html']">
       <output>  🖼️ Regenerating {{slide_file}}...</output>
 
-      <action>Read current slide from {config_path}/samples/{{slide_file}}</action>
+      <action>Read current template from {config_path}/catalog/{{slide_file}}</action>
 
-      <action>Regenerate the slide HTML:
+      <action>Regenerate the template HTML:
         - Use the same layout structure and content as before
         - Update the CSS :root block with new theme variables
         - Ensure all styling uses CSS variables (no hardcoded colors/fonts)
@@ -1742,7 +1841,7 @@ Please check file permissions and try again.</output>
         - Apply personality adjustments to visual weight and styling
       </action>
 
-      <action>Write regenerated slide to {config_path}/samples/{{slide_file}}</action>
+      <action>Write regenerated template to {config_path}/catalog/{{slide_file}}</action>
 
       <check if="Write succeeds">
         <output>  ✅ {{slide_file}} regenerated</output>
@@ -1753,11 +1852,12 @@ Please check file permissions and try again.</output>
       </check>
     </for-each>
 
-    <action>Update status.yaml with: last_action: "Samples regenerated (iteration {{feedback_iteration}})"</action>
+    <action>Update catalog.json lastModified timestamp</action>
+    <action>Update status.yaml with: last_action: "Catalog templates regenerated (iteration {{feedback_iteration}})"</action>
 
     <output>
 ═══════════════════════════════════════════════════════════════════════════════
-✅ **SAMPLE SLIDES UPDATED**
+✅ **CATALOG TEMPLATES UPDATED**
 ═══════════════════════════════════════════════════════════════════════════════
 
 **Changes Applied:**
@@ -1765,12 +1865,13 @@ Please check file permissions and try again.</output>
 
 **Updated Files:**
 - .slide-builder/config/theme.json (v{{theme.meta.version}})
-- .slide-builder/config/samples/01-title.html
-- .slide-builder/config/samples/02-agenda.html
-- .slide-builder/config/samples/03-flow.html
-- .slide-builder/config/samples/04-comparison.html
-- .slide-builder/config/samples/05-callout.html
-- .slide-builder/config/samples/06-technical.html
+- .slide-builder/config/catalog/title.html
+- .slide-builder/config/catalog/agenda.html
+- .slide-builder/config/catalog/process-flow.html
+- .slide-builder/config/catalog/comparison.html
+- .slide-builder/config/catalog/callout.html
+- .slide-builder/config/catalog/technical.html
+- .slide-builder/config/catalog/catalog.json (lastModified updated)
 
 **🔍 Please refresh your browser to see the changes.**
 ───────────────────────────────────────────────────────────────────────────────
@@ -1843,7 +1944,7 @@ Exiting setup workflow. Resume with `/sb:setup` after editing.
 
   <!-- ═══════════════════════════════════════════════════════════════════════════
        PHASE 6: FINALIZATION (Story 2.5)
-       Locks theme, copies to templates, saves version history
+       Locks theme, cleans up deprecated directories, saves version history
        ═══════════════════════════════════════════════════════════════════════════ -->
 
   <step n="6" goal="Finalize and lock theme">
@@ -1854,7 +1955,7 @@ Exiting setup workflow. Resume with `/sb:setup` after editing.
 🔒 **PHASE 6: THEME FINALIZATION**
 ───────────────────────────────────────────────────────────────────────────────
 
-Locking your approved theme and creating layout templates...
+Locking your approved theme and finalizing catalog...
 ───────────────────────────────────────────────────────────────────────────────
     </output>
 
@@ -1871,55 +1972,41 @@ Locking your approved theme and creating layout templates...
     <output>✅ Theme locked (v{{theme.meta.version}})</output>
   </step>
 
-  <step n="6.1" goal="Create templates directory and copy samples">
-    <action>Create .slide-builder/config/templates/ directory if it doesn't exist</action>
+  <step n="6.1" goal="Clean up deprecated directories">
+    <output>🧹 Cleaning up deprecated directories...</output>
 
-    <output>📁 Creating layout templates...</output>
+    <action>Check if .slide-builder/config/samples/ directory exists</action>
+    <check if="samples directory exists">
+      <action>Delete .slide-builder/config/samples/ directory and all its contents</action>
+      <output>  ✅ Removed deprecated config/samples/ directory</output>
+    </check>
 
-    <action>Define sample-to-template filename mapping:
-      {{filename_mapping}} = {
-        "01-title.html": "layout-title.html",
-        "02-agenda.html": "layout-list.html",
-        "03-flow.html": "layout-flow.html",
-        "04-comparison.html": "layout-columns-2.html",
-        "05-callout.html": "layout-callout.html",
-        "06-technical.html": "layout-code.html"
-      }
-    </action>
+    <action>Check if .slide-builder/config/templates/ directory exists</action>
+    <check if="templates directory exists">
+      <action>Delete .slide-builder/config/templates/ directory and all its contents</action>
+      <output>  ✅ Removed deprecated config/templates/ directory</output>
+    </check>
 
-    <for-each item="sample_file, template_file" in="{{filename_mapping}}">
-      <action>Read {config_path}/samples/{{sample_file}}</action>
-      <action>Write to {project-root}/.slide-builder/config/templates/{{template_file}}</action>
-
-      <check if="Write succeeds">
-        <output>  ✅ {{sample_file}} → {{template_file}}</output>
-      </check>
-
-      <check if="Write fails">
-        <output>  ⚠️ Failed to copy {{sample_file}}: {{error_message}}</output>
-      </check>
-    </for-each>
-
-    <output>✅ 6 layout templates created in .slide-builder/config/templates/</output>
+    <output>✅ Cleanup complete - catalog is now the unified template system</output>
   </step>
 
   <step n="6.2" goal="Update theme.json layouts section">
     <action>Read theme.json</action>
 
-    <action>Update layouts section with template file references:
+    <action>Update layouts section with catalog template references:
       {{theme.layouts}} = {
-        "title": { "file": "layout-title.html" },
-        "list": { "file": "layout-list.html" },
-        "flow": { "file": "layout-flow.html" },
-        "columns-2": { "file": "layout-columns-2.html" },
-        "callout": { "file": "layout-callout.html" },
-        "code": { "file": "layout-code.html" }
+        "title": { "file": "title.html", "catalog_id": "title" },
+        "list": { "file": "agenda.html", "catalog_id": "agenda" },
+        "flow": { "file": "process-flow.html", "catalog_id": "process-flow" },
+        "columns-2": { "file": "comparison.html", "catalog_id": "comparison" },
+        "callout": { "file": "callout.html", "catalog_id": "callout" },
+        "code": { "file": "technical.html", "catalog_id": "technical" }
       }
     </action>
 
     <action>Write updated theme.json</action>
 
-    <output>✅ Theme layouts section updated with template references</output>
+    <output>✅ Theme layouts section updated with catalog references</output>
   </step>
 
   <step n="6.3" goal="Save theme version history">
@@ -1962,16 +2049,23 @@ Theme is still locked and functional, but version history was not saved.</output
         personality: {{theme.personality.classification}}
         confidence: {{theme.personality.confidence}}
         approved: "[current date]"
-      templates:
-        directory: .slide-builder/config/templates/
+      catalog:
+        directory: .slide-builder/config/catalog/
+        manifest: .slide-builder/config/catalog/catalog.json
         count: 6
-        files:
-          - layout-title.html
-          - layout-list.html
-          - layout-flow.html
-          - layout-columns-2.html
-          - layout-callout.html
-          - layout-code.html
+        templates:
+          - id: title
+            name: Title Slide
+          - id: agenda
+            name: Agenda/List
+          - id: process-flow
+            name: Process Flow
+          - id: comparison
+            name: Comparison
+          - id: callout
+            name: Key Insight
+          - id: technical
+            name: Technical/Code
       last_action: "Setup complete - theme locked and approved"
       last_modified: "[current timestamp]"
     </action>
@@ -1993,19 +2087,19 @@ Your brand theme is ready for slide generation!
 | Location | Description |
 |----------|-------------|
 | .slide-builder/config/theme.json | Your locked brand theme (v{{theme.meta.version}}) |
-| .slide-builder/config/templates/ | 6 layout templates |
+| .slide-builder/config/catalog/ | 6 template files with catalog manifest |
 | .slide-builder/config/theme-history/ | Version snapshot for rollback |
 
-**📑 Available Layout Templates:**
+**📑 Available Catalog Templates:**
 
-| Template | Use Case |
-|----------|----------|
-| layout-title.html | Title slides, hero text |
-| layout-list.html | Bullet lists, agendas |
-| layout-flow.html | Process flows, timelines |
-| layout-columns-2.html | Comparisons, two-column content |
-| layout-callout.html | Key insights, statistics, CTAs |
-| layout-code.html | Technical content, code blocks |
+| ID | Name | Use Cases |
+|----|------|-----------|
+| title | Title Slide | title, opening, hero, intro |
+| agenda | Agenda/List | agenda, list, bullets, overview |
+| process-flow | Process Flow | flow, process, steps, timeline |
+| comparison | Comparison | comparison, versus, before-after, columns |
+| callout | Key Insight | callout, statistic, quote, highlight |
+| technical | Technical/Code | code, technical, api, syntax |
 
 **🎨 Theme Summary:**
 
@@ -2022,6 +2116,7 @@ Your brand theme is ready for slide generation!
 2. **Full deck:** Run `/sb:plan-deck` to plan a complete presentation
 3. **View theme:** Run `/sb:theme` to see your theme summary anytime
 4. **Edit theme:** Run `/sb:theme-edit` to modify your theme later
+5. **Add template:** Run `/sb:add-template` to create custom templates
 
 Happy presenting! 🎤
 ═══════════════════════════════════════════════════════════════════════════════

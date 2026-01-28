@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=1920, height=1080">
+    <title>Slide 3: The Context Window Explained</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --color-primary: #d4e94c;
+            --color-secondary: #4ecdc4;
+            --color-bg-default: #0a0a0a;
+            --color-bg-alt: #1a1a1a;
+            --color-text-heading: #ffffff;
+            --color-text-body: #f5f5f5;
+            --color-text-muted: #888888;
+            --color-border: #2a2a2a;
+            --font-heading: 'Outfit', system-ui, sans-serif;
+            --font-body: 'Outfit', system-ui, sans-serif;
+            --font-mono: 'Fira Code', monospace;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: var(--font-body);
+            background: var(--color-bg-default);
+            width: 1920px;
+            height: 1080px;
+            overflow: hidden;
+        }
+
+        .slide {
+            width: 1920px;
+            height: 1080px;
+            background: var(--color-bg-default);
+            padding: 80px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 48px;
+        }
+
+        .section-label {
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--color-secondary);
+            margin-bottom: 16px;
+        }
+
+        h1 {
+            font-family: var(--font-heading);
+            font-size: 52px;
+            font-weight: 700;
+            color: var(--color-text-heading);
+            line-height: 1.1;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-icon {
+            width: 32px;
+            height: 32px;
+            background: var(--color-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .logo-text {
+            font-weight: 600;
+            font-size: 16px;
+            color: var(--color-text-heading);
+        }
+
+        .content {
+            flex: 1;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            align-items: center;
+        }
+
+        /* Visual Diagram */
+        .diagram-container {
+            position: relative;
+            height: 600px;
+        }
+
+        .context-window {
+            background: var(--color-bg-alt);
+            border: 2px solid var(--color-primary);
+            border-radius: 0;
+            height: 500px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .window-label {
+            position: absolute;
+            top: -30px;
+            left: 0;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--color-primary);
+            letter-spacing: 1px;
+        }
+
+        .capacity-label {
+            position: absolute;
+            top: -30px;
+            right: 0;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--color-text-muted);
+            font-family: var(--font-mono);
+        }
+
+        .context-content {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .context-block {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--color-border);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .context-block.system {
+            background: rgba(78, 205, 196, 0.1);
+            border-left: 3px solid var(--color-secondary);
+        }
+
+        .context-block.user {
+            background: rgba(212, 233, 76, 0.05);
+            border-left: 3px solid var(--color-primary);
+        }
+
+        .context-block.assistant {
+            background: var(--color-bg-default);
+            border-left: 3px solid var(--color-text-muted);
+        }
+
+        .context-block.summarized {
+            background: rgba(136, 136, 136, 0.1);
+            border-left: 3px solid var(--color-border);
+            opacity: 0.6;
+        }
+
+        .block-label {
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            padding: 4px 8px;
+            background: var(--color-bg-default);
+        }
+
+        .context-block.system .block-label { color: var(--color-secondary); }
+        .context-block.user .block-label { color: var(--color-primary); }
+        .context-block.assistant .block-label { color: var(--color-text-muted); }
+
+        .block-text {
+            font-size: 13px;
+            color: var(--color-text-body);
+            flex: 1;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .progress-bar {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 8px;
+            background: var(--color-bg-default);
+        }
+
+        .progress-fill {
+            height: 100%;
+            width: 65%;
+            background: linear-gradient(90deg, var(--color-secondary), var(--color-primary));
+        }
+
+        .progress-text {
+            position: absolute;
+            bottom: 16px;
+            right: 12px;
+            font-size: 12px;
+            font-family: var(--font-mono);
+            color: var(--color-text-muted);
+        }
+
+        /* Info Panel */
+        .info-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .info-card {
+            background: var(--color-bg-alt);
+            border: 1px solid var(--color-border);
+            padding: 28px;
+            position: relative;
+        }
+
+        .info-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            width: 3px;
+            background: var(--color-secondary);
+        }
+
+        .info-card:nth-child(2)::before { background: var(--color-primary); }
+        .info-card:nth-child(3)::before { background: var(--color-secondary); }
+
+        .info-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--color-text-heading);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .info-stat {
+            font-family: var(--font-mono);
+            font-size: 18px;
+            color: var(--color-primary);
+            background: var(--color-bg-default);
+            padding: 4px 10px;
+        }
+
+        .info-desc {
+            font-size: 16px;
+            color: var(--color-text-muted);
+            line-height: 1.5;
+        }
+
+        .token-math {
+            display: flex;
+            gap: 20px;
+            margin-top: 16px;
+            flex-wrap: wrap;
+        }
+
+        .token-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            color: var(--color-text-body);
+        }
+
+        .token-item span {
+            font-family: var(--font-mono);
+            color: var(--color-secondary);
+        }
+
+        [contenteditable]:focus { outline: 2px solid var(--color-primary); outline-offset: 4px; }
+    </style>
+</head>
+<body>
+    <div class="slide" data-slide-id="3">
+        <div class="header">
+            <div>
+                <div class="section-label" contenteditable="true" data-field="section-label">Core Concept</div>
+                <h1 contenteditable="true" data-field="title">The Context Window Explained</h1>
+            </div>
+            <div class="logo">
+                <div class="logo-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="18" height="18">
+                        <polyline points="4 17 10 11 4 5"></polyline>
+                        <line x1="12" y1="19" x2="20" y2="19"></line>
+                    </svg>
+                </div>
+                <span class="logo-text">Claude Code</span>
+            </div>
+        </div>
+
+        <div class="content">
+            <div class="diagram-container">
+                <div class="window-label" contenteditable="true" data-field="window-label">CONTEXT WINDOW</div>
+                <div class="capacity-label" contenteditable="true" data-field="capacity-label">~200K tokens</div>
+                <div class="context-window">
+                    <div class="context-content">
+                        <div class="context-block summarized">
+                            <span class="block-label">Summarized</span>
+                            <span class="block-text" contenteditable="true" data-field="block-summarized">[Earlier conversation compressed...]</span>
+                        </div>
+                        <div class="context-block system">
+                            <span class="block-label">System</span>
+                            <span class="block-text" contenteditable="true" data-field="block-system">You are Claude Code, Anthropic's CLI...</span>
+                        </div>
+                        <div class="context-block user">
+                            <span class="block-label">User</span>
+                            <span class="block-text" contenteditable="true" data-field="block-user-1">@src/auth.ts - Help me refactor this...</span>
+                        </div>
+                        <div class="context-block assistant">
+                            <span class="block-label">Assistant</span>
+                            <span class="block-text" contenteditable="true" data-field="block-assistant-1">I'll analyze the auth module and suggest...</span>
+                        </div>
+                        <div class="context-block user">
+                            <span class="block-label">User</span>
+                            <span class="block-text" contenteditable="true" data-field="block-user-2">Now update the tests to match...</span>
+                        </div>
+                        <div class="context-block assistant">
+                            <span class="block-label">Assistant</span>
+                            <span class="block-text" contenteditable="true" data-field="block-assistant-2">I'll update the test files accordingly...</span>
+                        </div>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill"></div>
+                    </div>
+                    <div class="progress-text" contenteditable="true" data-field="progress">~130K / 200K used</div>
+                </div>
+            </div>
+
+            <div class="info-panel">
+                <div class="info-card">
+                    <h3 class="info-title" contenteditable="true" data-field="info-1-title">
+                        What is a Context Window?
+                    </h3>
+                    <p class="info-desc" contenteditable="true" data-field="info-1-desc">Think of it as Claude's "working memory" — everything Claude can "see" at once to understand your request and generate a response.</p>
+                </div>
+
+                <div class="info-card">
+                    <h3 class="info-title">
+                        <span contenteditable="true" data-field="info-2-title">Capacity</span>
+                        <span class="info-stat" contenteditable="true" data-field="info-2-stat">~200K tokens</span>
+                    </h3>
+                    <p class="info-desc" contenteditable="true" data-field="info-2-desc">Claude Code has a massive context window — enough for substantial codebases and long conversations.</p>
+                    <div class="token-math">
+                        <div class="token-item"><span>≈ 150K</span> words</div>
+                        <div class="token-item"><span>≈ 300</span> pages</div>
+                        <div class="token-item"><span>≈ 500KB</span> of code</div>
+                    </div>
+                </div>
+
+                <div class="info-card">
+                    <h3 class="info-title" contenteditable="true" data-field="info-3-title">
+                        Tokens vs Words
+                    </h3>
+                    <p class="info-desc" contenteditable="true" data-field="info-3-desc">A token is roughly 4 characters or ¾ of a word. Code tends to use more tokens due to syntax characters and formatting.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const saveEdits = () => {
+            const edits = [];
+            document.querySelectorAll('[contenteditable]').forEach(el => {
+                const field = el.getAttribute('data-field');
+                if (field) edits.push({ selector: `[data-field="${field}"]`, content: el.innerHTML });
+            });
+            localStorage.setItem('slide-3-edits', JSON.stringify({ slide: 3, edits, lastModified: new Date().toISOString() }));
+        };
+        document.querySelectorAll('[contenteditable]').forEach(el => {
+            el.addEventListener('blur', saveEdits);
+            el.addEventListener('input', () => setTimeout(saveEdits, 1000));
+        });
+        const stored = localStorage.getItem('slide-3-edits');
+        if (stored) { try { const data = JSON.parse(stored); if (data.slide === 3 && Array.isArray(data.edits)) { data.edits.forEach(edit => { const el = document.querySelector(edit.selector); if (el) el.innerHTML = edit.content; }); } } catch (e) { localStorage.removeItem('slide-3-edits'); } }
+    </script>
+</body>
+</html>

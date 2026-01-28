@@ -110,3 +110,32 @@ development_status:
   config-folder-2-update-workflow-paths: done
   config-folder-3-gitignore-updates: done
   epic-10-retrospective: optional
+
+  # Epic 11: Template Catalog System
+  epic-11-catalog-system: done
+  11-1-core-catalog-infrastructure: done
+  11-2-refactor-setup-workflow: done
+  11-3-create-add-template-skill: done
+  11-4-update-dependent-workflows: done
+  epic-11-retrospective: optional
+
+  # Epic 12: Slide Download & Export
+  epic-12-download-export: done
+  12-1-download-menu-ui: done
+  12-2-single-slide-png-export: done
+  12-3-batch-png-export-zip: done
+  12-4-pdf-export: done
+  epic-12-retrospective: optional
+
+  # Epic 13: Enhanced Planning Sessions
+  epic-13-enhanced-planning: done
+  13-1-agenda-structure-generation: done
+  13-2-section-message-discovery: done
+  13-3-content-visual-discovery: done
+  13-4-schema-integration: done
+  epic-13-retrospective: optional
+
+  # Epic 14: Viewer Template Move & Cleanup (Mini-Epic)
+  epic-14-viewer-template-move: done
+  14-1-move-viewer-template-cleanup-folders: done
+  epic-14-retrospective: optional

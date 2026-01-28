@@ -24,3 +24,11 @@ Thumbs.db
 .vscode/
 *.swp
 *.swo
+
+# BMAD workflow state
+.bmad/
+.claude/commands/bmad/
+.claude/skills/bmad/
+
+# Local-only workflows (not part of framework distribution)
+.slide-builder/workflows/optimize-instructions/

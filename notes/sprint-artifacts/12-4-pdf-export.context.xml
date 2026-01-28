@@ -1,0 +1,275 @@
+<story-context id="12-4-pdf-export" v="1.0">
+  <metadata>
+    <epicId>12</epicId>
+    <storyId>4</storyId>
+    <title>PDF Export</title>
+    <status>drafted</status>
+    <generatedAt>2026-01-28</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>notes/sprint-artifacts/12-4-pdf-export.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>presenter</asA>
+    <iWant>download the entire deck as a PDF</iWant>
+    <soThat>I can share a complete document version</soThat>
+    <tasks>
+      <task id="1" name="Inline jsPDF library">
+        <subtask>Download jsPDF v2.5.1 UMD minified (~90KB)</subtask>
+        <subtask>Add to script section before application code</subtask>
+        <subtask>Verify library loads correctly (check window.jspdf)</subtask>
+      </task>
+      <task id="2" name="Implement downloadDeckPDF() function">
+        <subtask>Show progress modal with "Generating PDF..."</subtask>
+        <subtask>Create jsPDF instance with landscape orientation and custom page size</subtask>
+        <subtask>Loop through all slides sequentially</subtask>
+        <subtask>For each slide: load in iframe, capture as PNG, convert to base64, add to PDF</subtask>
+        <subtask>Update progress after each slide</subtask>
+        <subtask>Add new page for each slide (except first)</subtask>
+        <subtask>Save PDF with deck name</subtask>
+        <subtask>Hide progress modal</subtask>
+      </task>
+      <task id="3" name="Optimize PDF generation">
+        <subtask>Use appropriate image compression</subtask>
+        <subtask>Handle large decks without memory issues</subtask>
+        <subtask>Ensure acceptable file sizes</subtask>
+      </task>
+      <task id="4" name="Wire up menu item">
+        <subtask>Replace placeholder downloadDeckPDF() with full implementation</subtask>
+        <subtask>Menu item already wired at line 598</subtask>
+      </task>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <criterion id="AC1">Given I am viewing slides in presentation mode, when I click "Download as PDF" from the download menu, then a progress modal appears</criterion>
+    <criterion id="AC2">The progress bar updates as each slide is processed</criterion>
+    <criterion id="AC3">When complete, a PDF file downloads automatically</criterion>
+    <criterion id="AC4">The PDF file is named {deckName}.pdf</criterion>
+    <criterion id="AC5">The PDF contains all slides as separate pages in landscape orientation</criterion>
+    <criterion id="AC6">Each page is 1920x1080 pixels (matching slide dimensions)</criterion>
+    <criterion id="AC7">The PDF file size is reasonable (less than 50MB for a 14-slide deck)</criterion>
+    <criterion id="AC8">This works with file:// protocol</criterion>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>notes/tech-spec.md</path>
+        <title>Technical Specification</title>
+        <section>PDF Generation Pipeline</section>
+        <snippet>Use jsPDF to create a multi-page PDF document with each slide rendered as a full-page image. PDF uses custom page size [1920, 1080] in landscape orientation with hotfixes: ['px_scaling'].</snippet>
+      </doc>
+      <doc>
+        <path>notes/tech-spec.md</path>
+        <title>Technical Specification</title>
+        <section>jsPDF Configuration</section>
+        <snippet>Create jsPDF instance with orientation: 'landscape', unit: 'px', format: [1920, 1080], hotfixes: ['px_scaling']. Use pdf.addImage() for each slide PNG.</snippet>
+      </doc>
+      <doc>
+        <path>notes/tech-spec.md</path>
+        <title>Technical Specification</title>
+        <section>File Naming Convention</section>
+        <snippet>PDF file: {deckName}.pdf. Use sanitizeFilename() function already available in viewer-template.html.</snippet>
+      </doc>
+      <doc>
+        <path>notes/tech-spec.md</path>
+        <title>Technical Specification</title>
+        <section>Story 4 - PDF Export Acceptance Criteria</section>
+        <snippet>Progress modal shows during generation, PDF pages are landscape 1920x1080, file size is reasonable, works with file:// protocol.</snippet>
+      </doc>
+      <doc>
+        <path>notes/sprint-artifacts/12-3-batch-png-export-zip.md</path>
+        <title>Previous Story - Batch PNG Export</title>
+        <section>Completion Notes</section>
+        <snippet>Progress modal infrastructure (showProgressModal, updateProgress, hideProgressModal) already implemented. captureSlideForExport() function available for capturing any slide by index.</snippet>
+      </doc>
+    </docs>
+
+    <code>
+      <file>
+        <path>.slide-builder/templates/viewer-template.html</path>
+        <kind>template</kind>
+        <symbol>downloadDeckPDF</symbol>
+        <lines>1432-1436</lines>
+        <reason>Placeholder function to be replaced with full PDF export implementation</reason>
+      </file>
+      <file>
+        <path>.slide-builder/templates/viewer-template.html</path>
+        <kind>template</kind>
+        <symbol>captureSlideForExport</symbol>
+        <lines>1249-1380</lines>
+        <reason>Existing function to capture any slide as PNG blob - reuse for PDF generation</reason>
+      </file>
+      <file>
+        <path>.slide-builder/templates/viewer-template.html</path>
+        <kind>template</kind>
+        <symbol>showProgressModal</symbol>
+        <lines>1340-1346</lines>
+        <reason>Progress modal display function - reuse for PDF generation progress</reason>
+      </file>
+      <file>
+        <path>.slide-builder/templates/viewer-template.html</path>
+        <kind>template</kind>
+        <symbol>updateProgress</symbol>
+        <lines>1348-1354</lines>
+        <reason>Progress bar update function - reuse for PDF generation progress</reason>
+      </file>
+      <file>
+        <path>.slide-builder/templates/viewer-template.html</path>
+        <kind>template</kind>
+        <symbol>hideProgressModal</symbol>
+        <lines>1356-1358</lines>
+        <reason>Progress modal hide function - call after PDF generation completes</reason>
+      </file>
+      <file>
+        <path>.slide-builder/templates/viewer-template.html</path>
+        <kind>template</kind>
+        <symbol>sanitizeFilename</symbol>
+        <lines>1195-1197</lines>
+        <reason>Filename sanitization utility - use for PDF filename generation</reason>
+      </file>
+      <file>
+        <path>.slide-builder/templates/viewer-template.html</path>
+        <kind>template</kind>
+        <symbol>downloadAllSlidesPNG</symbol>
+        <lines>1387-1427</lines>
+        <reason>Reference implementation for batch slide processing with progress modal - follow similar pattern for PDF</reason>
+      </file>
+      <file>
+        <path>.slide-builder/templates/viewer-template.html</path>
+        <kind>template</kind>
+        <symbol>download-menu onclick</symbol>
+        <lines>598</lines>
+        <reason>Menu item already wired to downloadDeckPDF() - no changes needed to menu HTML</reason>
+      </file>
+      <file>
+        <path>scripts/regenerate-viewer.js</path>
+        <kind>script</kind>
+        <symbol>regenerate-viewer</symbol>
+        <lines>all</lines>
+        <reason>Use to regenerate viewer after template changes for testing</reason>
+      </file>
+    </code>
+
+    <dependencies>
+      <node>
+        <package>jspdf</package>
+        <version>2.5.1</version>
+        <purpose>PDF document generation - must be inlined in viewer template</purpose>
+        <source>https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js</source>
+        <inline>true</inline>
+      </node>
+      <existing>
+        <package>html2canvas</package>
+        <version>1.4.1</version>
+        <purpose>Already inlined in viewer-template.html for PNG capture</purpose>
+        <status>available</status>
+      </existing>
+      <existing>
+        <package>JSZip</package>
+        <version>3.10.1</version>
+        <purpose>Already inlined in viewer-template.html (Story 12.3)</purpose>
+        <status>available</status>
+      </existing>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint type="pattern">Follow existing downloadAllSlidesPNG() pattern for batch processing</constraint>
+    <constraint type="pattern">Use captureSlideForExport() for slide PNG capture (returns blob)</constraint>
+    <constraint type="pattern">Use showProgressModal/updateProgress/hideProgressModal for progress UI</constraint>
+    <constraint type="pattern">Process slides sequentially to manage memory</constraint>
+    <constraint type="architecture">Single file modification - viewer-template.html only</constraint>
+    <constraint type="protocol">Must work with file:// protocol (no server required)</constraint>
+    <constraint type="naming">PDF filename: {deckName}.pdf using sanitizeFilename()</constraint>
+    <constraint type="size">Target less than 50MB for 14-slide deck</constraint>
+    <constraint type="dimensions">PDF pages must be 1920x1080 landscape</constraint>
+    <constraint type="compression">Use appropriate image compression for reasonable file sizes</constraint>
+  </constraints>
+
+  <interfaces>
+    <interface>
+      <name>jsPDF constructor</name>
+      <kind>library API</kind>
+      <signature>new jsPDF({ orientation: 'landscape', unit: 'px', format: [1920, 1080], hotfixes: ['px_scaling'] })</signature>
+      <path>jsPDF library (to be inlined)</path>
+    </interface>
+    <interface>
+      <name>jsPDF.addPage</name>
+      <kind>library API</kind>
+      <signature>pdf.addPage([1920, 1080], 'landscape')</signature>
+      <path>jsPDF library</path>
+    </interface>
+    <interface>
+      <name>jsPDF.addImage</name>
+      <kind>library API</kind>
+      <signature>pdf.addImage(dataUrl, 'PNG', 0, 0, 1920, 1080)</signature>
+      <path>jsPDF library</path>
+    </interface>
+    <interface>
+      <name>jsPDF.save</name>
+      <kind>library API</kind>
+      <signature>pdf.save(filename)</signature>
+      <path>jsPDF library</path>
+    </interface>
+    <interface>
+      <name>captureSlideForExport</name>
+      <kind>function</kind>
+      <signature>async function captureSlideForExport(slideIndex: number): Promise&lt;Blob&gt;</signature>
+      <path>.slide-builder/templates/viewer-template.html:1249</path>
+    </interface>
+    <interface>
+      <name>Canvas.toDataURL</name>
+      <kind>browser API</kind>
+      <signature>canvas.toDataURL('image/png')</signature>
+      <path>HTML Canvas API</path>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>Manual browser testing. No automated test framework. Test with file:// protocol and http:// protocol. Test across Chrome, Safari, Firefox. Verify PDF opens correctly in standard PDF viewers.</standards>
+    <locations>
+      <location>output/claude-code-fundamentals/index.html</location>
+    </locations>
+    <ideas>
+      <idea acId="AC1">Click Download as PDF menu item, verify progress modal appears with title</idea>
+      <idea acId="AC2">Watch progress bar during generation, verify it updates for each slide</idea>
+      <idea acId="AC3">Wait for generation to complete, verify PDF download triggers automatically</idea>
+      <idea acId="AC4">Check downloaded filename matches {deckName}.pdf pattern</idea>
+      <idea acId="AC5">Open PDF, verify all slides present as separate pages in landscape</idea>
+      <idea acId="AC6">Check PDF page dimensions are 1920x1080 (view page properties)</idea>
+      <idea acId="AC7">Check PDF file size is reasonable (less than 50MB for 14-slide deck)</idea>
+      <idea acId="AC8">Test with file:// protocol (open index.html directly without server)</idea>
+      <idea acId="quality">Verify slide content renders correctly (text, SVGs, backgrounds)</idea>
+      <idea acId="memory">Test with large deck to ensure no memory issues</idea>
+    </ideas>
+  </tests>
+
+  <previousStoryLearnings>
+    <source>notes/sprint-artifacts/12-3-batch-png-export-zip.md</source>
+    <status>ready-for-dev (in-progress in sprint-status)</status>
+    <completionNotes>
+      <note>Implemented batch PNG export with ZIP bundling using JSZip v3.10.1</note>
+      <note>Added progress modal (CSS + HTML) with animated progress bar</note>
+      <note>Created captureSlideForExport() function that works with any slide index</note>
+      <note>Full downloadAllSlidesPNG() implementation processes slides sequentially to manage memory</note>
+      <note>Works with both file:// and http:// protocols using srcdoc fallback</note>
+      <note>ZIP uses DEFLATE compression level 6 for good balance of size/speed</note>
+    </completionNotes>
+    <newServicesCreated>
+      <service name="captureSlideForExport" path=".slide-builder/templates/viewer-template.html:1249" purpose="Capture any slide as PNG blob by index - REUSE for PDF generation"/>
+      <service name="showProgressModal" path=".slide-builder/templates/viewer-template.html:1340" purpose="Show progress modal with title - REUSE for PDF progress"/>
+      <service name="updateProgress" path=".slide-builder/templates/viewer-template.html:1348" purpose="Update progress bar and text - REUSE for PDF progress"/>
+      <service name="hideProgressModal" path=".slide-builder/templates/viewer-template.html:1356" purpose="Hide progress modal - REUSE after PDF complete"/>
+    </newServicesCreated>
+    <patternsEstablished>
+      <pattern>Sequential slide processing to manage memory</pattern>
+      <pattern>Small delay (10ms) between slides to prevent UI freezing</pattern>
+      <pattern>srcdoc fallback for file:// protocol compatibility</pattern>
+    </patternsEstablished>
+    <filesModified>
+      <file>.slide-builder/templates/viewer-template.html - Added JSZip library, progress modal CSS/HTML, and batch export functions</file>
+    </filesModified>
+  </previousStoryLearnings>
+</story-context>

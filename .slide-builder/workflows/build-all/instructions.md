@@ -149,7 +149,7 @@ Building {{total_pending}} remaining slides...
       <try>
         <check if="template maps to known layout">
           <action>Set {{build_type}} = "template"</action>
-          <action>Load reference sample from .slide-builder/config/samples/{{template_file}}</action>
+          <action>Load reference template from .slide-builder/config/catalog/{{template_file}}</action>
           <goto step="3">Generate slide using template pattern</goto>
         </check>
 
@@ -181,7 +181,7 @@ Continuing with next slide...
   <!-- PHASE 3: Template-Based Slide Generation                                 -->
   <!-- ═══════════════════════════════════════════════════════════════════════ -->
   <step n="3" goal="Generate slide using template pattern">
-    <action>Load reference sample from .slide-builder/config/samples/{{template_file}}</action>
+    <action>Load reference template from .slide-builder/config/catalog/{{template_file}}</action>
     <action>Load theme.json from .slide-builder/config/theme.json</action>
 
     <css-variable-extraction>
@@ -526,7 +526,7 @@ All slides failed to build.
 
 Please check:
 - Theme file exists at `.slide-builder/config/theme.json`
-- Sample templates exist in `.slide-builder/config/samples/`
+- Catalog templates exist in `.slide-builder/config/catalog/`
 - Plan definitions are valid in `output/{{deck_slug}}/plan.yaml`
 
 Try building slides individually with `/sb:build-one` for detailed error messages.

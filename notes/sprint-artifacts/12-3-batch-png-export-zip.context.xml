@@ -1,0 +1,249 @@
+<story-context id=".bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>12</epicId>
+    <storyId>3</storyId>
+    <title>Batch PNG Export (ZIP)</title>
+    <status>drafted</status>
+    <generatedAt>2026-01-28</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>notes/sprint-artifacts/12-3-batch-png-export-zip.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>a presenter</asA>
+    <iWant>to download all slides as PNG images in a ZIP file</iWant>
+    <soThat>I can archive the deck or use slides individually</soThat>
+    <tasks>
+      <task id="1" title="Inline JSZip library">
+        <subtask>Download JSZip v3.10.1 minified (~45KB)</subtask>
+        <subtask>Add to script section before application code</subtask>
+        <subtask>Verify library loads correctly</subtask>
+      </task>
+      <task id="2" title="Add progress modal HTML/CSS">
+        <subtask>Modal overlay with dark semi-transparent background</subtask>
+        <subtask>Centered card with title and progress bar</subtask>
+        <subtask>Progress text showing current slide count</subtask>
+        <subtask>CSS for .progress-modal, .progress-bar, .progress-text</subtask>
+      </task>
+      <task id="3" title="Implement progress modal functions">
+        <subtask>showProgressModal(title) - Show modal with title</subtask>
+        <subtask>updateProgress(current, total) - Update bar and text</subtask>
+        <subtask>hideProgressModal() - Hide modal</subtask>
+      </task>
+      <task id="4" title="Implement downloadAllSlidesPNG() function">
+        <subtask>Show progress modal with "Exporting slides..."</subtask>
+        <subtask>Create new JSZip instance</subtask>
+        <subtask>Loop through all slides sequentially</subtask>
+        <subtask>For each slide: load in iframe, capture with html2canvas, add to zip</subtask>
+        <subtask>Update progress after each slide</subtask>
+        <subtask>Generate ZIP blob</subtask>
+        <subtask>Trigger download</subtask>
+        <subtask>Hide progress modal</subtask>
+      </task>
+      <task id="5" title="Wire up menu item">
+        <subtask>Connect "Download All Slides" menu item to function</subtask>
+        <subtask>Close menu after selection</subtask>
+      </task>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <ac id="1">Given I am viewing slides in presentation mode, When I click "Download All Slides (ZIP)" from the download menu, Then a progress modal appears</ac>
+    <ac id="2">The progress bar updates as each slide is processed (e.g., "Processing slide 3 of 14...")</ac>
+    <ac id="3">When complete, a ZIP file downloads automatically</ac>
+    <ac id="4">The ZIP file is named {deckName}-slides.zip</ac>
+    <ac id="5">The ZIP contains PNG files for each slide numbered sequentially (slide-1.png, slide-2.png, etc.)</ac>
+    <ac id="6">The progress modal dismisses after download</ac>
+    <ac id="7">This works with file:// protocol</ac>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>notes/tech-spec.md</path>
+        <title>Technical Specification - Epic 12</title>
+        <section>Implementation Details - Story 3: Batch PNG Export (ZIP)</section>
+        <snippet>Use JSZip to bundle individual slide PNGs into a single downloadable ZIP file. Process slides sequentially (not parallel) to manage memory usage. Show a progress modal to indicate activity and provide feedback during the potentially lengthy batch operation.</snippet>
+      </doc>
+      <doc>
+        <path>notes/tech-spec.md</path>
+        <title>Technical Specification</title>
+        <section>JSZip Configuration</section>
+        <snippet>JSZip v3.10.1 (~45KB minified). ZIP file naming: {deckName}-slides.zip. PNG files numbered slide-1.png, slide-2.png, etc.</snippet>
+      </doc>
+      <doc>
+        <path>notes/tech-spec.md</path>
+        <title>Technical Specification</title>
+        <section>Progress Calculation</section>
+        <snippet>function updateProgress(current, total) { const percent = Math.round((current / total) * 100); progressBar.style.width = percent + '%'; progressText.textContent = 'Processing slide ' + current + ' of ' + total + '...'; }</snippet>
+      </doc>
+      <doc>
+        <path>notes/tech-spec.md</path>
+        <title>Technical Specification</title>
+        <section>Memory Management</section>
+        <snippet>For large decks (20+ slides): Process slides sequentially (not parallel) to limit memory. Release canvas blobs after adding to ZIP/PDF. Show progress to indicate activity.</snippet>
+      </doc>
+    </docs>
+    <code>
+      <file>
+        <path>.slide-builder/config/templates/viewer-template.html</path>
+        <kind>template</kind>
+        <symbol>downloadAllSlidesPNG</symbol>
+        <lines>1113-1117</lines>
+        <reason>Placeholder function to replace with full implementation - currently shows alert</reason>
+      </file>
+      <file>
+        <path>.slide-builder/config/templates/viewer-template.html</path>
+        <kind>function</kind>
+        <symbol>captureSlide</symbol>
+        <lines>973-1076</lines>
+        <reason>Existing slide capture function using html2canvas - must be adapted for batch capture with slide index parameter</reason>
+      </file>
+      <file>
+        <path>.slide-builder/config/templates/viewer-template.html</path>
+        <kind>function</kind>
+        <symbol>downloadCurrentSlide</symbol>
+        <lines>1081-1109</lines>
+        <reason>Pattern for downloading PNG - use downloadBlob and sanitizeFilename utilities</reason>
+      </file>
+      <file>
+        <path>.slide-builder/config/templates/viewer-template.html</path>
+        <kind>function</kind>
+        <symbol>downloadBlob</symbol>
+        <lines>varies</lines>
+        <reason>Utility function for triggering downloads - reuse for ZIP file</reason>
+      </file>
+      <file>
+        <path>.slide-builder/config/templates/viewer-template.html</path>
+        <kind>function</kind>
+        <symbol>sanitizeFilename</symbol>
+        <lines>varies</lines>
+        <reason>Utility for safe filenames - use for ZIP filename</reason>
+      </file>
+      <file>
+        <path>.slide-builder/config/templates/viewer-template.html</path>
+        <kind>html</kind>
+        <symbol>download-menu</symbol>
+        <lines>528-555</lines>
+        <reason>Download menu already has "Download All Slides (ZIP)" button wired to downloadAllSlidesPNG()</reason>
+      </file>
+      <file>
+        <path>.slide-builder/config/templates/viewer-template.html</path>
+        <kind>css</kind>
+        <symbol>download-btn, download-menu</symbol>
+        <lines>245-318</lines>
+        <reason>Existing CSS patterns for download UI - follow for progress modal styling</reason>
+      </file>
+      <file>
+        <path>.slide-builder/config/templates/viewer-template.html</path>
+        <kind>global</kind>
+        <symbol>slides, totalSlides, deckName, SLIDE_HTML_BASE64</symbol>
+        <lines>varies</lines>
+        <reason>Global variables needed for batch processing - slides array, total count, deck name</reason>
+      </file>
+    </code>
+    <dependencies>
+      <npm>
+        <package>puppeteer</package>
+        <version>^23.0.0</version>
+        <note>Not used for this feature (server-side)</note>
+      </npm>
+      <npm>
+        <package>googleapis</package>
+        <version>^140.0.0</version>
+        <note>Not used for this feature</note>
+      </npm>
+      <inline>
+        <library>html2canvas</library>
+        <version>1.4.1</version>
+        <note>Already inlined in viewer-template.html (line 589+)</note>
+      </inline>
+      <inline>
+        <library>JSZip</library>
+        <version>3.10.1</version>
+        <source>https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js</source>
+        <size>~45KB minified</size>
+        <note>MUST BE ADDED - Download and inline before application code</note>
+      </inline>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint>Single file modification - all changes in .slide-builder/config/templates/viewer-template.html</constraint>
+    <constraint>Must work with file:// protocol - no server dependencies</constraint>
+    <constraint>Process slides sequentially, not in parallel, to manage memory</constraint>
+    <constraint>Use existing html2canvas captureSlide pattern but adapt for batch with slide index parameter</constraint>
+    <constraint>Follow existing code style: camelCase, inline onclick handlers, CSS variables for colors</constraint>
+    <constraint>JSZip library must be inlined before application code in script section</constraint>
+    <constraint>Progress modal styling must match existing dark theme (--amp-dark-alt, --amp-lime, --amp-mid-gray)</constraint>
+    <constraint>ZIP filename must be sanitized using existing sanitizeFilename utility</constraint>
+    <constraint>Progress modal must be non-dismissible during export (intentional UX)</constraint>
+    <constraint>After regenerating viewer, test with: node scripts/regenerate-viewer.js claude-code-fundamentals</constraint>
+  </constraints>
+
+  <interfaces>
+    <interface>
+      <name>captureSlideForExport</name>
+      <kind>function</kind>
+      <signature>async function captureSlideForExport(slideIndex: number): Promise&lt;Blob&gt;</signature>
+      <path>.slide-builder/config/templates/viewer-template.html</path>
+      <note>New function - adapts captureSlide to accept slide index and return PNG blob directly</note>
+    </interface>
+    <interface>
+      <name>showProgressModal</name>
+      <kind>function</kind>
+      <signature>function showProgressModal(title: string): void</signature>
+      <path>.slide-builder/config/templates/viewer-template.html</path>
+      <note>New function - shows progress modal with title</note>
+    </interface>
+    <interface>
+      <name>updateProgress</name>
+      <kind>function</kind>
+      <signature>function updateProgress(current: number, total: number): void</signature>
+      <path>.slide-builder/config/templates/viewer-template.html</path>
+      <note>New function - updates progress bar and text</note>
+    </interface>
+    <interface>
+      <name>hideProgressModal</name>
+      <kind>function</kind>
+      <signature>function hideProgressModal(): void</signature>
+      <path>.slide-builder/config/templates/viewer-template.html</path>
+      <note>New function - hides progress modal</note>
+    </interface>
+    <interface>
+      <name>downloadAllSlidesPNG</name>
+      <kind>function</kind>
+      <signature>async function downloadAllSlidesPNG(): Promise&lt;void&gt;</signature>
+      <path>.slide-builder/config/templates/viewer-template.html</path>
+      <note>Replace placeholder - full implementation for batch export</note>
+    </interface>
+    <interface>
+      <name>JSZip</name>
+      <kind>library</kind>
+      <signature>new JSZip(); zip.file(name, blob); zip.generateAsync({type: 'blob'})</signature>
+      <path>.slide-builder/config/templates/viewer-template.html (to be inlined)</path>
+      <note>JSZip v3.10.1 API for creating ZIP files</note>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>No automated testing framework in place. All testing is manual browser-based. Test in Chrome (primary), Safari, and Firefox. Open DevTools console for error monitoring during tests.</standards>
+    <locations>
+      <location>output/claude-code-fundamentals/index.html - Regenerate with: node scripts/regenerate-viewer.js claude-code-fundamentals</location>
+      <location>Manual testing via browser - open index.html directly (file://) and via python3 -m http.server (http://)</location>
+    </locations>
+    <ideas>
+      <idea ac="1">Click "Download All Slides (ZIP)" and verify progress modal appears immediately</idea>
+      <idea ac="2">Watch progress bar update - should show "Processing slide X of Y..." for each slide</idea>
+      <idea ac="3">Verify ZIP file downloads automatically when progress reaches 100%</idea>
+      <idea ac="4">Check downloaded filename matches pattern: {deckName}-slides.zip (e.g., claude-code-fundamentals-slides.zip)</idea>
+      <idea ac="5">Unzip file and verify contains slide-1.png through slide-N.png, each 1920x1080</idea>
+      <idea ac="6">Verify progress modal dismisses after download completes</idea>
+      <idea ac="7">Test with file:// protocol: Open index.html directly from filesystem, not via server</idea>
+      <idea ac="7">Test with http:// protocol: Serve via python3 -m http.server and verify works there too</idea>
+      <idea>Test large deck: Use 14-slide claude-code-fundamentals deck, verify no memory issues</idea>
+      <idea>Cross-browser: Test in Chrome, Safari, Firefox</idea>
+      <idea>Check console for errors during export process</idea>
+    </ideas>
+  </tests>
+</story-context>

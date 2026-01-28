@@ -1,0 +1,262 @@
+<story-context id=".bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>12</epicId>
+    <storyId>2</storyId>
+    <title>Single Slide PNG Export</title>
+    <status>drafted</status>
+    <generatedAt>2026-01-28</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>notes/sprint-artifacts/12-2-single-slide-png-export.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>presenter</asA>
+    <iWant>to download the current slide as a PNG image</iWant>
+    <soThat>I can share it in documents or emails</soThat>
+    <tasks>
+      <task id="1">
+        <title>Inline html2canvas library</title>
+        <subtasks>
+          <subtask>Download html2canvas v1.4.1 minified (~175KB)</subtask>
+          <subtask>Add to script section before application code</subtask>
+          <subtask>Verify library loads correctly</subtask>
+        </subtasks>
+      </task>
+      <task id="2">
+        <title>Implement captureSlide() helper function</title>
+        <subtasks>
+          <subtask>Get iframe contentDocument</subtask>
+          <subtask>Find .slide element in iframe</subtask>
+          <subtask>Configure html2canvas options for 1920x1080</subtask>
+          <subtask>Return canvas element or PNG blob</subtask>
+        </subtasks>
+      </task>
+      <task id="3">
+        <title>Implement downloadCurrentSlide() function</title>
+        <subtasks>
+          <subtask>Call captureSlide(currentSlide)</subtask>
+          <subtask>Convert canvas to PNG blob</subtask>
+          <subtask>Create object URL for download</subtask>
+          <subtask>Generate filename with deck name and slide number</subtask>
+          <subtask>Trigger download via hidden anchor click</subtask>
+          <subtask>Revoke object URL after download</subtask>
+        </subtasks>
+      </task>
+      <task id="4">
+        <title>Wire up menu item</title>
+        <subtasks>
+          <subtask>Connect "Download Current Slide" menu item to function</subtask>
+          <subtask>Close menu after selection</subtask>
+        </subtasks>
+      </task>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <criterion id="AC1">
+      <given>I am viewing a slide in presentation mode</given>
+      <when>I click "Download Current Slide" from the download menu</when>
+      <then>a PNG file downloads automatically</then>
+    </criterion>
+    <criterion id="AC2">
+      <description>The filename is {deckName}-slide-{N}.png (e.g., "Claude-Code-Fundamentals-slide-3.png")</description>
+    </criterion>
+    <criterion id="AC3">
+      <description>The PNG dimensions are exactly 1920x1080 pixels</description>
+    </criterion>
+    <criterion id="AC4">
+      <description>The PNG accurately captures all slide content (text, SVGs, backgrounds, gradients)</description>
+    </criterion>
+    <criterion id="AC5">
+      <description>This works with file:// protocol (opening index.html directly)</description>
+    </criterion>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>notes/tech-spec.md</path>
+        <title>Technical Specification - Slide Download &amp; Export</title>
+        <section>Technical Details - html2canvas Configuration</section>
+        <snippet>Complete configuration for html2canvas with options: width/height 1920x1080, scale 1, useCORS true, allowTaint true, backgroundColor null. Includes filename convention {deckName}-slide-{N}.png and download trigger pattern using object URLs.</snippet>
+      </doc>
+      <doc>
+        <path>notes/tech-spec.md</path>
+        <title>Technical Specification - Implementation Guide</title>
+        <section>Implementation Steps - Story 2</section>
+        <snippet>Story 2 implementation guide: 1) Inline html2canvas library in script section, 2) Implement captureSlide(slideNumber) helper, 3) Implement downloadCurrentSlide() function, 4) Wire up menu item click handler, 5) Test with various slide types.</snippet>
+      </doc>
+      <doc>
+        <path>notes/tech-spec.md</path>
+        <title>Technical Specification - Development Context</title>
+        <section>Existing Patterns</section>
+        <snippet>Code style uses camelCase functions, document.getElementById() for DOM queries, inline onclick handlers. CSS patterns include .nav-btn styling, button hover states with border-color transitions. Libraries should be added before application code.</snippet>
+      </doc>
+      <doc>
+        <path>notes/epics.md</path>
+        <title>Epic 12 Stories</title>
+        <section>Story 12.2: Single Slide PNG Export</section>
+        <snippet>Depends on Story 12.1 (Download Menu UI). Requires html2canvas integration. Implements captureSlide helper and downloadCurrentSlide function. Access slide via iframe.contentDocument.querySelector('.slide').</snippet>
+      </doc>
+    </docs>
+    <code>
+      <file>
+        <path>.slide-builder/config/templates/viewer-template.html</path>
+        <kind>template</kind>
+        <symbol>downloadCurrentSlide</symbol>
+        <lines>910-914</lines>
+        <reason>Placeholder function to replace with actual implementation. Currently shows alert message.</reason>
+      </file>
+      <file>
+        <path>.slide-builder/config/templates/viewer-template.html</path>
+        <kind>template</kind>
+        <symbol>closeDownloadMenu</symbol>
+        <lines>893-898</lines>
+        <reason>Helper function to close download menu after selection - already implemented.</reason>
+      </file>
+      <file>
+        <path>.slide-builder/config/templates/viewer-template.html</path>
+        <kind>template</kind>
+        <symbol>toggleDownloadMenu</symbol>
+        <lines>885-891</lines>
+        <reason>Menu toggle function from Story 12.1 - already implemented.</reason>
+      </file>
+      <file>
+        <path>.slide-builder/config/templates/viewer-template.html</path>
+        <kind>template</kind>
+        <symbol>download-menu HTML</symbol>
+        <lines>528-555</lines>
+        <reason>Download menu UI with three menu items including "Download Current Slide" button - already implemented from Story 12.1.</reason>
+      </file>
+      <file>
+        <path>.slide-builder/config/templates/viewer-template.html</path>
+        <kind>template</kind>
+        <symbol>currentSlide, totalSlides, deckName</symbol>
+        <lines>596, 591, 590</lines>
+        <reason>Global state variables needed for generating filename and accessing current slide.</reason>
+      </file>
+      <file>
+        <path>.slide-builder/config/templates/viewer-template.html</path>
+        <kind>template</kind>
+        <symbol>SLIDE_WIDTH, SLIDE_HEIGHT</symbol>
+        <lines>679-680</lines>
+        <reason>Constants for 1920x1080 slide dimensions - reuse for html2canvas configuration.</reason>
+      </file>
+      <file>
+        <path>.slide-builder/config/templates/viewer-template.html</path>
+        <kind>template</kind>
+        <symbol>presentation-iframe</symbol>
+        <lines>568</lines>
+        <reason>Iframe element containing current slide - access via contentDocument to get slide element for capture.</reason>
+      </file>
+    </code>
+    <dependencies>
+      <ecosystem name="browser">
+        <package name="html2canvas" version="1.4.1" purpose="HTML to canvas rendering for PNG capture" source="cdnjs">
+          <cdn>https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js</cdn>
+          <size>~175KB minified</size>
+          <note>Must be inlined in script section for file:// protocol support</note>
+        </package>
+      </ecosystem>
+      <ecosystem name="node">
+        <package name="puppeteer" version="^23.0.0" purpose="Headless browser - not used for this story" />
+        <package name="googleapis" version="^140.0.0" purpose="Google API - not used for this story" />
+      </ecosystem>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint type="file-protocol">
+      <description>Must work with file:// protocol - user opens index.html directly without server</description>
+      <implication>All libraries must be inlined, no fetch() calls for library loading</implication>
+    </constraint>
+    <constraint type="single-file">
+      <description>All code goes in viewer-template.html - no external JS files</description>
+      <implication>Inline html2canvas library in script section before application code</implication>
+    </constraint>
+    <constraint type="cross-origin">
+      <description>Slide content is in iframe from same origin (slides/slide-N.html)</description>
+      <implication>contentDocument access works for file:// protocol since same origin</implication>
+    </constraint>
+    <constraint type="dimensions">
+      <description>PNG must be exactly 1920x1080 pixels</description>
+      <implication>Configure html2canvas with explicit width/height, scale: 1</implication>
+    </constraint>
+    <constraint type="code-style">
+      <description>Follow existing patterns in viewer-template.html</description>
+      <implication>Use camelCase, document.getElementById(), inline onclick handlers</implication>
+    </constraint>
+  </constraints>
+
+  <interfaces>
+    <interface>
+      <name>html2canvas</name>
+      <kind>library function</kind>
+      <signature>html2canvas(element, options) => Promise&lt;Canvas&gt;</signature>
+      <path>Inlined from cdnjs</path>
+      <usage>
+        const canvas = await html2canvas(slideElement, {
+            width: 1920,
+            height: 1080,
+            scale: 1,
+            useCORS: true,
+            allowTaint: true,
+            backgroundColor: null,
+            logging: false
+        });
+      </usage>
+    </interface>
+    <interface>
+      <name>Canvas.toBlob</name>
+      <kind>browser API</kind>
+      <signature>canvas.toBlob(callback, type, quality)</signature>
+      <usage>
+        canvas.toBlob((blob) => {
+            // handle blob
+        }, 'image/png');
+      </usage>
+    </interface>
+    <interface>
+      <name>URL.createObjectURL</name>
+      <kind>browser API</kind>
+      <signature>URL.createObjectURL(blob) => string</signature>
+      <usage>Used to create downloadable URL from PNG blob</usage>
+    </interface>
+    <interface>
+      <name>URL.revokeObjectURL</name>
+      <kind>browser API</kind>
+      <signature>URL.revokeObjectURL(url) => void</signature>
+      <usage>Clean up object URL after download to prevent memory leaks</usage>
+    </interface>
+    <interface>
+      <name>iframe.contentDocument</name>
+      <kind>browser API</kind>
+      <signature>iframe.contentDocument => Document</signature>
+      <usage>
+        const iframe = document.getElementById('presentation-iframe');
+        const slideDoc = iframe.contentDocument || iframe.contentWindow.document;
+        const slideElement = slideDoc.querySelector('.slide');
+      </usage>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>
+      No automated testing framework exists. All testing is manual browser testing. Test in Chrome (primary), Safari, and Firefox. Test both file:// protocol (opening index.html directly) and http:// protocol (python3 -m http.server). Verify PNG dimensions using image viewer or properties dialog.
+    </standards>
+    <locations>
+      <location>Manual testing via output/claude-code-fundamentals/index.html</location>
+      <location>Browser DevTools console for error monitoring</location>
+    </locations>
+    <ideas>
+      <idea acRef="AC1">Open viewer in presentation mode, click Download Current Slide, verify download triggers</idea>
+      <idea acRef="AC2">Check downloaded filename matches pattern {deckName}-slide-{N}.png</idea>
+      <idea acRef="AC3">Open PNG in image viewer, verify dimensions are exactly 1920x1080</idea>
+      <idea acRef="AC4">Compare PNG to original slide - text, SVGs, backgrounds, gradients should all render correctly</idea>
+      <idea acRef="AC5">Open index.html via file:// (double-click file), test download works without server</idea>
+      <idea acRef="AC4">Test with different slide types: title slide, list slide, code slide, diagram slide</idea>
+      <idea>Test that menu closes after clicking download option</idea>
+      <idea>Test cross-browser: Chrome, Safari, Firefox</idea>
+    </ideas>
+  </tests>
+</story-context>

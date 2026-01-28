@@ -1,0 +1,202 @@
+<story-context id=".bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>11</epicId>
+    <storyId>2</storyId>
+    <title>Refactor Setup Workflow for Catalog</title>
+    <status>drafted</status>
+    <generatedAt>2026-01-28</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>notes/sprint-artifacts/story-catalog-system-2.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>user running /sb:setup</asA>
+    <iWant>the workflow to generate starter templates directly into the catalog</iWant>
+    <soThat>I have a unified template system from the start</soThat>
+    <tasks>
+      <task id="1" ac="1">Modify `setup/workflow.yaml` to add catalog_path variable</task>
+      <task id="2" ac="1">Modify `setup/instructions.md` Phase 4 to change output directory from samples/ to catalog/</task>
+      <task id="3" ac="1">Update template generation to create ID-based filenames (title.html not 01-title.html)</task>
+      <task id="4" ac="2">Add catalog.json generation after all templates are created</task>
+      <task id="5" ac="2">Generate catalog entries with all required metadata fields</task>
+      <task id="6" ac="2">Define starter template metadata (use_cases arrays for 6 templates)</task>
+      <task id="7" ac="3">Update status.yaml generation to use catalog schema instead of templates schema</task>
+      <task id="8" ac="4">Add cleanup step to remove config/samples/ if exists</task>
+      <task id="9" ac="4">Add cleanup step to remove config/templates/ if exists</task>
+      <task id="10" ac="all">Test full setup workflow end-to-end</task>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <criterion id="1">
+      <description>Given I run `/sb:setup` and approve the theme, when sample generation completes, then 6 templates exist in `config/catalog/`: title.html, agenda.html, process-flow.html, comparison.html, callout.html, technical.html</description>
+      <testable>true</testable>
+    </criterion>
+    <criterion id="2">
+      <description>Given templates are generated, when I read catalog.json, then it contains 6 entries with: Unique IDs matching filenames (without .html), Descriptive names and descriptions, Relevant use_cases arrays, source: "setup", created_at timestamps</description>
+      <testable>true</testable>
+    </criterion>
+    <criterion id="3">
+      <description>Given setup completes, when I check status.yaml, then it reflects catalog structure: catalog.directory, catalog.manifest, catalog.count, catalog.templates array with id and name</description>
+      <testable>true</testable>
+    </criterion>
+    <criterion id="4">
+      <description>Given the old directories exist, when setup completes successfully, then `config/samples/` and `config/templates/` directories are deleted</description>
+      <testable>true</testable>
+    </criterion>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>notes/tech-spec-catalog.md</path>
+        <title>Technical Specification: Template Catalog System</title>
+        <section>Implementation Details</section>
+        <snippet>Catalog manifest schema defines version, generated date, lastModified timestamp, and templates array with id, name, description, use_cases, file, preview, created_at, source fields. Starter templates: title, agenda, process-flow, comparison, callout, technical.</snippet>
+      </doc>
+      <doc>
+        <path>notes/epics.md</path>
+        <title>Epic Breakdown - Epic 11</title>
+        <section>Story 11.2: Refactor Setup Workflow for Catalog</section>
+        <snippet>Refactors setup workflow to output to config/catalog/ with ID-based filenames and generates catalog.json alongside template files. Updates status.yaml schema and removes deprecated directories.</snippet>
+      </doc>
+      <doc>
+        <path>.slide-builder/CONVENTIONS.md</path>
+        <title>Slide Builder Conventions</title>
+        <section>Template Catalog</section>
+        <snippet>Catalog location at .slide-builder/config/catalog/ with catalog.json manifest and *.html template files. Schema documented with all metadata fields. Template IDs use kebab-case slugs.</snippet>
+      </doc>
+    </docs>
+    <code>
+      <artifact>
+        <path>.slide-builder/workflows/setup/workflow.yaml</path>
+        <kind>workflow-config</kind>
+        <symbol>setup workflow configuration</symbol>
+        <lines>1-38</lines>
+        <reason>Primary file to modify - add catalog_path variable, update samples_dir and templates_dir to catalog_path</reason>
+      </artifact>
+      <artifact>
+        <path>.slide-builder/workflows/setup/instructions.md</path>
+        <kind>workflow-instructions</kind>
+        <symbol>setup workflow instructions</symbol>
+        <lines>1276-1498 (Phase 4), 1874-1904 (Phase 6.1)</lines>
+        <reason>Primary file to modify - Phase 4 generates samples, Phase 6.1 copies to templates. Both need refactoring to output to catalog/ with ID-based names and generate catalog.json</reason>
+      </artifact>
+      <artifact>
+        <path>.slide-builder/status.yaml</path>
+        <kind>state-file</kind>
+        <symbol>templates section</symbol>
+        <lines>39-49</lines>
+        <reason>Current templates section structure needs updating to catalog structure with directory, manifest, count, and templates array</reason>
+      </artifact>
+      <artifact>
+        <path>.slide-builder/config/catalog/catalog.json</path>
+        <kind>manifest</kind>
+        <symbol>catalog manifest</symbol>
+        <lines>1-6</lines>
+        <reason>Existing empty catalog.json from Story 11.1 - setup workflow must populate templates array</reason>
+      </artifact>
+    </code>
+    <dependencies>
+      <ecosystem name="node">
+        <package name="puppeteer" version="^23.0.0">Headless browser for screenshots - not used for this story</package>
+        <package name="googleapis" version="^140.0.0">Google API - not used for this story</package>
+      </ecosystem>
+      <internal>
+        <dependency name="frontend-design skill">Used in Phase 4 for template HTML generation - invocation pattern unchanged</dependency>
+        <dependency name="BMAD workflow engine">Workflow execution framework - no changes needed</dependency>
+      </internal>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint source="tech-spec-catalog.md">Templates must use CSS variables from theme.json - pattern unchanged from current implementation</constraint>
+    <constraint source="tech-spec-catalog.md">Template IDs use kebab-case slugs: title, agenda, process-flow, comparison, callout, technical</constraint>
+    <constraint source="tech-spec-catalog.md">Catalog.json uses camelCase keys (per existing JSON convention)</constraint>
+    <constraint source="CONVENTIONS.md">Status.yaml uses snake_case keys</constraint>
+    <constraint source="status.yaml">History array must be preserved when updating status.yaml</constraint>
+    <constraint source="instructions.md">frontend-design skill invocation pattern in Phase 4 must remain unchanged - only output paths change</constraint>
+    <constraint source="tech-spec-catalog.md">No new dependencies required - pure workflow file changes</constraint>
+  </constraints>
+
+  <interfaces>
+    <interface>
+      <name>catalog.json schema</name>
+      <kind>JSON manifest</kind>
+      <signature>{version: string, generated: date, lastModified: ISO-timestamp, templates: [{id, name, description, use_cases[], file, preview, created_at, source}]}</signature>
+      <path>.slide-builder/config/catalog/catalog.json</path>
+    </interface>
+    <interface>
+      <name>status.yaml catalog section</name>
+      <kind>YAML config</kind>
+      <signature>catalog: {directory: string, manifest: string, count: number, templates: [{id, name}]}</signature>
+      <path>.slide-builder/status.yaml</path>
+    </interface>
+    <interface>
+      <name>Starter Template Metadata</name>
+      <kind>data definition</kind>
+      <signature>
+        title: {id: "title", name: "Title Slide", use_cases: ["title", "opening", "hero", "intro"]}
+        agenda: {id: "agenda", name: "Agenda/List", use_cases: ["agenda", "list", "bullets", "overview"]}
+        process-flow: {id: "process-flow", name: "Process Flow", use_cases: ["flow", "process", "steps", "timeline"]}
+        comparison: {id: "comparison", name: "Comparison", use_cases: ["comparison", "versus", "before-after", "columns"]}
+        callout: {id: "callout", name: "Key Insight", use_cases: ["callout", "statistic", "quote", "highlight"]}
+        technical: {id: "technical", name: "Technical/Code", use_cases: ["code", "technical", "api", "syntax"]}
+      </signature>
+      <path>notes/tech-spec-catalog.md:190-199</path>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>No automated test framework exists. Manual validation via running workflows and verifying outputs. Testing is done by executing /sb:setup with test brand assets and verifying: 1) catalog.json is generated with 6 template entries, 2) 6 HTML files exist in config/catalog/, 3) status.yaml has new catalog section, 4) old samples/ and templates/ directories are removed.</standards>
+    <locations>
+      <location>Manual execution of /sb:setup workflow</location>
+      <location>File inspection of .slide-builder/config/catalog/</location>
+      <location>Browser preview of generated HTML templates</location>
+    </locations>
+    <ideas>
+      <idea ac="1">Run /sb:setup, verify 6 .html files in config/catalog/ with ID-based names (no numeric prefixes)</idea>
+      <idea ac="2">Read catalog.json, verify schema compliance: version 1.0, templates array with 6 entries, each has id/name/description/use_cases/file/source="setup"/created_at</idea>
+      <idea ac="3">Read status.yaml, verify catalog section exists with correct structure instead of templates section</idea>
+      <idea ac="4">Verify config/samples/ and config/templates/ directories do not exist after setup completes</idea>
+      <idea ac="all">Open each generated template in browser, verify theme CSS variables applied, 1920x1080 dimensions</idea>
+    </ideas>
+  </tests>
+
+  <keyChanges>
+    <file action="MODIFY" path=".slide-builder/workflows/setup/workflow.yaml">
+      <change>Add catalog_path variable: "{config_path}/catalog"</change>
+      <change>Add catalog_manifest variable: "{catalog_path}/catalog.json"</change>
+      <change>Keep samples_dir and templates_dir for backward compatibility during transition (optional cleanup)</change>
+    </file>
+    <file action="MODIFY" path=".slide-builder/workflows/setup/instructions.md">
+      <change>Phase 4 Step 4.1: Update slide_specs filenames from "01-title.html" to "title.html" pattern</change>
+      <change>Phase 4 Step 4.2: Change output path from {config_path}/samples/ to {config_path}/catalog/</change>
+      <change>Phase 4 Step 4.3: Add catalog.json generation with 6 template entries after slides generated</change>
+      <change>Phase 4 Step 4.3: Update status.yaml to use catalog schema instead of templates schema</change>
+      <change>Phase 6.1: Remove copy-to-templates step (catalog IS the templates now)</change>
+      <change>Phase 6.1: Add cleanup step to remove config/samples/ and config/templates/ if they exist</change>
+      <change>Phase 6.4: Update final status.yaml output to use catalog structure</change>
+    </file>
+    <file action="MODIFY" path=".slide-builder/status.yaml">
+      <change>At runtime: Replace templates section with catalog section</change>
+    </file>
+  </keyChanges>
+
+  <previousStoryLearnings>
+    <source>notes/sprint-artifacts/story-catalog-system-1.md</source>
+    <status>done</status>
+    <learnings>
+      <learning type="new_files">
+        <file>.slide-builder/config/catalog/</file>
+        <file>.slide-builder/config/catalog/catalog.json</file>
+      </learning>
+      <learning type="modified_files">
+        <file>.slide-builder/CONVENTIONS.md</file>
+      </learning>
+      <learning type="patterns">Catalog directory established with empty manifest, CONVENTIONS.md documents catalog structure</learning>
+      <learning type="decisions">Template IDs use kebab-case, ISO 8601 timestamps, source field tracks origin</learning>
+      <learning type="reuse">Catalog.json schema already defined - this story must populate the templates array</learning>
+    </learnings>
+  </previousStoryLearnings>
+</story-context>

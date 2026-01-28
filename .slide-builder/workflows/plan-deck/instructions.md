@@ -143,37 +143,580 @@ Recommendations:
     <action>Parse response to get min and max slide counts</action>
   </step>
 
-  <step n="3" goal="Generate narrative structure (AC5.1.5-6)">
+  <step n="2.5" goal="Generate and refine agenda structure">
+    <critical>This step proposes high-level agenda sections BEFORE generating individual slides</critical>
+    <critical>AskUserQuestion tool has 4-option limit per question - split into multiple calls if needed</critical>
+
+    <!-- ═══════════════════════════════════════════════════════════════════ -->
+    <!-- AGENDA PROPOSAL LOGIC                                                -->
+    <!-- Analyze collected context to propose 4-8 narrative sections          -->
+    <!-- ═══════════════════════════════════════════════════════════════════ -->
+
+    <action>Analyze {{purpose}}, {{audience}}, {{key_points}}, and {{desired_length}} to determine appropriate agenda structure</action>
+
+    <action>Generate 4-8 proposed agenda sections where each section has:
+      - id: unique identifier (agenda-1, agenda-2, etc.)
+      - title: section name (e.g., "Opening Hook", "The Problem", "Our Solution", "Results")
+      - narrative_role: one of: opening | context | problem | solution | evidence | cta
+      - estimated_slides: 1-3 slides per section (based on complexity)
+      - description: 1-sentence purpose description
+
+      Use these heuristics based on purpose keywords:
+      - "pitch" / "proposal" / "sell" → Opening Hook, Problem, Solution, Proof, CTA
+      - "demo" / "walkthrough" → Overview, Key Features, Demo Flow, Technical Details, Next Steps
+      - "update" / "review" / "status" → Context, Progress, Results, Challenges, Next Steps
+      - "training" / "onboarding" → Introduction, Concepts, Examples, Practice, Resources
+      - Default fallback → Opening, Context, Main Content, Evidence, Conclusion
+    </action>
+
+    <action>Store generated sections as {{proposed_agenda}} array</action>
+
+    <!-- ═══════════════════════════════════════════════════════════════════ -->
+    <!-- SECTION SELECTION VIA AskUserQuestion                                -->
+    <!-- Present sections in groups of 4 (tool limit) with multiSelect: true  -->
+    <!-- ═══════════════════════════════════════════════════════════════════ -->
+
+    <output>
+**Proposed Agenda Structure**
+
+Based on your presentation purpose and audience, here's a suggested narrative structure:
+
+{{for each section in proposed_agenda}}
+**{{section.id}}:** {{section.title}} ({{section.narrative_role}})
+- {{section.description}}
+- Estimated slides: {{section.estimated_slides}}
+{{end for}}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    </output>
+
+    <action>Present agenda sections for selection using AskUserQuestion tool:
+      - Use multiSelect: true to allow selecting multiple sections
+      - Split into multiple questions if more than 4 sections (tool limit)
+      - For each option: label = section.title, description = section.description
+      - User can always add custom sections via "Other" option
+
+      Example tool call structure:
+      {
+        "questions": [{
+          "question": "Which agenda sections should we include? (Select all that apply)",
+          "header": "Agenda",
+          "options": [
+            {"label": "{{section_1.title}}", "description": "{{section_1.description}}"},
+            {"label": "{{section_2.title}}", "description": "{{section_2.description}}"},
+            {"label": "{{section_3.title}}", "description": "{{section_3.description}}"},
+            {"label": "{{section_4.title}}", "description": "{{section_4.description}}"}
+          ],
+          "multiSelect": true
+        }]
+      }
+
+      If more than 4 sections proposed, use second question for remaining sections:
+      {
+        "questions": [{
+          "question": "Any additional sections to include?",
+          "header": "More",
+          "options": [
+            {"label": "{{section_5.title}}", "description": "{{section_5.description}}"},
+            ...
+          ],
+          "multiSelect": true
+        }]
+      }
+    </action>
+
+    <action>Wait for user response from AskUserQuestion</action>
+
+    <!-- ═══════════════════════════════════════════════════════════════════ -->
+    <!-- HANDLE CUSTOM SECTIONS VIA "Other"                                   -->
+    <!-- Parse custom input into proper section structure                     -->
+    <!-- ═══════════════════════════════════════════════════════════════════ -->
+
+    <check if="user provided custom input via 'Other' option">
+      <action>Parse custom section text to extract:
+        - title: Use the provided text as the section title
+        - Generate unique id: agenda-N where N is next available number
+        - Infer narrative_role based on keywords:
+          * "intro" / "hook" / "opening" → opening
+          * "background" / "context" / "situation" → context
+          * "problem" / "challenge" / "pain" → problem
+          * "solution" / "approach" / "how" → solution
+          * "results" / "proof" / "data" / "case" → evidence
+          * "next" / "action" / "call" → cta
+          * Default: evidence
+        - Set estimated_slides: 2 (default for custom sections)
+        - Generate description: "Custom section covering {{title}}"
+      </action>
+      <action>Add custom section to selected sections list</action>
+    </check>
+
+    <!-- ═══════════════════════════════════════════════════════════════════ -->
+    <!-- MINIMUM SECTIONS VALIDATION                                          -->
+    <!-- Warn if fewer than 3 sections - presentation may be too brief        -->
+    <!-- ═══════════════════════════════════════════════════════════════════ -->
+
+    <action>Count total selected sections (including any custom sections)</action>
+
+    <check if="fewer than 3 sections selected">
+      <output>
+**⚠️ Warning: Minimal Agenda**
+
+You've selected only {{selected_count}} section(s). A presentation with fewer than 3 sections may feel too brief or lack narrative depth.
+
+**Recommendations:**
+- Most effective presentations have 4-6 sections
+- Consider adding context or evidence sections
+- At minimum, include: Opening, Core Content, and Conclusion/CTA
+      </output>
+
+      <ask>
+Would you like to:
+- **[a]dd** more sections (return to selection)
+- **[p]roceed** anyway with {{selected_count}} section(s)
+      </ask>
+
+      <check if="user chooses to add more sections">
+        <goto step="2.5">Return to section selection</goto>
+      </check>
+    </check>
+
+    <!-- ═══════════════════════════════════════════════════════════════════ -->
+    <!-- STORE CONFIRMED AGENDA                                               -->
+    <!-- Save selected sections for use in narrative generation (Step 3)      -->
+    <!-- ═══════════════════════════════════════════════════════════════════ -->
+
+    <action>Store confirmed sections as {{agenda_sections}} array with full structure:
+      - Each section includes: id, title, narrative_role, estimated_slides, description
+      - Preserve selection order as presentation order
+      - This variable is available for Phase 2 discovery (Story 13.2)
+    </action>
+
+    <output>
+**Agenda Confirmed**
+
+Your presentation will follow this structure:
+
+{{for each section in agenda_sections}}
+{{loop_index}}. **{{section.title}}** ({{section.narrative_role}}) - ~{{section.estimated_slides}} slide(s)
+{{end for}}
+
+Total estimated slides: {{sum of estimated_slides}}
+
+Proceeding to generate detailed slide breakdown...
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    </output>
+  </step>
+
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  <!-- STEP 2.6: SECTION MESSAGE DISCOVERY (Story 13.2)                         -->
+  <!-- Deep discovery loop: For each agenda section, discover key message       -->
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+
+  <step n="2.6" goal="Deep discovery for each agenda section" for-each="section in agenda_sections">
+    <critical>Use AskUserQuestion with multiSelect: false (single-select) for message framings</critical>
+    <critical>Store selection in section.discovery.key_message</critical>
+
+    <!-- ═══════════════════════════════════════════════════════════════════ -->
+    <!-- SECTION HEADER - Show progress through sections                      -->
+    <!-- ═══════════════════════════════════════════════════════════════════ -->
+
+    <output>
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+**Section Discovery: {{section.title}}** ({{loop_index}} of {{total_sections}})
+Role: {{section.narrative_role}} | Estimated slides: {{section.estimated_slides}}
+
+{{section.description}}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    </output>
+
+    <!-- ═══════════════════════════════════════════════════════════════════ -->
+    <!-- INITIALIZE DISCOVERY OBJECT                                          -->
+    <!-- Create discovery object to store message selection                   -->
+    <!-- ═══════════════════════════════════════════════════════════════════ -->
+
+    <action>Initialize {{section.discovery}} = {} if not already present</action>
+
+    <!-- ═══════════════════════════════════════════════════════════════════ -->
+    <!-- GENERATE MESSAGE FRAMING OPTIONS                                     -->
+    <!-- Options are contextual to section.narrative_role                     -->
+    <!-- ═══════════════════════════════════════════════════════════════════ -->
+
+    <action>Generate 4 message framing options based on {{section.narrative_role}}:
+
+      For narrative_role = "opening":
+        - Direct: Provocative statement about audience's current situation
+        - Question: "What if {{desirable_outcome}}?"
+        - Story: "{{time_reference}}, {{relatable_scenario}}..."
+        - Data: "{{surprising_statistic}} of {{audience_group}} {{situation}}"
+
+      For narrative_role = "context":
+        - Direct: Scene-setting statement about current landscape
+        - Question: "What's driving this change in {{industry/domain}}?"
+        - Story: "Here's where we stand today..."
+        - Data: "{{market_data}} shows {{trend}}"
+
+      For narrative_role = "problem":
+        - Direct: "{{pain_point}} is costing you {{consequence}}"
+        - Question: "Why do {{audience_group}} struggle with {{challenge}}?"
+        - Story: "Meet {{persona}}, who faces {{challenge}} every day"
+        - Data: "{{statistic}} shows the impact of {{problem}}"
+
+      For narrative_role = "solution":
+        - Direct: "{{solution}} delivers {{key_benefit}}"
+        - Question: "What would {{desirable_outcome}} mean for your team?"
+        - Story: "Here's how {{customer}} achieved {{result}}"
+        - Data: "{{solution}} reduces {{metric}} by {{percentage}}"
+
+      For narrative_role = "evidence":
+        - Direct: "The results speak for themselves"
+        - Question: "How do we know this works?"
+        - Story: "{{customer_name}}'s transformation"
+        - Data: "{{metric_improvement}} across {{number}} implementations"
+
+      For narrative_role = "cta":
+        - Direct: "Let's start with {{specific_next_step}}"
+        - Question: "Ready to {{action}}?"
+        - Story: "Join {{number}} teams who have already {{action}}"
+        - Data: "{{time_to_value}} to see first results"
+
+      Replace template variables with contextual content from:
+      - {{purpose}} - presentation purpose
+      - {{audience}} - target audience
+      - {{key_points}} - key messages to convey
+      - {{section.title}} - current section title
+      - {{section.description}} - section description
+    </action>
+
+    <!-- ═══════════════════════════════════════════════════════════════════ -->
+    <!-- ASK USER TO SELECT MESSAGE FRAMING                                   -->
+    <!-- Uses AskUserQuestion tool with single-select (multiSelect: false)    -->
+    <!-- ═══════════════════════════════════════════════════════════════════ -->
+
+    <action>Use AskUserQuestion tool to present message options:
+
+      {
+        "questions": [{
+          "question": "Which message framing resonates best for '{{section.title}}'?",
+          "header": "Message",
+          "options": [
+            {"label": "Direct", "description": "{{generated_direct_framing}}"},
+            {"label": "Question", "description": "{{generated_question_framing}}"},
+            {"label": "Story", "description": "{{generated_story_framing}}"},
+            {"label": "Data", "description": "{{generated_data_framing}}"}
+          ],
+          "multiSelect": false
+        }]
+      }
+
+      Note: User can always select "Other" to provide custom message framing.
+    </action>
+
+    <action>Wait for user response from AskUserQuestion</action>
+
+    <!-- ═══════════════════════════════════════════════════════════════════ -->
+    <!-- HANDLE USER SELECTION                                                -->
+    <!-- Store selection or custom input in discovery.key_message             -->
+    <!-- ═══════════════════════════════════════════════════════════════════ -->
+
+    <check if="user selected one of the provided options (Direct, Question, Story, Data)">
+      <action>Get the description text from the selected option</action>
+      <action>Store in {{section.discovery.key_message}} = selected description text</action>
+    </check>
+
+    <check if="user selected 'Other' and provided custom text">
+      <action>Store user's custom text exactly as entered</action>
+      <action>Set {{section.discovery.key_message}} = custom text</action>
+    </check>
+
+    <!-- ═══════════════════════════════════════════════════════════════════ -->
+    <!-- CONFIRM SELECTION                                                    -->
+    <!-- Show what was stored for this section                                -->
+    <!-- ═══════════════════════════════════════════════════════════════════ -->
+
+    <output>
+✓ **{{section.title}}** key message set:
+"{{section.discovery.key_message}}"
+
+    </output>
+
+    <!-- ═══════════════════════════════════════════════════════════════════ -->
+    <!-- OPTIONAL DEEP DISCOVERY (Story 13.3)                                -->
+    <!-- Single multi-select to choose which discovery areas to explore       -->
+    <!-- Only opens discovery for selected items - reduces friction           -->
+    <!-- ═══════════════════════════════════════════════════════════════════ -->
+
+    <action>Initialize discovery defaults:
+      {{section.discovery.diagram_requirements}} = null
+      {{section.discovery.visual_metaphor}} = null
+      {{section.discovery.research_findings}} = []
+    </action>
+
+    <action>Use AskUserQuestion tool to ask which discovery areas to explore:
+
+      {
+        "questions": [{
+          "question": "Want to define specific visual/content guidance for '{{section.title}}'? (Optional - skip to auto-generate)",
+          "header": "Discovery",
+          "options": [
+            {"label": "Diagram Style", "description": "Specify diagram types like flowchart, timeline, comparison, hierarchy"},
+            {"label": "Visual Metaphor", "description": "Guide imagery theme like journey, growth, transformation, building"},
+            {"label": "Deep Research", "description": "Search for statistics, quotes, case studies to include"}
+          ],
+          "multiSelect": true
+        }]
+      }
+
+      Note: User can select none to skip all optional discovery and proceed quickly.
+    </action>
+
+    <action>Wait for user response from AskUserQuestion</action>
+
+    <action>Store selected discovery areas in {{selected_discovery_areas}} array</action>
+
+    <!-- ═══════════════════════════════════════════════════════════════════ -->
+    <!-- DIAGRAM STYLE DISCOVERY (only if selected)                          -->
+    <!-- ═══════════════════════════════════════════════════════════════════ -->
+
+    <check if="'Diagram Style' in selected_discovery_areas">
+      <action>Use AskUserQuestion tool to present diagram type options:
+
+        {
+          "questions": [{
+            "question": "What diagram style works best for '{{section.title}}'?",
+            "header": "Diagrams",
+            "options": [
+              {"label": "Flowchart", "description": "Process flow, steps, decision points"},
+              {"label": "Comparison", "description": "Side-by-side, before/after, vs layout"},
+              {"label": "Timeline", "description": "Chronological sequence, phases, milestones"},
+              {"label": "Hierarchy", "description": "Org chart, tree structure, nested items"}
+            ],
+            "multiSelect": true
+          }]
+        }
+      </action>
+
+      <action>Wait for user response from AskUserQuestion</action>
+
+      <check if="user selected diagram options or provided 'Other' text">
+        <action>Store selections in {{section.discovery.diagram_requirements}} array</action>
+      </check>
+
+      <output>
+✓ Diagram style: {{section.discovery.diagram_requirements | join(", ") | default("None specified")}}
+      </output>
+    </check>
+
+    <!-- ═══════════════════════════════════════════════════════════════════ -->
+    <!-- VISUAL METAPHOR DISCOVERY (only if selected)                        -->
+    <!-- ═══════════════════════════════════════════════════════════════════ -->
+
+    <check if="'Visual Metaphor' in selected_discovery_areas">
+      <action>Use AskUserQuestion tool to present visual metaphor options:
+
+        {
+          "questions": [{
+            "question": "What visual metaphor or imagery theme for '{{section.title}}'?",
+            "header": "Visuals",
+            "options": [
+              {"label": "Journey", "description": "Path, roadmap, progression toward destination"},
+              {"label": "Growth", "description": "Seeds, trees, upward arrows, expansion"},
+              {"label": "Transformation", "description": "Before/after, metamorphosis, evolution"},
+              {"label": "Technology", "description": "Modern, digital, abstract tech imagery"}
+            ],
+            "multiSelect": true
+          }]
+        }
+      </action>
+
+      <action>Wait for user response from AskUserQuestion</action>
+
+      <check if="user selected metaphor options or provided 'Other' text">
+        <action>Store selections in {{section.discovery.visual_metaphor}} array</action>
+      </check>
+
+      <output>
+✓ Visual metaphor: {{section.discovery.visual_metaphor | join(", ") | default("None specified")}}
+      </output>
+    </check>
+
+    <!-- ═══════════════════════════════════════════════════════════════════ -->
+    <!-- DEEP RESEARCH DISCOVERY (only if selected)                          -->
+    <!-- ═══════════════════════════════════════════════════════════════════ -->
+
+    <check if="'Deep Research' in selected_discovery_areas">
+      <action>Construct search queries based on section context:
+        - Query 1: "{{section.title}} statistics data {{purpose_keywords}}"
+        - Query 2: "{{section.title}} case study examples results"
+      </action>
+
+      <action>Use WebSearch tool to find relevant supporting data</action>
+
+      <action>Parse search results and extract top 3-4 most relevant findings:
+        - For each finding, extract: source URL, key content/statistic
+        - Filter for credible sources (prefer .gov, .edu, industry publications)
+        - Prioritize findings with specific data points or quotable content
+      </action>
+
+      <check if="search returned relevant findings">
+        <action>Use AskUserQuestion tool to present research findings:
+
+          {
+            "questions": [{
+              "question": "Which findings to include for '{{section.title}}'?",
+              "header": "Research",
+              "options": [
+                {"label": "Finding 1", "description": "{{finding_1_summary}} ({{finding_1_source}})"},
+                {"label": "Finding 2", "description": "{{finding_2_summary}} ({{finding_2_source}})"},
+                {"label": "Finding 3", "description": "{{finding_3_summary}} ({{finding_3_source}})"},
+                {"label": "Finding 4", "description": "{{finding_4_summary}} ({{finding_4_source}})"}
+              ],
+              "multiSelect": true
+            }]
+          }
+
+          Note: Present only as many options as findings found (up to 4).
+        </action>
+
+        <action>Wait for user response from AskUserQuestion</action>
+
+        <check if="user selected research findings">
+          <action>For each selected finding, add to {{section.discovery.research_findings}}:
+            {
+              "source": "{{finding_source_url}}",
+              "content": "{{finding_content_text}}",
+              "selected": true
+            }
+          </action>
+        </check>
+
+        <output>
+✓ Research: {{section.discovery.research_findings.length}} finding(s) added
+        </output>
+      </check>
+
+      <check if="search returned no relevant findings">
+        <output>
+ℹ️ No highly relevant findings found. Proceeding without research data.
+        </output>
+      </check>
+    </check>
+
+    <!-- ═══════════════════════════════════════════════════════════════════ -->
+    <!-- SECTION COMPLETE - Show summary and continue                        -->
+    <!-- ═══════════════════════════════════════════════════════════════════ -->
+
+    <output>
+✓ **{{section.title}}** complete ({{loop_index}} of {{total_sections}})
+  Message: "{{section.discovery.key_message | truncate(50)}}"
+  {{if section.discovery.diagram_requirements}}Diagrams: {{section.discovery.diagram_requirements | join(", ")}}{{end if}}
+  {{if section.discovery.visual_metaphor}}Visuals: {{section.discovery.visual_metaphor | join(", ")}}{{end if}}
+  {{if section.discovery.research_findings.length > 0}}Research: {{section.discovery.research_findings.length}} finding(s){{end if}}
+
+    </output>
+
+  </step>
+
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  <!-- END STEP 2.6 - Sections have discovery data (optional fields may be null) -->
+  <!--   - key_message (required, from Story 13.2)                              -->
+  <!--   - diagram_requirements (optional, Story 13.3)                          -->
+  <!--   - visual_metaphor (optional, Story 13.3)                               -->
+  <!--   - research_findings (optional, Story 13.3)                             -->
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+
+  <step n="3" goal="Generate narrative structure (AC5.1.5-6) - Catalog-Driven, Agenda-Based">
+    <critical>Template suggestions are now catalog-driven. Read catalog.json first.</critical>
+    <critical>Slides are now generated FROM agenda_sections - each section produces estimated_slides number of slides</critical>
+    <critical>Each slide MUST have agenda_section_id linking to its parent section</critical>
+
+    <action>Read `.slide-builder/config/catalog/catalog.json`</action>
+    <action>Parse the `templates` array to get available template IDs and use_cases</action>
+
     <action>Analyze collected inputs: purpose, audience, key_points, desired_length</action>
 
-    <action>Generate storyline structure with:
-      - opening_hook: Attention-grabbing opening related to audience's situation
-      - tension: The problem or challenge being addressed
-      - resolution: How the solution addresses the tension
-      - call_to_action: Specific next step for the audience
+    <!-- ═══════════════════════════════════════════════════════════════════ -->
+    <!-- STORYLINE DERIVED FROM AGENDA SECTIONS                               -->
+    <!-- Map narrative_role to storyline components                           -->
+    <!-- ═══════════════════════════════════════════════════════════════════ -->
+
+    <action>Generate storyline structure by extracting from agenda_sections:
+      - opening_hook: From section with narrative_role="opening" → use section.discovery.key_message
+      - tension: From section with narrative_role="problem" → use section.discovery.key_message
+      - resolution: From section with narrative_role="solution" → use section.discovery.key_message
+      - call_to_action: From section with narrative_role="cta" → use section.discovery.key_message
+
+      Fallback if role not present:
+      - opening_hook: From first section's key_message
+      - tension: From section with role="context" or generate from purpose
+      - resolution: From section with role="evidence" or generate from key_points
+      - call_to_action: Generate specific next step from purpose
     </action>
 
     <action>Identify recurring_themes from key_points</action>
 
-    <action>Generate slide breakdown within desired_length range:
-      For each slide, determine:
-      - number: Sequential slide number
-      - intent: Clear description of slide purpose
-      - template: Match to layout template using keyword patterns:
-        * "title", "intro", "opening" → layout-title
-        * "list", "bullets", "points", "agenda" → layout-list
-        * "flow", "process", "timeline", "steps" → layout-flow
-        * "compare", "vs", "two" → layout-columns-2
-        * "three", "triad", "options" → layout-columns-3
-        * "key", "insight", "callout", "cta" → layout-callout
-        * "code", "technical", "api" → layout-code
-        * If no match → layout-content (default)
-      - status: "pending"
-      - storyline_role: opening | tension | evidence | resolution | cta
-      - key_points: Specific points for this slide
-      - visual_guidance: Brief description of visual approach
-      - tone: professional | bold | warm | technical | urgent
+    <!-- ═══════════════════════════════════════════════════════════════════ -->
+    <!-- SLIDE GENERATION FROM AGENDA SECTIONS                                -->
+    <!-- Each section generates its estimated_slides number of slides         -->
+    <!-- ═══════════════════════════════════════════════════════════════════ -->
+
+    <action>Generate slide breakdown from agenda_sections:
+      Initialize slide_number = 1
+
+      For each section in agenda_sections:
+        Generate {{section.estimated_slides}} slides where each slide has:
+
+        - number: {{slide_number}} (increment after each slide)
+        - intent: Derive from section context:
+          * First slide of section: Use section.discovery.key_message or section.description
+          * Additional slides: Expand on section content with specific aspects
+        - template: Match to catalog template using use_cases:
+          1. Check section.discovery.diagram_requirements for hints (flowchart → process-flow)
+          2. Scan slide intent for keywords
+          3. For each catalog template, check if any use_case matches
+          4. Use matched template.id (e.g., "title", "agenda", "process-flow")
+          5. If no catalog match → use "custom"
+        - status: "pending"
+        - storyline_role: Map from section.narrative_role:
+          * "opening" → "opening"
+          * "context" → "tension"
+          * "problem" → "tension"
+          * "solution" → "resolution"
+          * "evidence" → "evidence"
+          * "cta" → "cta"
+        - agenda_section_id: "{{section.id}}"  ← CRITICAL: Link slide to its parent section
+        - key_points: Extract from section context and key_message
+        - visual_guidance: Derive from section.discovery:
+          * Use diagram_requirements if present (e.g., "Flowchart layout")
+          * Use visual_metaphor if present (e.g., "Journey imagery")
+          * Otherwise generate from intent
+        - tone: professional | bold | warm | technical | urgent (based on section.narrative_role)
+
+        Increment slide_number by 1 for each slide generated
     </action>
+
+    <template-matching-from-catalog>
+      ```
+      For each slide intent:
+        # First check discovery hints
+        If section.discovery.diagram_requirements contains "Flowchart":
+          Use "process-flow" template
+        If section.discovery.diagram_requirements contains "Comparison":
+          Use "comparison" template
+        If section.discovery.diagram_requirements contains "Timeline":
+          Use "timeline" template
+
+        # Then check intent keywords
+        For each template in catalog.templates:
+          If any word in intent matches template.use_cases:
+            Use template.id as the template value
+            Break (first match wins)
+        If no match:
+          Use "custom" (allows novel layouts via frontend-design skill)
+      ```
+    </template-matching-from-catalog>
 
     <output>
 **Proposed Narrative Structure**
@@ -204,6 +747,7 @@ Recommendations:
 **Slide {{slide.number}}:** {{slide.intent}}
 - Template: {{slide.template}}
 - Role: {{slide.storyline_role}}
+- Section: {{slide.agenda_section_id}}
 - Key points: {{slide.key_points}}
 - Tone: {{slide.tone}}
 {{end for}}
@@ -711,7 +1255,34 @@ purpose: "{{purpose}}"
 desired_outcome: "{{desired_outcome}}"
 key_message: "{{key_message}}"
 
-# Narrative Structure
+# Agenda Structure with Discovery (Story 13.4)
+# Each section contains discovery data collected during planning
+agenda:
+  total_sections: {{agenda_sections.length}}
+  sections:
+{{for each section in agenda_sections}}
+    - id: "{{section.id}}"
+      title: "{{section.title}}"
+      narrative_role: "{{section.narrative_role}}"
+      estimated_slides: {{section.estimated_slides}}
+      description: "{{section.description}}"
+      discovery:
+        key_message: "{{section.discovery.key_message}}"
+        key_message_framing: "{{section.discovery.key_message_framing | default: 'direct'}}"
+        diagram_requirements: {{section.discovery.diagram_requirements | default: [] | to_yaml_array}}
+        visual_metaphor: {{section.discovery.visual_metaphor | default: [] | to_yaml_array}}
+        research_findings:
+{{for each finding in section.discovery.research_findings | default: []}}
+          - source: "{{finding.source}}"
+            content: "{{finding.content}}"
+            selected: {{finding.selected | default: true}}
+{{end for}}
+{{if section.discovery.research_findings is empty or null}}
+          []
+{{end if}}
+{{end for}}
+
+# Narrative Structure (derived from agenda sections)
 storyline:
   opening_hook: "{{storyline.opening_hook}}"
   tension: "{{storyline.tension}}"
@@ -723,7 +1294,7 @@ recurring_themes:
   - "{{theme}}"
 {{end for}}
 
-# Slide Breakdown with Rich Context
+# Slide Breakdown with Rich Context (linked to agenda sections)
 slides:
 {{for each slide in slides}}
   - number: {{slide.number}}
@@ -731,6 +1302,7 @@ slides:
     template: "{{slide.template}}"
     status: pending
     storyline_role: "{{slide.storyline_role}}"
+    agenda_section_id: "{{slide.agenda_section_id}}"
     key_points:
 {{for each point in slide.key_points}}
       - "{{point}}"

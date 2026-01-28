@@ -1,0 +1,267 @@
+<story-context id="13-3-content-visual-discovery" v="1.0">
+  <metadata>
+    <epicId>13</epicId>
+    <storyId>3</storyId>
+    <title>Content &amp; Visual Discovery</title>
+    <status>drafted</status>
+    <generatedAt>2026-01-28</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>notes/sprint-artifacts/13-3-content-visual-discovery.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>presentation planner</asA>
+    <iWant>to select supporting content types and visual treatment options for each section, with optional research</iWant>
+    <soThat>each part of my presentation has rich context for slide generation</soThat>
+    <tasks>
+      <task id="1" ac="1">
+        <title>Add content type selection</title>
+        <subtasks>
+          <subtask>Continue Step 2.6 after message selection</subtask>
+          <subtask>Use AskUserQuestion with multiSelect: true</subtask>
+          <subtask>Present 4 content type options: Statistics/data points, Customer quotes/testimonials, Case study examples, Industry benchmarks</subtask>
+          <subtask>Store selections in section.discovery.content_types</subtask>
+        </subtasks>
+      </task>
+      <task id="2" ac="2">
+        <title>Add visual treatment selection</title>
+        <subtasks>
+          <subtask>Present diagram type options via AskUserQuestion (multiSelect: true): Flowchart, Comparison, Timeline, Hierarchy</subtask>
+          <subtask>Present visual metaphor options: Journey, Building, Growth, Transformation</subtask>
+          <subtask>Present imagery theme options: Technology, People, Nature, Abstract</subtask>
+          <subtask>Store selections in section.discovery.visual_treatment object</subtask>
+        </subtasks>
+      </task>
+      <task id="3" ac="3,4">
+        <title>Add on-demand research integration</title>
+        <subtasks>
+          <subtask>Ask user if they want research for this section</subtask>
+          <subtask>If yes, use WebSearch tool to find statistics, quotes, examples</subtask>
+          <subtask>Present findings via AskUserQuestion (multiSelect: true)</subtask>
+          <subtask>Store selected findings in section.discovery.research_findings</subtask>
+        </subtasks>
+      </task>
+      <task id="4" ac="5">
+        <title>Add section refinement opportunity</title>
+        <subtasks>
+          <subtask>Display summary of all section discovery selections</subtask>
+          <subtask>Ask if user wants to refine any selections</subtask>
+          <subtask>If refinement requested, allow adjustment</subtask>
+          <subtask>Proceed to next section after confirmation</subtask>
+        </subtasks>
+      </task>
+      <task id="5" ac="6">
+        <title>Ensure discovery object persistence</title>
+        <subtasks>
+          <subtask>Verify section.discovery object contains: key_message, content_types, visual_treatment, research_findings</subtask>
+          <subtask>Confirm data available for Story 13.4 schema integration</subtask>
+        </subtasks>
+      </task>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <criterion id="1">
+      <title>Content Type Selection</title>
+      <given>I have selected a key message for a section</given>
+      <when>the discovery continues</when>
+      <then>I can select content types via multi-select from: Statistics/data points, Customer quotes/testimonials, Case study examples, Industry benchmarks</then>
+    </criterion>
+    <criterion id="2">
+      <title>Visual Treatment Selection</title>
+      <given>content types have been selected</given>
+      <when>visual treatment options are presented</when>
+      <then>I can select via multi-select from: Diagram type (flowchart, comparison, timeline, hierarchy), Visual metaphor (journey, building, growth, transformation), Imagery theme (technology, people, nature, abstract)</then>
+    </criterion>
+    <criterion id="3">
+      <title>On-Demand Research</title>
+      <given>I am asked if I want research for the section</given>
+      <when>I request research</when>
+      <then>WebSearch tool finds supporting data (statistics, quotes, examples)</then>
+    </criterion>
+    <criterion id="4">
+      <title>Research Results Selection</title>
+      <given>WebSearch returns findings</given>
+      <when>results are presented</when>
+      <then>I can select which findings to include via multi-select AskUserQuestion</then>
+    </criterion>
+    <criterion id="5">
+      <title>Section Refinement</title>
+      <given>content and visual selections are complete</given>
+      <when>I'm offered a refinement opportunity</when>
+      <then>I can adjust my selections or provide additional notes before advancing to the next section</then>
+    </criterion>
+    <criterion id="6">
+      <title>Discovery Storage</title>
+      <given>all selections are made for a section</given>
+      <when>the section discovery completes</when>
+      <then>all data is stored in section.discovery object: content_types, visual_treatment, research_findings</then>
+    </criterion>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>notes/tech-spec-enhanced-planning.md</path>
+        <title>Enhanced Planning Sessions - Technical Specification</title>
+        <section>Phase 2 Implementation: Section Discovery Loop</section>
+        <snippet>Defines the content type selection (multiSelect: true for Statistics, Testimonials, Case Study, Benchmarks), visual treatment selection (diagram types, visual metaphors, imagery themes), and on-demand research integration pattern via WebSearch tool.</snippet>
+      </doc>
+      <doc>
+        <path>notes/tech-spec-enhanced-planning.md</path>
+        <title>Enhanced Planning Sessions - Technical Specification</title>
+        <section>AskUserQuestion Integration Pattern</section>
+        <snippet>Shows JSON structure for AskUserQuestion tool with multiSelect: true, 4-option limit per question, and required fields (question, header, options with label/description).</snippet>
+      </doc>
+      <doc>
+        <path>notes/sprint-artifacts/epic-13-enhanced-planning.md</path>
+        <title>Epic 13: Enhanced Planning Sessions</title>
+        <section>Story 13.3 Definition</section>
+        <snippet>Content type selection (stats, quotes, examples, benchmarks), visual treatment options (diagram types, metaphors, themes), on-demand research via WebSearch, section refinement before advancing.</snippet>
+      </doc>
+      <doc>
+        <path>notes/architecture.md</path>
+        <title>Slide Builder Architecture</title>
+        <section>State File Patterns - plan.yaml schema</section>
+        <snippet>Defines the discovery object structure under each slide/section with key_message, content_types array, visual_treatment object (diagram_type, visual_metaphor, imagery_theme), and research_findings array.</snippet>
+      </doc>
+      <doc>
+        <path>notes/sprint-artifacts/13-2-section-message-discovery.md</path>
+        <title>Story 13.2: Section Message Discovery</title>
+        <section>Dev Agent Record - Learnings</section>
+        <snippet>Establishes Step 2.6 iteration pattern with for-each over agenda_sections, discovery object initialization, AskUserQuestion single-select for messages, and workflow continuation within same step.</snippet>
+      </doc>
+    </docs>
+    <code>
+      <artifact>
+        <path>.slide-builder/workflows/plan-deck/instructions.md</path>
+        <kind>workflow-instructions</kind>
+        <symbol>Step 2.6 - Section Message Discovery</symbol>
+        <lines>316-449</lines>
+        <reason>Primary modification target. Contains the for-each loop over agenda_sections where content/visual discovery will be added after message selection.</reason>
+      </artifact>
+      <artifact>
+        <path>.slide-builder/workflows/plan-deck/instructions.md</path>
+        <kind>workflow-instructions</kind>
+        <symbol>Step 2.6 - Discovery Object Initialization</symbol>
+        <lines>340-341</lines>
+        <reason>Shows existing pattern for initializing section.discovery object - content_types and visual_treatment will be added to this same object.</reason>
+      </artifact>
+      <artifact>
+        <path>.slide-builder/workflows/plan-deck/instructions.md</path>
+        <kind>workflow-instructions</kind>
+        <symbol>Step 2.6 - AskUserQuestion Usage</symbol>
+        <lines>398-417</lines>
+        <reason>Reference for AskUserQuestion tool call structure with questions array, header, options, and multiSelect parameter.</reason>
+      </artifact>
+      <artifact>
+        <path>.slide-builder/workflows/plan-deck/instructions.md</path>
+        <kind>workflow-instructions</kind>
+        <symbol>Step 2.6 - Selection Handling</symbol>
+        <lines>424-443</lines>
+        <reason>Pattern for handling user selection from AskUserQuestion and "Other" custom input, storing in discovery object.</reason>
+      </artifact>
+      <artifact>
+        <path>.slide-builder/workflows/plan-deck/workflow.yaml</path>
+        <kind>workflow-config</kind>
+        <symbol>plan-deck workflow configuration</symbol>
+        <lines>1-50</lines>
+        <reason>Workflow configuration for plan-deck; may need variable additions for discovery state tracking.</reason>
+      </artifact>
+    </code>
+    <dependencies>
+      <node>
+        <package>puppeteer</package>
+        <version>^23.0.0</version>
+        <purpose>Headless browser for screenshots (not directly used in this story)</purpose>
+      </node>
+      <node>
+        <package>googleapis</package>
+        <version>^140.0.0</version>
+        <purpose>Google Slides export (not directly used in this story)</purpose>
+      </node>
+      <claudeCode>
+        <tool>AskUserQuestion</tool>
+        <purpose>Primary tool for multi-select content type and visual treatment selection</purpose>
+      </claudeCode>
+      <claudeCode>
+        <tool>WebSearch</tool>
+        <purpose>On-demand research to find supporting statistics, quotes, examples</purpose>
+      </claudeCode>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint type="tool-limit">AskUserQuestion has a 4-option limit per question - must split visual treatment into multiple questions (diagram types, then metaphors/themes)</constraint>
+    <constraint type="tool-limit">Maximum 4 questions per AskUserQuestion call</constraint>
+    <constraint type="pattern">Use multiSelect: true for all selections in this story (different from Story 13.2 which used false for single-select messages)</constraint>
+    <constraint type="pattern">Continue within existing Step 2.6 for-each loop - do NOT create a new step</constraint>
+    <constraint type="pattern">Store all selections in section.discovery object to maintain data structure for Story 13.4</constraint>
+    <constraint type="pattern">Handle "Other" custom input for all AskUserQuestion prompts</constraint>
+    <constraint type="dependency">Depends on Story 13.2 completion - section.discovery.key_message must already be populated</constraint>
+    <constraint type="flow">Research is optional - only invoke WebSearch if user explicitly requests it</constraint>
+    <constraint type="flow">Provide refinement opportunity before advancing to next section in the loop</constraint>
+  </constraints>
+
+  <interfaces>
+    <interface>
+      <name>AskUserQuestion Tool</name>
+      <kind>Claude Code native tool</kind>
+      <signature>{
+  "questions": [{
+    "question": "string (max ~200 chars)",
+    "header": "string (max 12 chars)",
+    "options": [
+      {"label": "string", "description": "string"}
+    ],
+    "multiSelect": boolean
+  }]
+}</signature>
+      <path>Claude Code built-in</path>
+    </interface>
+    <interface>
+      <name>WebSearch Tool</name>
+      <kind>Claude Code native tool</kind>
+      <signature>WebSearch(query: string) -&gt; SearchResults</signature>
+      <path>Claude Code built-in</path>
+    </interface>
+    <interface>
+      <name>section.discovery Object</name>
+      <kind>data structure</kind>
+      <signature>{
+  key_message: string,  // from Story 13.2
+  content_types: string[],  // NEW in 13.3
+  visual_treatment: {  // NEW in 13.3
+    diagram_type: string[],
+    visual_metaphor: string[],
+    imagery_theme: string[]
+  },
+  research_findings: [{  // NEW in 13.3 (optional)
+    source: string,
+    content: string,
+    selected: boolean
+  }]
+}</signature>
+      <path>.slide-builder/workflows/plan-deck/instructions.md</path>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>No automated testing framework in place. Testing is manual via workflow execution. Run /sb:plan-deck in Claude Code CLI and observe multi-select prompts, verify selections are stored in discovery object, and confirm research integration works when requested.</standards>
+    <locations>
+      <location>Manual testing via /sb:plan-deck execution</location>
+      <location>Inspect generated plan.yaml in output/{deck-slug}/ for discovery data</location>
+    </locations>
+    <ideas>
+      <idea ac="1">Test content type multi-select appears after message selection with 4 options</idea>
+      <idea ac="2">Test visual treatment multi-select with diagram types, verify multiple questions if needed due to 4-option limit</idea>
+      <idea ac="3">Test "yes" response to research offer triggers WebSearch</idea>
+      <idea ac="4">Test research findings presented as multi-select options</idea>
+      <idea ac="5">Test refinement prompt appears and allows adjustment before proceeding</idea>
+      <idea ac="6">Test section.discovery contains all new fields after section completes</idea>
+      <idea ac="1,2,3,4,5,6">Test full flow through multiple sections - each should get full discovery</idea>
+      <idea ac="2">Test "Other" custom input handling for visual treatment options</idea>
+      <idea ac="3">Test declining research (user says "no") skips WebSearch and proceeds</idea>
+    </ideas>
+  </tests>
+</story-context>

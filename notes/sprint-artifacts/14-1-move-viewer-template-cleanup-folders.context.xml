@@ -1,0 +1,156 @@
+<story-context id="14-1-move-viewer-template-cleanup-folders" v="1.0">
+  <metadata>
+    <epicId>14</epicId>
+    <storyId>1</storyId>
+    <title>Move Viewer Template &amp; Cleanup Deprecated Folders</title>
+    <status>drafted</status>
+    <generatedAt>2026-01-28</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>notes/sprint-artifacts/story-viewer-template-move-1.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>Slide Builder developer</asA>
+    <iWant>the viewer-template.html moved out of config/ and deprecated folders removed</iWant>
+    <soThat>the config/ folder only contains shareable brand assets and the codebase structure is clean</soThat>
+    <tasks>
+      <task id="1">Create `.slide-builder/templates/` directory (AC: #1)</task>
+      <task id="2">Move `viewer-template.html` from `config/templates/` to `templates/` (AC: #1)</task>
+      <task id="3">Update `scripts/regenerate-viewer.js` line 61 to use new path (AC: #2)</task>
+      <task id="4">Test viewer generation: `node scripts/regenerate-viewer.js claude-code-fundamentals` (AC: #2)</task>
+      <task id="5">Delete `.slide-builder/config/templates/` directory (AC: #3)</task>
+      <task id="6">Delete `.slide-builder/config/samples/` directory (AC: #4)</task>
+      <task id="7">Update `build-one/instructions.md` - change `config/samples/` to `config/catalog/` (AC: #5)</task>
+      <task id="8">Update `build-all/instructions.md` - change `config/samples/` to `config/catalog/` (AC: #5)</task>
+      <task id="9">Update `theme-edit/instructions.md` - remove deprecated sample generation logic (AC: #5)</task>
+      <task id="10">Update `setup/instructions.md` - verify/update cleanup logic (AC: #5)</task>
+      <task id="11">Update `CONVENTIONS.md` - add templates/ folder documentation (AC: #6)</task>
+      <task id="12">Final verification - confirm config/ only has theme.json, theme-history/, catalog/</task>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <criterion id="AC1">Given `.slide-builder/config/templates/viewer-template.html` exists, when the refactoring is complete, then `viewer-template.html` exists at `.slide-builder/templates/viewer-template.html`</criterion>
+    <criterion id="AC2">Given the new viewer-template location, when running `node scripts/regenerate-viewer.js claude-code-fundamentals`, then the viewer generates successfully without errors</criterion>
+    <criterion id="AC3">Given deprecated folders exist, when the refactoring is complete, then `.slide-builder/config/templates/` directory does not exist</criterion>
+    <criterion id="AC4">Given deprecated folders exist, when the refactoring is complete, then `.slide-builder/config/samples/` directory does not exist</criterion>
+    <criterion id="AC5">Given workflow instructions reference `config/samples/`, when the refactoring is complete, then all workflow instructions reference `config/catalog/` instead</criterion>
+    <criterion id="AC6">Given CONVENTIONS.md documents the file structure, when the refactoring is complete, then CONVENTIONS.md includes the `templates/` folder for framework templates</criterion>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>notes/tech-spec-viewer-template-move.md</path>
+        <title>Technical Specification: Move Viewer Template &amp; Cleanup</title>
+        <section>Full tech spec</section>
+        <snippet>Complete technical specification for this refactoring story, including source tree changes, directory structure before/after, workflow reference updates, and testing strategy.</snippet>
+      </doc>
+      <doc>
+        <path>notes/tech-spec-catalog.md</path>
+        <title>Catalog System Tech Spec</title>
+        <section>Catalog system</section>
+        <snippet>Documents the catalog system that replaces the deprecated samples/ and templates/ folders.</snippet>
+      </doc>
+      <doc>
+        <path>notes/tech-spec-config-folder.md</path>
+        <title>Config Folder Tech Spec</title>
+        <section>Config folder structure</section>
+        <snippet>Original config folder restructuring spec that established the shareable brand assets pattern.</snippet>
+      </doc>
+      <doc>
+        <path>.slide-builder/CONVENTIONS.md</path>
+        <title>Slide Builder Conventions</title>
+        <section>File Structure</section>
+        <snippet>Defines conventions and patterns including command-to-workflow mapping and file structure. Needs update to include templates/ folder.</snippet>
+      </doc>
+    </docs>
+    <code>
+      <file>
+        <path>scripts/regenerate-viewer.js</path>
+        <kind>script</kind>
+        <symbol>templatePath</symbol>
+        <lines>61</lines>
+        <reason>Contains hardcoded path to viewer-template.html at config/templates/ - must be updated to templates/</reason>
+      </file>
+      <file>
+        <path>.slide-builder/workflows/build-one/instructions.md</path>
+        <kind>workflow-instructions</kind>
+        <symbol>samples reference</symbol>
+        <lines>47</lines>
+        <reason>References config/samples/ for layout patterns - must update to config/catalog/</reason>
+      </file>
+      <file>
+        <path>.slide-builder/workflows/build-all/instructions.md</path>
+        <kind>workflow-instructions</kind>
+        <symbol>samples references</symbol>
+        <lines>152, 184, 529</lines>
+        <reason>Multiple references to config/samples/ - must update all to config/catalog/</reason>
+      </file>
+      <file>
+        <path>.slide-builder/workflows/theme-edit/instructions.md</path>
+        <kind>workflow-instructions</kind>
+        <symbol>sample generation</symbol>
+        <lines>265-317, 610-660</lines>
+        <reason>Contains sample generation logic that writes to config/samples/ - must be updated or removed</reason>
+      </file>
+      <file>
+        <path>.slide-builder/workflows/setup/instructions.md</path>
+        <kind>workflow-instructions</kind>
+        <symbol>cleanup logic</symbol>
+        <lines>1975-1991</lines>
+        <reason>Contains cleanup logic for deprecated directories - verify it's still relevant</reason>
+      </file>
+      <file>
+        <path>.slide-builder/config/templates/viewer-template.html</path>
+        <kind>template</kind>
+        <symbol>viewer-template</symbol>
+        <lines>all</lines>
+        <reason>The 249KB viewer template file that needs to be moved to .slide-builder/templates/</reason>
+      </file>
+    </code>
+    <dependencies>
+      <node>
+        <package>puppeteer</package>
+        <version>^23.0.0</version>
+      </node>
+      <node>
+        <package>googleapis</package>
+        <version>^140.0.0</version>
+      </node>
+    </dependencies>
+  </artifacts>
+
+  <interfaces>
+    <interface>
+      <name>regenerate-viewer.js</name>
+      <kind>Node.js CLI script</kind>
+      <signature>node scripts/regenerate-viewer.js [deck-slug]</signature>
+      <path>scripts/regenerate-viewer.js</path>
+    </interface>
+  </interfaces>
+
+  <constraints>
+    <constraint type="pattern">Path variables in workflows use `{project-root}/.slide-builder/` pattern</constraint>
+    <constraint type="naming">Directory naming uses lowercase/kebab-case</constraint>
+    <constraint type="structure">config/ folder should only contain shareable brand assets (theme.json, theme-history/, catalog/)</constraint>
+    <constraint type="framework">templates/ folder at .slide-builder/templates/ is for framework templates (not shareable)</constraint>
+    <constraint type="catalog">Catalog references use config/catalog/ for slide layout templates</constraint>
+  </constraints>
+
+  <tests>
+    <standards>Manual validation only - no automated test framework for this story. Tests are command-line verification and file system checks.</standards>
+    <locations>
+      <location>Manual CLI: node scripts/regenerate-viewer.js {deck-slug}</location>
+      <location>Manual CLI: ls commands to verify folder structure</location>
+    </locations>
+    <ideas>
+      <idea ac="AC1">Verify viewer-template.html exists at new location: ls .slide-builder/templates/viewer-template.html</idea>
+      <idea ac="AC2">Run viewer generation: node scripts/regenerate-viewer.js claude-code-fundamentals - should succeed</idea>
+      <idea ac="AC3">Verify config/templates/ removed: ls .slide-builder/config/templates/ should fail</idea>
+      <idea ac="AC4">Verify config/samples/ removed: ls .slide-builder/config/samples/ should fail</idea>
+      <idea ac="AC5">Grep for "config/samples" in workflows - should return no matches</idea>
+      <idea ac="AC6">Check CONVENTIONS.md includes templates/ folder documentation</idea>
+    </ideas>
+  </tests>
+</story-context>

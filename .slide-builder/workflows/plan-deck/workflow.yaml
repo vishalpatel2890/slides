@@ -16,6 +16,10 @@ instructions: "{installed_path}/instructions.md"
 config_path: "{project-root}/.slide-builder/config"
 theme_file: "{config_path}/theme.json"
 
+# Catalog paths (template discovery)
+catalog_path: "{config_path}/catalog"
+catalog_manifest: "{catalog_path}/catalog.json"
+
 # State management
 status_file: "{project-root}/.slide-builder/status.yaml"
 
@@ -27,7 +31,7 @@ output_root: "{project-root}/output"
 
 # Input variables (collected from user)
 variables:
-  workflow_version: "2.0"
+  workflow_version: "2.1"
   # Collected during workflow
   purpose: ""
   audience: ""
@@ -35,19 +39,23 @@ variables:
   key_points: []
   desired_length: "6-10"
   deck_name: ""
-  # Generated
+  # Generated - Step 2.5 (Epic 13: Enhanced Planning)
+  proposed_agenda: []      # Generated agenda sections before user selection
+  agenda_sections: []      # User-confirmed agenda sections for Phase 2 discovery
+  # Generated - Step 3+
   storyline: {}
   slides: []
 
-# Template matching patterns (from Architecture Novel Pattern 2)
-template_mapping:
+# Template matching is now catalog-driven
+# Read use_cases from catalog.json for intelligent template suggestions
+# Legacy mappings below kept for fallback if catalog is unavailable
+legacy_template_mapping:
   title: ["title", "intro", "opening", "welcome"]
-  list: ["list", "bullets", "points", "agenda"]
-  flow: ["flow", "process", "timeline", "steps", "journey"]
-  columns-2: ["compare", "vs", "versus", "two", "split"]
-  columns-3: ["three", "triad", "options", "trio"]
+  agenda: ["list", "bullets", "points", "agenda"]
+  process-flow: ["flow", "process", "timeline", "steps", "journey"]
+  comparison: ["compare", "vs", "versus", "two", "split"]
   callout: ["key", "insight", "callout", "cta", "highlight", "quote"]
-  code: ["code", "technical", "api", "demo"]
+  technical: ["code", "technical", "api", "demo"]
 
 # Output configuration
 template: false

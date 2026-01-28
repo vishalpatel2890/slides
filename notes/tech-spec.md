@@ -2,9 +2,9 @@
 
 **Author:** Vishal
 **Date:** 2026-01-28
-**Project Level:** Quick-Flow
-**Change Type:** Enhancement
-**Development Context:** Brownfield
+**Project Level:** Quick Flow
+**Change Type:** Feature Addition
+**Development Context:** Brownfield - Adding export functionality to existing slide viewer
 
 ---
 
@@ -12,24 +12,47 @@
 
 ### Available Documents
 
-No formal documents - direct code analysis. Key files: `viewer-template.html`, `regenerate-viewer.js`, and sample `index.html`.
+- Product briefs: None found
+- Research documents: None found
+- Brownfield documentation: None found (codebase analyzed directly)
 
 ### Project Stack
 
-- **Runtime:** Node.js CommonJS
-- **Frontend:** Vanilla HTML/CSS/JavaScript
-- **Dependencies:** puppeteer@23.0.0, googleapis@140.0.0
-- **Test Framework:** None configured
+**Runtime:** Node.js (CommonJS modules)
+
+**Dependencies (from package.json):**
+- `puppeteer ^23.0.0` - Headless browser (not used for this feature)
+- `googleapis ^140.0.0` - Google API integration
+
+**Frontend:** Vanilla HTML/CSS/JavaScript
+- No framework (React, Vue, etc.)
+- No build tooling (Webpack, Vite, etc.)
+- Single HTML file with inline CSS and JavaScript
+- Slide dimensions: 1920x1080px (16:9 aspect ratio)
 
 ### Existing Codebase Structure
 
 ```
-.slide-builder/templates/viewer-template.html  ← Generation template
-scripts/regenerate-viewer.js                   ← Manual regeneration
-output/{deck-slug}/index.html                  ← Static viewer (problem)
-output/{deck-slug}/slides/slide-N.html         ← Individual slides
-output/{deck-slug}/plan.yaml                   ← Deck metadata
+slide-builder/
+├── .slide-builder/
+│   └── config/
+│       └── templates/
+│           └── viewer-template.html    ← PRIMARY: Template for generated viewers
+├── output/{deck-slug}/
+│   ├── index.html                      ← Generated from template
+│   └── slides/
+│       ├── slide-N.html                ← Individual slide files
+│       └── manifest.json               ← Slide metadata
+└── scripts/
+    ├── generate-manifest.js            ← Creates manifest.json
+    └── regenerate-viewer.js            ← Rebuilds viewer from template
 ```
+
+**Key File:** `.slide-builder/config/templates/viewer-template.html` (838 lines)
+- Contains all viewer logic in single file
+- Uses `{{PLACEHOLDERS}}` for build-time substitution
+- Inline CSS (~415 lines of styles)
+- Inline JavaScript (~370 lines of application logic)
 
 ---
 
@@ -37,33 +60,39 @@ output/{deck-slug}/plan.yaml                   ← Deck metadata
 
 ### Problem Statement
 
-The presentation viewer (`index.html`) has slide data statically embedded at build time. When slides are added, modified, or removed in the `slides/` folder, the viewer doesn't reflect these changes until manually regenerated via `node scripts/regenerate-viewer.js` or agent workflow. This creates friction during iterative slide development.
+The slide viewer currently has no export functionality. Users need to download slides as images (PNG) and PDFs for sharing, offline use, and archival purposes. The viewer must support `file://` protocol for true offline capability - users often open the generated `index.html` directly from their filesystem without running a local server.
 
 ### Proposed Solution
 
-Implement a manifest-based dynamic loading system:
-1. Create `slides/manifest.json` containing slide metadata (number, filename, title)
-2. Modify `index.html` to fetch this manifest on page load instead of using embedded data
-3. Add cache-busting query parameters to iframe URLs for guaranteed fresh content
-4. Update `regenerate-viewer.js` to generate manifest alongside viewer
-5. Provide utility to generate manifest from existing slides folder
+Add a download dropdown menu to the presentation header with three export options:
+
+1. **Download Current Slide as PNG** - Capture and download the currently displayed slide as a 1920x1080 PNG image
+2. **Download All Slides as PNG (ZIP)** - Render all slides as PNGs and bundle into a downloadable ZIP file
+3. **Download Deck as PDF** - Render all slides as PNGs and combine into a multi-page landscape PDF document
+
+**Technical Approach:** Use browser-based rendering libraries (html2canvas, jsPDF, JSZip) inlined in the viewer template for true offline support.
 
 ### Scope
 
 **In Scope:**
 
-- Create new `manifest.json` file format and initial generation
-- Modify `viewer-template.html` to fetch manifest dynamically
-- Add cache-busting to all iframe src assignments
-- Update `regenerate-viewer.js` to generate manifest alongside viewer
-- Provide utility to generate manifest from existing slides folder
+- Download dropdown menu button in presentation header (next to navigation controls)
+- Single slide PNG export (current slide)
+- Batch PNG export with ZIP bundling (all slides)
+- PDF export with all slides as pages
+- Progress modal with progress bar for batch operations
+- Inline library bundling (html2canvas, jsPDF, JSZip minified)
+- Full `file://` protocol support
 
 **Out of Scope:**
 
-- Auto-watching for file changes (requires background process)
-- Server-side components (must work with `file://` protocol)
-- Changes to individual slide HTML structure
-- Changes to slide-building agent workflows (separate story if needed)
+- Gallery view download options (presentation mode only)
+- Server-side rendering via Puppeteer
+- Customizable export settings (resolution, format, compression)
+- Cloud storage integration (Google Drive, Dropbox)
+- Individual slide PDF downloads
+- Selective slide export (choosing specific slides)
+- Export from within iframes (we capture the parent container)
 
 ---
 
@@ -73,66 +102,101 @@ Implement a manifest-based dynamic loading system:
 
 | File | Action | Description |
 |------|--------|-------------|
-| `.slide-builder/templates/viewer-template.html` | MODIFY | Replace static slide data with dynamic manifest fetch, add cache-busting |
-| `scripts/regenerate-viewer.js` | MODIFY | Generate `manifest.json` in slides folder alongside viewer regeneration |
-| `scripts/generate-manifest.js` | CREATE | Standalone utility to generate manifest from existing slides folder |
-| `output/claude-code-fundamentals/slides/manifest.json` | CREATE | Initial manifest for existing deck |
+| `.slide-builder/config/templates/viewer-template.html` | MODIFY | Add download menu HTML, CSS, JavaScript, and inline libraries |
+
+**Detailed Changes to `viewer-template.html`:**
+
+1. **CSS Section (~line 200):** Add styles for:
+   - `.download-btn` - Dropdown trigger button
+   - `.download-menu` - Dropdown menu container
+   - `.download-menu-item` - Menu item styling
+   - `.progress-modal` - Export progress overlay
+   - `.progress-bar` - Progress bar styling
+
+2. **HTML Section (~line 443):** Add to `.presentation-controls`:
+   - Download dropdown button with SVG icon
+   - Dropdown menu with three export options
+   - Progress modal overlay (hidden by default)
+
+3. **JavaScript Section (~line 825):** Add new functions:
+   - `toggleDownloadMenu()` - Show/hide dropdown
+   - `downloadCurrentSlide()` - Single PNG export
+   - `downloadAllSlidesPNG()` - ZIP of all PNGs
+   - `downloadDeckPDF()` - PDF export
+   - `showProgressModal(title)` - Show progress UI
+   - `updateProgress(current, total)` - Update progress bar
+   - `hideProgressModal()` - Hide progress UI
+   - `captureSlide(slideNumber)` - Render slide to canvas
+
+4. **Library Section (new, ~line 467):** Inline minified libraries:
+   - html2canvas v1.4.1 (~175KB minified)
+   - jsPDF v2.5.1 (~90KB minified)
+   - JSZip v3.10.1 (~45KB minified)
 
 ### Technical Approach
 
-**Manifest File Format (`slides/manifest.json`):**
-```json
-{
-  "deckName": "Claude Code Fundamentals",
-  "generatedAt": "2026-01-28T12:00:00.000Z",
-  "slides": [
-    {"number": 1, "filename": "slide-1.html", "title": "Claude Code Fundamentals"},
-    {"number": 2, "filename": "slide-2.html", "title": "The AI Evolution"}
-  ]
-}
+**PNG Rendering Pipeline:**
+```
+iframe.contentDocument → html2canvas(slideElement) → canvas.toBlob('image/png') → download/store
 ```
 
-**Dynamic Loading Strategy:**
-1. On `DOMContentLoaded`, fetch `slides/manifest.json`
-2. Parse response and populate `slides` array
-3. Update `deckName` and `totalSlides` from manifest
-4. Render gallery with fetched data
-5. Handle fetch errors gracefully (show error message if manifest missing)
+1. Access slide content via `document.getElementById('presentation-iframe').contentDocument`
+2. Use `html2canvas` to render the slide's `.slide` element to a canvas
+3. Convert canvas to PNG blob via `canvas.toBlob()`
+4. For single download: Create object URL and trigger download
+5. For batch: Store blob in memory, add to JSZip, generate ZIP
 
-**Cache-Busting Implementation:**
-```javascript
-const cacheBuster = `?t=${Date.now()}`;
-iframe.src = `slides/${slide.filename}${cacheBuster}`;
+**PDF Generation Pipeline:**
+```
+For each slide:
+  captureSlide(n) → PNG blob → base64 → jsPDF.addImage()
+jsPDF.save('deck.pdf')
 ```
 
-Apply cache-busting to:
-- Gallery preview iframes (in `renderGallery()`)
-- Presentation iframe (in `updatePresentationSlide()`)
+1. Create jsPDF instance with landscape orientation (1920x1080 aspect)
+2. Loop through all slides, capturing each as PNG
+3. Add each PNG as a page in the PDF
+4. Save the final PDF document
+
+**Library Versions (Definitive):**
+- html2canvas: v1.4.1 (latest stable as of Jan 2026)
+- jsPDF: v2.5.1 (latest stable)
+- JSZip: v3.10.1 (latest stable)
 
 ### Existing Patterns to Follow
 
-Follow patterns established in `regenerate-viewer.js`:
-- Use `fs.readFileSync` / `fs.writeFileSync` for file operations
-- Use `path.join()` for cross-platform path construction
-- Extract titles using regex from slide HTML content
-- Sort slides by numeric value extracted from filename
+**Code Style (from viewer-template.html):**
+- Functions use camelCase: `renderGallery()`, `calculateScale()`, `goToSlide()`
+- DOM queries use `document.getElementById()` and `document.querySelector()`
+- Event handlers inline on HTML elements: `onclick="functionName()"`
+- CSS variables for theming: `var(--amp-lime)`, `var(--amp-dark-alt)`
+- Comment blocks with `═══` characters for section separators
+- No semicolons at end of statements in existing JS (inconsistent - normalize to include)
 
-Follow patterns in `viewer-template.html`:
-- Vanilla JavaScript, no external dependencies
-- ES6 features (const, let, arrow functions, template literals)
-- 4-space indentation
-- Single quotes for strings in JavaScript
-- CSS custom properties for theming
+**CSS Patterns:**
+- Class naming: `.presentation-controls`, `.nav-btn`, `.slide-counter`
+- Button hover states: `border-color` and `color` transitions
+- Disabled states: `opacity: 0.3`, `cursor: not-allowed`
+- Use existing CSS variables for colors
+
+**HTML Patterns:**
+- Button elements for interactive controls
+- Inline `onclick` handlers
+- SVG icons inline (not external files)
 
 ### Integration Points
 
-**Internal Dependencies:**
-- `slides/manifest.json` must exist for viewer to function
-- `plan.yaml` used as fallback for deck name if manifest missing deckName
+**Internal Integration:**
+- `slides` array (global) - Contains slide metadata for iteration
+- `currentSlide` (global) - Index of currently displayed slide
+- `totalSlides` (global) - Total slide count
+- `deckName` (global) - Deck name for filenames
+- Presentation iframe: `document.getElementById('presentation-iframe')`
 
-**Filesystem Structure:**
-- Manifest lives in `slides/` folder alongside slide HTML files
-- Viewer (`index.html`) fetches manifest via relative path `slides/manifest.json`
+**No External Integration Required:**
+- Feature is entirely client-side
+- No API calls needed
+- No server-side components
 
 ---
 
@@ -140,128 +204,194 @@ Follow patterns in `viewer-template.html`:
 
 ### Relevant Existing Code
 
-**Title Extraction (regenerate-viewer.js:26-36):**
+**Slide Navigation (viewer-template.html:711-730):**
 ```javascript
-function extractTitle(htmlContent, slideNum) {
-    const h1Match = htmlContent.match(/<h1[^>]*>([^<]+)<\/h1>/i);
-    if (h1Match) return h1Match[1].trim();
-    const titleMatch = htmlContent.match(/<title>Slide \d+:\s*([^<]+)<\/title>/i);
-    if (titleMatch) return titleMatch[1].trim();
-    return `Slide ${slideNum}`;
+function nextSlide() {
+    if (currentSlide < totalSlides) {
+        currentSlide++;
+        updatePresentationSlide();
+    }
 }
 ```
+Use similar pattern for iterating through slides during batch export.
 
-**Slide Discovery (regenerate-viewer.js:76-82):**
-```javascript
-const slideFiles = fs.readdirSync(slidesFolder)
-    .filter(f => /^slide-\d+\.html$/.test(f))
-    .sort((a, b) => {
-        const numA = parseInt(a.match(/\d+/)[0]);
-        const numB = parseInt(b.match(/\d+/)[0]);
-        return numA - numB;
-    });
+**Presentation Controls HTML (viewer-template.html:439-444):**
+```html
+<div class="presentation-controls">
+    <button class="nav-btn" id="prev-btn" onclick="prevSlide()">← Previous</button>
+    <span class="slide-counter" id="slide-counter">1 / {{TOTAL_SLIDES}}</span>
+    <button class="nav-btn" id="next-btn" onclick="nextSlide()">Next →</button>
+    <button class="close-btn" onclick="exitToGallery()" title="Close (Esc)">×</button>
+</div>
 ```
+Add download button here, between next-btn and close-btn.
 
-**Gallery Rendering (viewer-template.html:347-366):**
-```javascript
-function renderGallery() {
-    const grid = document.getElementById('slide-grid');
-    grid.innerHTML = '';
-    slides.forEach((slide, index) => {
-        const card = document.createElement('div');
-        card.className = 'card';
-        card.onclick = () => enterPresentation(index + 1);
-        card.innerHTML = `
-            <div class="card-preview">
-                <iframe src="slides/${slide.filename}" loading="lazy"></iframe>
-            </div>
-            ...
-        `;
-        grid.appendChild(card);
-    });
+**Button Styling (viewer-template.html:202-220):**
+```css
+.nav-btn {
+    background: transparent;
+    border: 1px solid var(--amp-mid-gray);
+    color: var(--amp-white);
+    padding: 8px 16px;
+    font-family: var(--font-body);
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
 }
 ```
+Follow this pattern for download button styling.
 
 ### Dependencies
 
-**Framework/Libraries:**
-- Node.js (runtime for scripts)
-- fs (built-in, file operations)
-- path (built-in, path handling)
-- No browser-side dependencies (vanilla JS)
+**Framework/Libraries (to be added inline):**
+
+| Library | Version | Size (minified) | Purpose |
+|---------|---------|-----------------|---------|
+| html2canvas | 1.4.1 | ~175KB | HTML to canvas rendering |
+| jsPDF | 2.5.1 | ~90KB | PDF document generation |
+| JSZip | 3.10.1 | ~45KB | ZIP file creation |
+
+Total addition: ~310KB to viewer template
 
 **Internal Modules:**
-- None - self-contained scripts
+- None (all code inline in template)
 
 ### Configuration Changes
 
-None required. Manifest is auto-discovered by convention (`slides/manifest.json`).
+None required - no external configuration files affected.
 
 ### Existing Conventions (Brownfield)
 
-- **Semicolons:** Yes
-- **Quotes:** Single quotes in JS
-- **Indentation:** 4 spaces
-- **Naming:** kebab-case for files, camelCase for JS variables
-- **Error handling:** Console logging with process.exit(1) for scripts
+**Code Style:**
+- Vanilla JavaScript (ES6+ features used: async/await, arrow functions, template literals)
+- No TypeScript
+- No module system (all functions global)
+- Inline styles via CSS variables
+
+**File Organization:**
+- Single-file viewer template
+- All CSS in `<style>` block
+- All JavaScript in `<script>` block
+- Libraries should be added before application code
+
+**Error Handling:**
+- Console logging for errors: `console.error('message')`
+- Try/catch for async operations
+- Graceful fallbacks where possible
 
 ### Test Framework & Standards
 
-No test framework configured. Manual testing via browser.
+No automated testing framework in place. Testing will be manual.
 
 ---
 
 ## Implementation Stack
 
-- **Runtime:** Node.js (scripts)
-- **Browser:** Vanilla HTML/CSS/JavaScript
-- **File Format:** JSON for manifest
-- **Protocol Support:** `file://` (no server required)
+| Category | Technology | Version |
+|----------|------------|---------|
+| Runtime | Browser (Chrome, Safari, Firefox) | Latest |
+| Language | JavaScript (ES6+) | - |
+| Rendering | html2canvas | 1.4.1 |
+| PDF | jsPDF | 2.5.1 |
+| ZIP | JSZip | 3.10.1 |
+| Styling | CSS3 with CSS Variables | - |
 
 ---
 
 ## Technical Details
 
-**Error Handling Strategy:**
+### html2canvas Configuration
 
-1. **Manifest fetch fails:** Display user-friendly error in gallery area
-2. **Empty manifest:** Show "No slides found" message
-3. **Malformed JSON:** Catch parse error, display message
+```javascript
+const canvas = await html2canvas(slideElement, {
+    width: 1920,
+    height: 1080,
+    scale: 1,
+    useCORS: true,
+    allowTaint: true,
+    backgroundColor: null,
+    logging: false
+});
+```
 
-**Browser Compatibility:**
-- Modern browsers (Chrome, Firefox, Safari, Edge)
-- Uses `fetch()` API (ES6+)
-- Uses template literals, arrow functions, const/let
+**Key Options:**
+- `width/height: 1920/1080` - Force exact slide dimensions
+- `scale: 1` - 1:1 pixel ratio (no scaling)
+- `useCORS: true` - Allow cross-origin images (fonts from Google)
+- `allowTaint: true` - Allow tainted canvas for local fonts
+- `backgroundColor: null` - Preserve slide's background
 
-**Performance Considerations:**
-- Manifest is small JSON file (< 5KB typically)
-- Cache-busting adds minimal overhead (query string only)
-- Lazy loading retained for gallery thumbnails (`loading="lazy"`)
+### jsPDF Configuration
 
-**Edge Cases:**
-- Slides numbered non-sequentially (e.g., 1, 2, 5) - handled by sort
-- Slides with special characters in title - JSON encoding handles this
-- Very long deck names - CSS handles truncation
+```javascript
+const pdf = new jsPDF({
+    orientation: 'landscape',
+    unit: 'px',
+    format: [1920, 1080],
+    hotfixes: ['px_scaling']
+});
+```
+
+**Key Options:**
+- `orientation: 'landscape'` - Slides are wider than tall
+- `unit: 'px'` - Use pixels for positioning
+- `format: [1920, 1080]` - Custom page size matching slides
+- `hotfixes: ['px_scaling']` - Fix pixel scaling issues
+
+### File Naming Convention
+
+- Single PNG: `{deckName}-slide-{N}.png` (e.g., "Claude-Code-Fundamentals-slide-3.png")
+- ZIP file: `{deckName}-slides.zip`
+- PDF file: `{deckName}.pdf`
+
+### Cross-Origin Considerations
+
+**iframe Content Access:**
+Slides are loaded in iframes from `slides/slide-N.html`. For `file://` protocol, same-origin policy is strict. The iframe's `contentDocument` should be accessible since both parent and child are from same origin (local filesystem).
+
+**External Resources:**
+- Google Fonts loaded via `<link>` - html2canvas handles these
+- SVG icons are inline - no cross-origin issues
+- No external images in slides by default
+
+### Progress Calculation
+
+For batch operations:
+```javascript
+function updateProgress(current, total) {
+    const percent = Math.round((current / total) * 100);
+    progressBar.style.width = `${percent}%`;
+    progressText.textContent = `Processing slide ${current} of ${total}...`;
+}
+```
+
+### Memory Management
+
+For large decks (20+ slides):
+- Process slides sequentially (not parallel) to limit memory
+- Release canvas blobs after adding to ZIP/PDF
+- Show progress to indicate activity
 
 ---
 
 ## Development Setup
 
 ```bash
-# No special setup needed - vanilla Node.js project
-
 # Clone repo (if not already)
 git clone <repo-url>
 cd slide-builder
 
-# Install dependencies (only needed for export features)
+# Install dependencies (only needed if using npm scripts)
 npm install
 
-# Run manifest generation
-node scripts/generate-manifest.js claude-code-fundamentals
+# No build step required - edit viewer-template.html directly
 
-# Open viewer
-open output/claude-code-fundamentals/index.html
+# Test changes:
+# 1. Edit .slide-builder/config/templates/viewer-template.html
+# 2. Regenerate a deck's viewer:
+node scripts/regenerate-viewer.js claude-code-fundamentals
+
+# 3. Open output/claude-code-fundamentals/index.html in browser
 ```
 
 ---
@@ -270,54 +400,109 @@ open output/claude-code-fundamentals/index.html
 
 ### Setup Steps
 
-1. Create feature branch: `git checkout -b feature/dynamic-viewer`
-2. Verify existing viewer works: `open output/claude-code-fundamentals/index.html`
-3. Review current `viewer-template.html` structure
+1. Create feature branch
+2. Download minified library files:
+   - https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js
+   - https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js
+   - https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js
+3. Open `.slide-builder/config/templates/viewer-template.html` for editing
 
 ### Implementation Steps
 
-**Phase 1: Create Manifest Generator Script**
-1. Create `scripts/generate-manifest.js`
-2. Implement slide discovery (reuse logic from regenerate-viewer.js)
-3. Implement title extraction (reuse logic from regenerate-viewer.js)
-4. Write manifest.json to slides folder
-5. Test: `node scripts/generate-manifest.js claude-code-fundamentals`
+**Story 1: Download Menu UI**
+1. Add CSS for download button, dropdown menu, and items (~line 220)
+2. Add download button HTML to `.presentation-controls` (~line 443)
+3. Add dropdown menu HTML (hidden by default)
+4. Add `toggleDownloadMenu()` JavaScript function
+5. Add click-outside handler to close menu
+6. Add keyboard shortcut 'D' for download menu
 
-**Phase 2: Update Viewer Template**
-1. Remove static `{{SLIDE_LIST}}` injection
-2. Add `loadManifest()` async function
-3. Update `DOMContentLoaded` to call `loadManifest()` then `renderGallery()`
-4. Add error handling UI for failed manifest load
-5. Add cache-busting to `renderGallery()` iframe src
-6. Add cache-busting to `updatePresentationSlide()` iframe src
+**Story 2: Single Slide PNG Export**
+1. Inline html2canvas library in `<script>` section
+2. Implement `captureSlide(slideNumber)` helper function
+3. Implement `downloadCurrentSlide()` function
+4. Wire up menu item click handler
+5. Test with various slide types
 
-**Phase 3: Update Regenerate Script**
-1. Modify `regenerate-viewer.js` to also generate manifest.json
-2. Ensure manifest is written before viewer template population
-3. Keep template variables for deck name and total slides (dynamically updated)
+**Story 3: Batch PNG Export (ZIP)**
+1. Inline JSZip library
+2. Add progress modal HTML and CSS
+3. Implement `showProgressModal()`, `updateProgress()`, `hideProgressModal()`
+4. Implement `downloadAllSlidesPNG()` function
+5. Test with 14-slide deck
 
-**Phase 4: Generate Initial Manifest**
-1. Run generator for existing deck
-2. Verify viewer loads correctly with dynamic data
+**Story 4: PDF Export**
+1. Inline jsPDF library
+2. Implement `downloadDeckPDF()` function
+3. Wire up menu item click handler
+4. Test PDF output quality and page breaks
+5. Verify file size is reasonable
 
 ### Testing Strategy
 
 **Manual Testing Checklist:**
-- [ ] Open index.html via file:// - slides load from manifest
-- [ ] Add new slide HTML to slides/ folder, update manifest, refresh - new slide appears
-- [ ] Edit slide content, refresh viewer - updated content shows (cache-busting)
-- [ ] Delete manifest.json, refresh - error message displays gracefully
-- [ ] Test keyboard navigation in presentation mode
-- [ ] Test gallery click to enter presentation
-- [ ] Verify slide counter updates correctly
+
+1. **file:// Protocol:**
+   - Open `index.html` directly in browser (not via server)
+   - Verify download menu appears and functions
+   - Verify PNG download works
+   - Verify ZIP download works
+   - Verify PDF download works
+
+2. **Server Protocol:**
+   - Serve via `python3 -m http.server`
+   - Verify all functionality works
+
+3. **Cross-Browser:**
+   - Chrome (primary)
+   - Safari
+   - Firefox
+
+4. **Export Quality:**
+   - PNG is 1920x1080 pixels
+   - PNG captures all slide elements (text, SVGs, backgrounds)
+   - PDF pages are correct size
+   - PDF text/images are crisp
+
+5. **Large Deck:**
+   - Test with 20+ slides
+   - Verify progress bar updates
+   - Verify no memory crashes
+   - Verify reasonable export time
 
 ### Acceptance Criteria
 
-1. **Given** a valid `slides/manifest.json` exists, **when** `index.html` is opened via `file://`, **then** all slides from manifest are displayed in gallery
-2. **Given** a slide HTML file is modified, **when** the viewer is refreshed, **then** the updated content is displayed (no stale cache)
-3. **Given** no manifest exists, **when** `index.html` is opened, **then** a user-friendly error message is displayed
-4. **Given** `regenerate-viewer.js` is run, **when** it completes, **then** both `index.html` and `slides/manifest.json` are created/updated
-5. **Given** `generate-manifest.js` is run with a deck slug, **when** it completes, **then** `manifest.json` is created in the slides folder
+**Story 1 - Download Menu UI:**
+- [ ] Download button visible in presentation header
+- [ ] Dropdown menu opens on click
+- [ ] Menu shows three options with icons
+- [ ] Menu closes when clicking outside
+- [ ] Keyboard shortcut 'D' opens menu
+- [ ] Styling matches existing nav buttons
+
+**Story 2 - Single PNG Export:**
+- [ ] Clicking "Download Current Slide" triggers download
+- [ ] Downloaded PNG is named `{deckName}-slide-{N}.png`
+- [ ] PNG dimensions are 1920x1080
+- [ ] PNG accurately captures slide content
+- [ ] Works with `file://` protocol
+
+**Story 3 - Batch PNG Export:**
+- [ ] Clicking "Download All as PNG" shows progress modal
+- [ ] Progress bar updates as slides are processed
+- [ ] ZIP file downloads when complete
+- [ ] ZIP contains all slides as numbered PNGs
+- [ ] Modal dismisses after download
+- [ ] Works with `file://` protocol
+
+**Story 4 - PDF Export:**
+- [ ] Clicking "Download as PDF" shows progress modal
+- [ ] Progress bar updates during generation
+- [ ] PDF file downloads when complete
+- [ ] PDF contains all slides as pages
+- [ ] PDF pages are landscape 1920x1080
+- [ ] PDF file size is reasonable (<50MB for 14 slides)
+- [ ] Works with `file://` protocol
 
 ---
 
@@ -325,60 +510,122 @@ open output/claude-code-fundamentals/index.html
 
 ### File Paths Reference
 
-- `.slide-builder/templates/viewer-template.html` - Template to modify
-- `scripts/regenerate-viewer.js` - Existing script to update
-- `scripts/generate-manifest.js` - New script to create
-- `output/{deck-slug}/index.html` - Generated viewer
-- `output/{deck-slug}/slides/manifest.json` - New manifest file
-- `output/{deck-slug}/slides/slide-N.html` - Individual slides
+| File | Purpose |
+|------|---------|
+| `.slide-builder/config/templates/viewer-template.html` | Main template (modify this) |
+| `output/claude-code-fundamentals/index.html` | Generated viewer (for testing) |
+| `scripts/regenerate-viewer.js` | Regenerates viewer from template |
 
 ### Key Code Locations
 
-- Title extraction: `scripts/regenerate-viewer.js:26`
-- Slide discovery: `scripts/regenerate-viewer.js:76`
-- Gallery rendering: `.slide-builder/templates/viewer-template.html:347`
-- Presentation update: `.slide-builder/templates/viewer-template.html:412`
+| Function/Element | Location |
+|-----------------|----------|
+| CSS styles | viewer-template.html:10-415 |
+| Gallery view HTML | viewer-template.html:421-431 |
+| Presentation view HTML | viewer-template.html:436-465 |
+| Presentation controls | viewer-template.html:439-444 |
+| JavaScript functions | viewer-template.html:467-836 |
+| Keyboard handlers | viewer-template.html:770-825 |
 
 ### Testing Locations
 
-No automated tests - manual browser testing.
+No automated tests. Manual testing via:
+1. Open `output/claude-code-fundamentals/index.html` in browser
+2. Enter presentation mode
+3. Test download menu functionality
 
 ### Documentation to Update
 
-- None required for this change
+None required - this is an internal tool.
 
 ---
 
 ## UX/UI Considerations
 
-**Error State UI:**
-When manifest fails to load, display centered message in gallery area:
-```
-Unable to load slides.
-Please ensure slides/manifest.json exists.
-```
+### UI Components Affected
 
-Style error message to match existing theme (dark background, light text, lime accent).
+**New Components:**
+- Download dropdown button (styled like existing nav buttons)
+- Dropdown menu (3 items with icons)
+- Progress modal overlay
+- Progress bar
 
-**Loading State (Optional Enhancement):**
-Could add brief loading indicator while manifest fetches, but for local `file://` this is nearly instantaneous - skip for MVP.
+**Existing Components Modified:**
+- `.presentation-controls` div - Add download button
+
+### UX Flow
+
+**Current Flow:**
+1. User views slides
+2. No export option available
+
+**New Flow:**
+1. User views slides
+2. User clicks "Download" button in header
+3. Dropdown shows three options
+4. User selects export type
+5. For batch: Progress modal appears
+6. File downloads automatically
+7. Modal dismisses (batch) or immediate download (single)
+
+### Visual Design
+
+**Download Button:**
+- Same size as close button (36x36px)
+- Download icon (↓ arrow with line)
+- Same border/hover styling as nav buttons
+
+**Dropdown Menu:**
+- Dark background (`var(--amp-dark-alt)`)
+- Border: `1px solid var(--amp-mid-gray)`
+- Items with icons on left
+- Hover state: lime accent color
+
+**Progress Modal:**
+- Semi-transparent dark overlay
+- Centered white card
+- Title: "Exporting..." or "Generating PDF..."
+- Progress bar with lime fill
+- Slide count text below
+
+### Accessibility
+
+- Download button has `title` attribute for tooltip
+- Dropdown menu is keyboard navigable
+- Progress modal is not dismissible during export (intentional)
+- Color contrast meets WCAG AA
 
 ---
 
 ## Testing Approach
 
-**Manual Browser Testing:**
-1. Open `output/claude-code-fundamentals/index.html` in Chrome
-2. Verify gallery displays all 14 slides
-3. Click slide to enter presentation mode
-4. Navigate with arrow keys
-5. Press Escape to return to gallery
-6. Modify a slide file, refresh, verify change appears
+### Manual Testing Protocol
 
-**Edge Case Testing:**
-1. Delete manifest.json - verify error message
-2. Create malformed manifest.json - verify error handling
-3. Empty slides array in manifest - verify "no slides" handling
+Since no test framework exists, follow this manual testing checklist:
+
+**Pre-Testing:**
+1. Regenerate viewer: `node scripts/regenerate-viewer.js claude-code-fundamentals`
+2. Clear browser cache
+3. Open DevTools console for error monitoring
+
+**Test Matrix:**
+
+| Test | Chrome | Safari | Firefox |
+|------|--------|--------|---------|
+| Menu opens/closes | | | |
+| Single PNG (file://) | | | |
+| Single PNG (http://) | | | |
+| ZIP export (file://) | | | |
+| ZIP export (http://) | | | |
+| PDF export (file://) | | | |
+| PDF export (http://) | | | |
+| Progress bar works | | | |
+| Large deck (14 slides) | | | |
+
+**Quality Verification:**
+1. Open downloaded PNG in image viewer - verify 1920x1080
+2. Unzip ZIP file - verify all slides present
+3. Open PDF - verify all pages, quality, file size
 
 ---
 
@@ -386,14 +633,25 @@ Could add brief loading indicator while manifest fetches, but for local `file://
 
 ### Deployment Steps
 
-Not applicable - local development tool. Changes take effect immediately when files are saved.
+1. Merge feature branch to main
+2. Regenerate all existing deck viewers:
+   ```bash
+   node scripts/regenerate-viewer.js claude-code-fundamentals
+   # Repeat for other decks
+   ```
+3. Commit regenerated viewers
+4. Deploy updated decks to hosting (if applicable)
 
 ### Rollback Plan
 
-1. Revert to previous `viewer-template.html`
-2. Re-run `node scripts/regenerate-viewer.js {deck-slug}` to restore static viewer
-3. Delete `manifest.json` files (optional cleanup)
+1. Revert commit on main branch
+2. Regenerate viewers to restore previous template
+3. Redeploy
 
 ### Monitoring
 
-Not applicable - local tool with no production deployment.
+No server-side monitoring needed - purely client-side feature.
+
+**User Feedback Channels:**
+- Direct user reports
+- Browser console errors (users can share screenshots)

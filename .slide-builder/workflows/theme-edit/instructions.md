@@ -262,7 +262,7 @@ Generating sample slides for preview...
     <action>Use frontend-design skill to generate professional sample slides</action>
     <action>Pass {{working_theme}} as the theme configuration</action>
 
-    <action>Generate 6 sample slides to .slide-builder/config/samples/:
+    <action>Generate 6 sample slides to output/theme-preview/:
 
     **01-title.html** (Title Slide)
     - Hero typography with heading font at 72px
@@ -295,11 +295,11 @@ Generating sample slides for preview...
     - Demonstrates: mono font, dark theme variant, technical styling
     </action>
 
-    <action>Save all 6 slides to .slide-builder/config/samples/</action>
+    <action>Save all 6 slides to output/theme-preview/</action>
 
-    <action>Create index.html in samples/ that links to all 6 slides for easy navigation</action>
+    <action>Create index.html in output/theme-preview/ that links to all 6 slides for easy navigation</action>
 
-    <action>Open samples/index.html in browser using: open .slide-builder/config/samples/index.html</action>
+    <action>Open preview in browser: open output/theme-preview/index.html</action>
 
     <output>
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -314,7 +314,7 @@ Generating sample slides for preview...
   5. Callout (accent color, emphasis)
   6. Technical (mono font, dark variant)
 
-📂 Open in browser: .slide-builder/config/samples/index.html
+📂 Open in browser: output/theme-preview/index.html
 
 Review the samples to see your theme changes applied.
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -370,13 +370,13 @@ Your response:
 📐 Shape primitives changed - regenerating templates...
       </output>
 
-      <action>Copy sample slides to templates with layout-* naming:
-        - 01-title.html → templates/layout-title.html
-        - 02-agenda.html → templates/layout-agenda.html
-        - 03-process-flow.html → templates/layout-flow.html
-        - 04-comparison.html → templates/layout-comparison.html
-        - 05-callout.html → templates/layout-callout.html
-        - 06-technical.html → templates/layout-technical.html
+      <action>Copy preview slides to catalog with updated styling:
+        - output/theme-preview/01-title.html → config/catalog/title.html
+        - output/theme-preview/02-agenda.html → config/catalog/agenda.html
+        - output/theme-preview/03-process-flow.html → config/catalog/process-flow.html
+        - output/theme-preview/04-comparison.html → config/catalog/comparison.html
+        - output/theme-preview/05-callout.html → config/catalog/callout.html
+        - output/theme-preview/06-technical.html → config/catalog/technical.html
       </action>
 
       <action>Update status.yaml templates section with regenerated files</action>
@@ -607,7 +607,7 @@ Generating preview samples with v{{selected_version.version}} theme...
     <action>Use frontend-design skill to generate professional sample slides</action>
     <action>Pass {{restore_theme}} as the theme configuration</action>
 
-    <action>Generate 6 sample slides to .slide-builder/config/samples/:
+    <action>Generate 6 sample slides to output/theme-preview/:
 
     **01-title.html** (Title Slide)
     - Hero typography with heading font at 72px
@@ -640,9 +640,9 @@ Generating preview samples with v{{selected_version.version}} theme...
     - Demonstrates: mono font, dark theme variant, technical styling
     </action>
 
-    <action>Save all 6 slides to .slide-builder/config/samples/</action>
-    <action>Create/update index.html in samples/ that links to all 6 slides</action>
-    <action>Open samples/index.html in browser using: open .slide-builder/config/samples/index.html</action>
+    <action>Save all 6 slides to output/theme-preview/</action>
+    <action>Create/update index.html in output/theme-preview/ that links to all 6 slides</action>
+    <action>Open preview in browser: open output/theme-preview/index.html</action>
 
     <output>
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -657,7 +657,7 @@ Generating preview samples with v{{selected_version.version}} theme...
   5. Callout (accent color, emphasis)
   6. Technical (mono font, dark variant)
 
-📂 Open in browser: .slide-builder/config/samples/index.html
+📂 Open in browser: output/theme-preview/index.html
 
 Review the samples to preview the v{{selected_version.version}} theme.
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -765,13 +765,13 @@ Please respond with "y" (yes) to proceed or "n" (no) to cancel.
 📐 Shape primitives changed - regenerating templates...
       </output>
 
-      <action>Copy sample slides to templates with layout-* naming:
-        - samples/01-title.html → templates/layout-title.html
-        - samples/02-agenda.html → templates/layout-agenda.html
-        - samples/03-process-flow.html → templates/layout-flow.html
-        - samples/04-comparison.html → templates/layout-comparison.html
-        - samples/05-callout.html → templates/layout-callout.html
-        - samples/06-technical.html → templates/layout-technical.html
+      <action>Copy preview slides to catalog with updated styling:
+        - output/theme-preview/01-title.html → config/catalog/title.html
+        - output/theme-preview/02-agenda.html → config/catalog/agenda.html
+        - output/theme-preview/03-process-flow.html → config/catalog/process-flow.html
+        - output/theme-preview/04-comparison.html → config/catalog/comparison.html
+        - output/theme-preview/05-callout.html → config/catalog/callout.html
+        - output/theme-preview/06-technical.html → config/catalog/technical.html
       </action>
 
       <action>Update status.yaml templates section with regenerated files</action>

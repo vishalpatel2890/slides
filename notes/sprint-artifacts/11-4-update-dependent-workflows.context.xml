@@ -1,0 +1,222 @@
+<story-context id=".bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>11</epicId>
+    <storyId>4</storyId>
+    <title>Update Dependent Workflows for Catalog</title>
+    <status>drafted</status>
+    <generatedAt>2026-01-28</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>notes/sprint-artifacts/story-catalog-system-4.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>system</asA>
+    <iWant>build-one, plan-one, plan-deck, and edit workflows to use the catalog</iWant>
+    <soThat>template selection is metadata-driven and consistent</soThat>
+    <tasks>
+      <task ac="1">Add `catalog_path` and `catalog_manifest` variables to `build-one/workflow.yaml`</task>
+      <task ac="1">Modify `build-one/instructions.md` template mapping section to read catalog.json</task>
+      <task ac="1,5">Implement catalog matching algorithm: ID -> use_cases -> fallback</task>
+      <task ac="1">Remove hardcoded template-to-file mappings in build-one</task>
+      <task ac="2">Add `catalog_path` variable to `plan-one/workflow.yaml`</task>
+      <task ac="2">Modify `plan-one/instructions.md` to display templates from catalog.json</task>
+      <task ac="3">Add `catalog_path` variable to `plan-deck/workflow.yaml`</task>
+      <task ac="3">Modify `plan-deck/instructions.md` template suggestions to use catalog</task>
+      <task ac="4">Add `catalog_path` variable to `edit/workflow.yaml`</task>
+      <task ac="4">Modify `edit/instructions.md` to reference catalog for template awareness</task>
+      <task ac="5">Implement fallback logging when no catalog match found</task>
+      <task ac="1">Test build-one with each starter template ID</task>
+      <task ac="1">Test build-one with use_case matching</task>
+      <task ac="5">Test build-one fallback to custom generation</task>
+      <task ac="2">Test plan-one template display</task>
+      <task ac="3">Test plan-deck template suggestions</task>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <criterion id="AC1">Given I run `/sb:build-one` with a template type (e.g., "layout-title"), when the workflow selects a template, then it: Reads `config/catalog/catalog.json`, Matches against template `id` first (exact match), Falls back to `use_cases` array match if no ID match, Loads the matched template HTML file from catalog/</criterion>
+    <criterion id="AC2">Given I run `/sb:plan-one`, when I'm prompted to select a template, then: Available templates are read from catalog.json, Each template shows name and description, use_cases are used for intelligent suggestions</criterion>
+    <criterion id="AC3">Given I run `/sb:plan-deck`, when templates are suggested for each slide, then: Suggestions reference catalog entry IDs, Template names and descriptions are used in output, Custom option always available for non-catalog needs</criterion>
+    <criterion id="AC4">Given I run `/sb:edit`, when template context is needed, then: Reads catalog.json to understand available templates, Can reference template patterns for layout changes</criterion>
+    <criterion id="AC5">Given a template type has no catalog match (ID or use_cases), when selection fails, then: Falls back to custom generation via frontend-design skill, Logs "No matching catalog template, using custom generation"</criterion>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>notes/tech-spec-catalog.md</path>
+        <title>Technical Specification: Template Catalog System</title>
+        <section>Catalog Discovery Algorithm</section>
+        <snippet>Read catalog.json, parse templates array, match requested template type against id or use_cases, fallback to custom generation via frontend-design.</snippet>
+      </doc>
+      <doc>
+        <path>notes/tech-spec-catalog.md</path>
+        <title>Technical Specification: Template Catalog System</title>
+        <section>Workflow Integration</section>
+        <snippet>Build-one reads catalog.json to find matching template. Plan-one shows available templates from catalog. Plan-deck references catalog for slide type suggestions.</snippet>
+      </doc>
+      <doc>
+        <path>notes/tech-spec-catalog.md</path>
+        <title>Technical Specification: Template Catalog System</title>
+        <section>Variable Updates</section>
+        <snippet>Each workflow.yaml needs: catalog_path: "{project-root}/.slide-builder/config/catalog" and catalog_manifest: "{catalog_path}/catalog.json"</snippet>
+      </doc>
+      <doc>
+        <path>notes/epics.md</path>
+        <title>Epic 11: Template Catalog System</title>
+        <section>Story 11.4: Update Dependent Workflows</section>
+        <snippet>Update build-one, plan-one, plan-deck, edit workflows to use catalog. Template selection is metadata-driven and consistent.</snippet>
+      </doc>
+    </docs>
+    <code>
+      <file>
+        <path>.slide-builder/workflows/build-one/workflow.yaml</path>
+        <kind>workflow-config</kind>
+        <symbol>template_mapping</symbol>
+        <lines>36-95</lines>
+        <reason>Contains current hardcoded template-to-file mappings (layout-title: "01-title.html") that need to be replaced with catalog lookups</reason>
+      </file>
+      <file>
+        <path>.slide-builder/workflows/build-one/instructions.md</path>
+        <kind>workflow-instructions</kind>
+        <symbol>Phase 2: Determine Build Strategy</symbol>
+        <lines>277-301</lines>
+        <reason>Template routing table references hardcoded sample files - needs to read from catalog.json instead</reason>
+      </file>
+      <file>
+        <path>.slide-builder/workflows/build-one/instructions.md</path>
+        <kind>workflow-instructions</kind>
+        <symbol>Phase 3A: Template Build</symbol>
+        <lines>303-348</lines>
+        <reason>Reads sample HTML from config/samples/ - needs to read from config/catalog/ using catalog manifest</reason>
+      </file>
+      <file>
+        <path>.slide-builder/workflows/plan-one/workflow.yaml</path>
+        <kind>workflow-config</kind>
+        <symbol>template_keywords</symbol>
+        <lines>24-78</lines>
+        <reason>Contains hardcoded keyword-to-layout mappings - should reference catalog use_cases instead</reason>
+      </file>
+      <file>
+        <path>.slide-builder/workflows/plan-one/instructions.md</path>
+        <kind>workflow-instructions</kind>
+        <symbol>Phase 3: Template Matching</symbol>
+        <lines>71-105</lines>
+        <reason>Template matching rules use hardcoded keywords - should read from catalog.json use_cases</reason>
+      </file>
+      <file>
+        <path>.slide-builder/workflows/plan-one/instructions.md</path>
+        <kind>workflow-instructions</kind>
+        <symbol>Template Reference table</symbol>
+        <lines>213-227</lines>
+        <reason>Static template reference table - should be dynamically generated from catalog.json</reason>
+      </file>
+      <file>
+        <path>.slide-builder/workflows/plan-deck/workflow.yaml</path>
+        <kind>workflow-config</kind>
+        <symbol>template_mapping</symbol>
+        <lines>42-50</lines>
+        <reason>Hardcoded template mapping patterns - should reference catalog</reason>
+      </file>
+      <file>
+        <path>.slide-builder/workflows/plan-deck/instructions.md</path>
+        <kind>workflow-instructions</kind>
+        <symbol>Step 3: Generate narrative structure</symbol>
+        <lines>146-213</lines>
+        <reason>Template matching uses hardcoded keyword patterns - should use catalog use_cases for intelligent matching</reason>
+      </file>
+      <file>
+        <path>.slide-builder/workflows/edit/workflow.yaml</path>
+        <kind>workflow-config</kind>
+        <symbol>config_path</symbol>
+        <lines>14-16</lines>
+        <reason>References config_path but not catalog - needs catalog_path and catalog_manifest variables</reason>
+      </file>
+      <file>
+        <path>.slide-builder/workflows/edit/instructions.md</path>
+        <kind>workflow-instructions</kind>
+        <symbol>Phase 5A: Layout Regeneration</symbol>
+        <lines>244-313</lines>
+        <reason>Uses frontend-design skill directly - should first check catalog for template patterns</reason>
+      </file>
+      <file>
+        <path>.slide-builder/config/catalog/catalog.json</path>
+        <kind>data-manifest</kind>
+        <symbol>templates</symbol>
+        <lines>1-77</lines>
+        <reason>The catalog manifest with template metadata (id, name, description, use_cases, file) that workflows should read</reason>
+      </file>
+    </code>
+    <dependencies>
+      <node>
+        <package>puppeteer</package>
+        <version>^23.0.0</version>
+        <purpose>Screenshot/PDF generation for export</purpose>
+      </node>
+      <node>
+        <package>googleapis</package>
+        <version>^140.0.0</version>
+        <purpose>Google Slides export functionality</purpose>
+      </node>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint source="tech-spec">Template matching algorithm: ID exact match first, then use_cases array match, then fallback to custom via frontend-design skill</constraint>
+    <constraint source="tech-spec">Catalog path variables must be added to all four workflow.yaml files</constraint>
+    <constraint source="tech-spec">Fallback to custom generation must log "No matching catalog template, using custom generation"</constraint>
+    <constraint source="conventions">Workflow YAML schema: name, description, installed_path, instructions required</constraint>
+    <constraint source="conventions">Instruction files use XML tags within markdown: step, action, check, output</constraint>
+    <constraint source="conventions">Slides must be 1920x1080 pixels with contenteditable and data-field attributes</constraint>
+    <constraint source="story">Cannot break existing functionality - fallback to custom must always work</constraint>
+    <constraint source="story">Prerequisites: Story 11.1 (catalog infrastructure), Story 11.2 (catalog populated with templates)</constraint>
+  </constraints>
+
+  <interfaces>
+    <interface>
+      <name>Catalog Manifest Schema</name>
+      <kind>JSON data structure</kind>
+      <signature>{ version: string, generated: string, lastModified: string, templates: Array&lt;{id, name, description, use_cases: string[], file, preview, created_at, source}&gt; }</signature>
+      <path>.slide-builder/config/catalog/catalog.json</path>
+    </interface>
+    <interface>
+      <name>Catalog Matching Algorithm</name>
+      <kind>Function pattern</kind>
+      <signature>matchTemplate(requestedType: string, catalog: CatalogManifest): { template: Template | null, matchType: 'id' | 'use_case' | 'fallback' }</signature>
+      <path>To be implemented in workflow instructions</path>
+    </interface>
+    <interface>
+      <name>Workflow Config Variables</name>
+      <kind>YAML configuration</kind>
+      <signature>catalog_path: "{project-root}/.slide-builder/config/catalog", catalog_manifest: "{catalog_path}/catalog.json"</signature>
+      <path>All workflow.yaml files</path>
+    </interface>
+    <interface>
+      <name>frontend-design skill</name>
+      <kind>Skill invocation</kind>
+      <signature>Skill tool with skill: "frontend-design", context includes current HTML, edit instruction, theme, constraints</signature>
+      <path>.claude/commands/ skill system</path>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>
+      No automated testing framework exists. Manual validation via running workflows and verifying output. Testing checklist includes: running each modified workflow end-to-end, verifying expected outputs created, checking status.yaml updates correctly, validating HTML output in browser at 1920x1080.
+    </standards>
+    <locations>
+      <location>Manual testing via workflow execution</location>
+      <location>Browser preview for HTML validation</location>
+      <location>JSON schema validation for catalog.json</location>
+    </locations>
+    <ideas>
+      <idea ac="1">Run `/sb:build-one` with template type "title" - verify it reads catalog.json and uses title.html template</idea>
+      <idea ac="1">Run `/sb:build-one` with template type "layout-title" - verify exact ID match works</idea>
+      <idea ac="1">Run `/sb:build-one` with intent "opening slide" - verify use_cases match finds title template</idea>
+      <idea ac="5">Run `/sb:build-one` with template "nonexistent-template" - verify fallback to custom generation with appropriate log message</idea>
+      <idea ac="2">Run `/sb:plan-one` - verify template options display shows catalog entries with names and descriptions</idea>
+      <idea ac="3">Run `/sb:plan-deck` - verify slide breakdown shows template suggestions from catalog</idea>
+      <idea ac="4">Run `/sb:edit` - verify template context available for layout changes</idea>
+      <idea ac="1-5">End-to-end test: setup -> plan-deck -> build-one -> edit cycle using catalog throughout</idea>
+    </ideas>
+  </tests>
+</story-context>
