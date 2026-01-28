@@ -37,7 +37,27 @@ The framework files (workflows, instructions, templates) are the "starter" - the
 ```
 slide-builder/                          # Project root
 ├── .slide-builder/                     # Framework directory (mirrors .bmad/)
-│   ├── workflows/                      # Workflow definitions
+│   ├── config/                         # Shareable brand assets (zip to share)
+│   │   ├── theme.json                  # Brand primitives
+│   │   ├── theme-history/              # Version snapshots
+│   │   │   └── theme-v1-2026-01-26.json
+│   │   ├── samples/                    # Sample slides demonstrating theme
+│   │   │   ├── sample-1-title.html
+│   │   │   ├── sample-2-list.html
+│   │   │   ├── sample-3-flow.html
+│   │   │   ├── sample-4-columns.html
+│   │   │   ├── sample-5-callout.html
+│   │   │   └── sample-6-code.html
+│   │   └── templates/                  # Layout templates
+│   │       ├── layout-title.html       # Title slide template
+│   │       ├── layout-list.html        # Bullet list template
+│   │       ├── layout-flow.html        # Process flow template
+│   │       ├── layout-columns-2.html   # Two-column template
+│   │       ├── layout-columns-3.html   # Three-column template
+│   │       ├── layout-callout.html     # Centered callout template
+│   │       └── layout-code.html        # Code showcase template
+│   │
+│   ├── workflows/                      # Core framework (versioned)
 │   │   ├── setup/                      # Theme setup workflow
 │   │   │   ├── workflow.yaml           # Workflow config
 │   │   │   └── instructions.md         # Execution instructions
@@ -47,7 +67,10 @@ slide-builder/                          # Project root
 │   │   ├── plan-deck/                  # Deck planning
 │   │   │   ├── workflow.yaml
 │   │   │   └── instructions.md
-│   │   ├── build/                      # Slide building
+│   │   ├── build-one/                  # Single slide building
+│   │   │   ├── workflow.yaml
+│   │   │   └── instructions.md
+│   │   ├── build-all/                  # Batch slide building
 │   │   │   ├── workflow.yaml
 │   │   │   └── instructions.md
 │   │   ├── edit/                       # Slide editing
@@ -57,44 +80,25 @@ slide-builder/                          # Project root
 │   │       ├── workflow.yaml
 │   │       └── instructions.md
 │   │
-│   ├── templates/                      # Generated HTML templates (from /setup)
-│   │   ├── layout-title.html           # Title slide template
-│   │   ├── layout-list.html            # Bullet list template
-│   │   ├── layout-flow.html            # Process flow template
-│   │   ├── layout-columns-2.html       # Two-column template
-│   │   ├── layout-columns-3.html       # Three-column template
-│   │   ├── layout-callout.html         # Centered callout template
-│   │   └── layout-code.html            # Code showcase template
+│   ├── status.yaml                     # Runtime session state
 │   │
-│   ├── samples/                        # Sample deck generated during setup
-│   │   ├── sample-1-title.html
-│   │   ├── sample-2-list.html
-│   │   ├── sample-3-flow.html
-│   │   ├── sample-4-columns.html
-│   │   ├── sample-5-callout.html
-│   │   └── sample-6-code.html
-│   │
-│   ├── theme.json                      # Generated theme primitives
-│   ├── theme-history/                  # Theme version history
-│   │   └── theme-v1-2026-01-26.json
-│   │
-│   ├── single/                         # Single slide mode
+│   ├── single/                         # User single-slide workspace
 │   │   ├── plan.yaml                   # Single slide intent
 │   │   ├── slide.html                  # Generated slide
 │   │   └── slide-state.json            # Text edit state
 │   │
-│   ├── deck/                           # Deck mode
+│   ├── deck/                           # User deck workspace
 │   │   ├── plan.yaml                   # Deck narrative plan
-│   │   ├── status.yaml                 # Build progress
 │   │   └── slides/                     # Generated slides
 │   │       ├── slide-1.html
 │   │       ├── slide-1-state.json      # Text edits for slide 1
 │   │       ├── slide-2.html
 │   │       └── ...
 │   │
-│   └── credentials/                    # API credentials (gitignored)
+│   └── credentials/                    # OAuth tokens (gitignored)
 │       └── google-oauth.json
 │
+├── output/                             # User-generated slide outputs
 ├── .gitignore                          # Ignore credentials, node_modules
 ├── package.json                        # Dependencies (puppeteer, googleapis)
 └── README.md                           # Setup instructions

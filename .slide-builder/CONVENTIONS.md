@@ -33,10 +33,12 @@ All workflows follow the BMAD pattern:
 
 ```
 .slide-builder/
-├── theme.json           # Brand theme primitives
-├── status.yaml          # Global workflow state
-├── CONVENTIONS.md       # This file
-├── workflows/           # Workflow definitions
+├── config/              # Shareable brand assets (zip to share)
+│   ├── theme.json       # Brand theme primitives
+│   ├── theme-history/   # Version snapshots
+│   ├── samples/         # Sample slides demonstrating theme
+│   └── templates/       # Layout templates
+├── workflows/           # Core framework (versioned)
 │   ├── setup/
 │   │   ├── workflow.yaml
 │   │   └── instructions.md
@@ -45,20 +47,21 @@ All workflows follow the BMAD pattern:
 │   ├── plan/
 │   ├── plan-one/
 │   ├── plan-deck/
-│   ├── build/
+│   ├── build-one/
+│   ├── build-all/
 │   ├── edit/
-│   ├── export/
-│   └── test/            # Test workflow from Story 1.2
-├── single/              # Single slide mode
+│   └── export/
+├── status.yaml          # Runtime session state
+├── CONVENTIONS.md       # This file
+├── single/              # Single slide mode workspace
 │   ├── plan.yaml
 │   └── slide.html
-├── deck/                # Deck mode
+├── deck/                # Deck mode workspace
 │   ├── plan.yaml
 │   └── slides/
 │       ├── slide-1.html
 │       └── ...
-├── templates/           # Layout templates
-└── credentials/         # Google OAuth tokens
+└── credentials/         # OAuth tokens (gitignored)
 
 .claude/commands/sb/     # Claude Code skill registrations
 ├── setup.md
