@@ -69,39 +69,55 @@ What slide do you need?
   </step>
 
   <!-- ═══════════════════════════════════════════════════════════════════════ -->
-  <!-- PHASE 3: Template Matching                                               -->
+  <!-- PHASE 3: Template Matching (Catalog-Driven)                              -->
   <!-- ═══════════════════════════════════════════════════════════════════════ -->
-  <step n="3" goal="Match intent to template">
-    <action>Scan {{user_intent}} for template-matching keywords (case-insensitive)</action>
+  <step n="3" goal="Match intent to template using catalog">
+    <critical>Template matching is now catalog-driven. Read catalog.json first.</critical>
 
-    <template-matching-rules>
-      <!-- Priority order: first match wins -->
-      <rule keywords="title, intro, opening, welcome, cover" template="layout-title">
-        Title/intro slides with hero text and subtitle
-      </rule>
-      <rule keywords="list, bullets, points, agenda, items, features" template="layout-list">
-        Bulleted list or numbered agenda items
-      </rule>
-      <rule keywords="flow, process, timeline, steps, sequence, pipeline, workflow" template="layout-flow">
-        Process flows, timelines, step sequences
-      </rule>
-      <rule keywords="compare, vs, versus, two, side-by-side, before, after, pros, cons" template="layout-columns-2">
-        Two-column comparisons
-      </rule>
-      <rule keywords="three, triad, options, pillars, trio" template="layout-columns-3">
-        Three-column layouts
-      </rule>
-      <rule keywords="key, insight, callout, cta, highlight, quote, stat, metric" template="layout-callout">
-        Single key insight or call-to-action
-      </rule>
-      <rule keywords="code, technical, api, snippet, demo, terminal" template="layout-code">
-        Technical/code-focused slides
-      </rule>
-    </template-matching-rules>
+    <action>Read `.slide-builder/config/catalog/catalog.json`</action>
+    <action>Parse the `templates` array to get available templates</action>
 
-    <action>If keyword match found → set {{suggested_template}} to matched template name</action>
-    <action>If no keyword match → set {{suggested_template}} to "custom"</action>
-    <action>Log the decision reasoning</action>
+    <action>Display available templates from catalog:
+      ```
+      **Available Templates:**
+      {{for each template in catalog.templates}}
+      - **{{template.name}}** ({{template.id}}): {{template.description}}
+        Keywords: {{template.use_cases.join(", ")}}
+      {{end for}}
+      - **custom**: Generate a unique layout for novel content
+      ```
+    </action>
+
+    <action>Scan {{user_intent}} for template matching using catalog use_cases:
+      1. For each template in catalog.templates:
+         - Check if any word in {{user_intent}} matches template.use_cases (case-insensitive)
+         - Calculate match score (number of matching keywords)
+      2. Select template with highest match score
+      3. If no matches found → set suggested_template to "custom"
+    </action>
+
+    <template-matching-algorithm>
+      ```
+      matchTemplate(userIntent, catalog):
+        bestMatch = null
+        bestScore = 0
+
+        for template in catalog.templates:
+          score = countMatches(userIntent.words, template.use_cases)
+          if score > bestScore:
+            bestMatch = template.id
+            bestScore = score
+
+        if bestMatch:
+          return { template: bestMatch, confidence: "high" if bestScore > 1 else "low" }
+        else:
+          return { template: "custom", confidence: "fallback" }
+      ```
+    </template-matching-algorithm>
+
+    <action>If catalog match found → set {{suggested_template}} to matched template.id</action>
+    <action>If no catalog match → set {{suggested_template}} to "custom"</action>
+    <action>Log the decision reasoning with template name and description</action>
   </step>
 
   <!-- ═══════════════════════════════════════════════════════════════════════ -->
@@ -132,7 +148,91 @@ Is this correct? (yes to proceed, or provide corrections)
     </check>
 
     <check if="user says yes or confirms">
-      <action>Proceed to save</action>
+      <action>Proceed to optional discovery</action>
+    </check>
+  </step>
+
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  <!-- PHASE 4.5: Optional Quick Discovery (Story 13.4)                         -->
+  <!-- Lighter version of plan-deck's discovery - just message framing          -->
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  <step n="4.5" goal="Optional message discovery for enhanced slide generation">
+    <critical>This step is optional - user can skip for faster workflow</critical>
+
+    <action>Initialize discovery object: {{discovery}} = null</action>
+
+    <ask>
+**Quick Discovery (Optional)**
+
+Would you like to refine the message approach for better slide generation?
+
+- **[y]es** - Choose a message framing style (adds ~30 seconds)
+- **[n]o** - Skip and proceed directly to build
+
+This helps generate more targeted content but is not required.
+    </ask>
+
+    <check if="user chooses yes (y, yes, Y, Yes)">
+      <action>Use AskUserQuestion tool to present framing options:
+
+        {
+          "questions": [{
+            "question": "What message approach works best for this slide?",
+            "header": "Message",
+            "options": [
+              {"label": "Direct", "description": "Clear statement of the value or main point"},
+              {"label": "Question", "description": "Engage with a thought-provoking question"},
+              {"label": "Story", "description": "Narrative approach with context and resolution"},
+              {"label": "Data", "description": "Lead with evidence, statistics, or proof"}
+            ],
+            "multiSelect": false
+          }]
+        }
+
+        Note: User can select "Other" to provide custom framing approach.
+      </action>
+
+      <action>Wait for user response from AskUserQuestion</action>
+
+      <check if="user selected one of the provided options (Direct, Question, Story, Data)">
+        <action>Map selection to framing:
+          - "Direct" → key_message_framing = "direct"
+          - "Question" → key_message_framing = "question"
+          - "Story" → key_message_framing = "story"
+          - "Data" → key_message_framing = "data"
+        </action>
+        <action>Generate a contextual key message based on the framing and intent:
+          - For "direct": Create a clear statement from slide_purpose
+          - For "question": Formulate a thought-provoking question from intent
+          - For "story": Create narrative setup from context
+          - For "data": Frame as data-driven claim from key_elements
+        </action>
+        <action>Set {{discovery}} = {
+          key_message: "{{generated_key_message}}",
+          key_message_framing: "{{key_message_framing}}"
+        }</action>
+      </check>
+
+      <check if="user selected 'Other' and provided custom text">
+        <action>Set {{discovery}} = {
+          key_message: "{{user_custom_text}}",
+          key_message_framing: "custom"
+        }</action>
+      </check>
+
+      <output>
+✓ Message framing set: {{discovery.key_message_framing}}
+"{{discovery.key_message}}"
+
+Proceeding to save plan...
+      </output>
+    </check>
+
+    <check if="user chooses no (n, no, N, No, skip, Skip)">
+      <action>Set {{discovery}} = null</action>
+      <output>
+Skipping discovery. Proceeding to save plan...
+      </output>
     </check>
   </step>
 
@@ -162,6 +262,14 @@ Is this correct? (yes to proceed, or provide corrections)
         {{key_elements_as_yaml_list}}
       visual_guidance: "{{visual_guidance_or_default}}"
       tone: "{{tone_based_on_theme}}"  # professional | bold | warm | technical
+
+      # Discovery (Story 13.4 - optional, from Phase 4.5)
+      # Included only if user engaged with quick discovery
+      {{if discovery is not null}}
+      discovery:
+        key_message: "{{discovery.key_message}}"
+        key_message_framing: "{{discovery.key_message_framing}}"
+      {{end if}}
 
       # Technical Details (if applicable)
       technical_depth: "{{depth_if_technical}}"  # none | overview | detailed | deep-dive
@@ -210,17 +318,16 @@ Your slide plan is ready at `output/singles/plan.yaml`
 </workflow>
 ```
 
-## Template Reference
+## Template Reference (Catalog-Driven)
 
-Available templates and their use cases:
+Templates are now loaded dynamically from `.slide-builder/config/catalog/catalog.json`.
 
-| Template | Keywords | Best For |
-|----------|----------|----------|
-| layout-title | title, intro, opening, welcome, cover | Opening/title slides with hero text |
-| layout-list | list, bullets, points, agenda, items, features | Bulleted content, agendas |
-| layout-flow | flow, process, timeline, steps, sequence | Workflows, timelines, sequences |
-| layout-columns-2 | compare, vs, two, side-by-side, before/after | Two-way comparisons |
-| layout-columns-3 | three, triad, options, pillars | Three-column content |
-| layout-callout | key, insight, callout, cta, highlight, quote | Key insights, stats, CTAs |
-| layout-code | code, technical, api, snippet, demo | Technical/code content |
-| custom | (no keywords match) | Novel layouts via frontend-design skill |
+Each template entry includes:
+- **id**: Template identifier used in plan.yaml
+- **name**: Human-readable name
+- **description**: What the template is best for
+- **use_cases**: Keywords for automatic matching
+
+The `custom` option is always available for novel layouts that don't match any catalog template. Custom slides are generated via the frontend-design skill.
+
+**Note:** Run `/sb:theme` to see current available templates with their descriptions.

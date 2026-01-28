@@ -11,383 +11,179 @@
         :root {
             --color-primary: #d4e94c;
             --color-secondary: #4ecdc4;
-            --color-accent: #FF6B6B;
-            --color-bg-default: #FFFFFF;
-            --color-bg-alt: #F5F5F5;
-            --color-bg-dark: #0a0a0a;
-            --color-bg-dark-alt: #1a1a1a;
-            --color-text-heading: #0a0a0a;
-            --color-text-body: #4A4A4A;
+            --color-bg-default: #0a0a0a;
+            --color-bg-alt: #1a1a1a;
+            --color-text-heading: #ffffff;
+            --color-text-body: #f5f5f5;
             --color-text-muted: #888888;
-            --color-text-on-dark: #FFFFFF;
-            --color-text-on-primary: #0a0a0a;
-            --font-heading: 'Outfit', system-ui, -apple-system, sans-serif;
-            --font-body: 'Outfit', system-ui, -apple-system, sans-serif;
-            --font-mono: 'SF Mono', 'Monaco', 'Consolas', monospace;
-            --size-hero: 72px;
-            --size-h1: 48px;
-            --size-h2: 36px;
-            --size-h3: 24px;
-            --size-body: 18px;
-            --border-radius: 0px;
-            --shadow: none;
+            --font-heading: 'Outfit', system-ui, sans-serif;
+            --font-body: 'Outfit', system-ui, sans-serif;
         }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
+            font-family: var(--font-body);
+            background: var(--color-bg-default);
             width: 1920px;
             height: 1080px;
             overflow: hidden;
-            font-family: var(--font-body);
-            background: #2a2a2a;
         }
-
         .slide {
             width: 1920px;
             height: 1080px;
-            background: var(--color-bg-dark);
+            background: var(--color-bg-default);
             position: relative;
-            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 80px 120px;
         }
-
-        /* Subtle grid texture */
         .slide::before {
             content: '';
             position: absolute;
-            inset: 0;
-            background-image:
-                linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
-            background-size: 40px 40px;
-            pointer-events: none;
+            top: 0;
+            right: 0;
+            width: 600px;
+            height: 100%;
+            background: linear-gradient(135deg, transparent 50%, var(--color-bg-alt) 50%);
+            z-index: 0;
         }
-
-        /* Top accent bar */
         .accent-bar {
             position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
+            top: 80px;
+            left: 120px;
+            width: 120px;
             height: 4px;
-            background: linear-gradient(90deg, var(--color-primary) 0%, var(--color-primary) 30%, transparent 30%);
+            background: var(--color-primary);
         }
-
-        /* Header */
-        .header {
+        .content {
+            position: relative;
+            z-index: 1;
+            max-width: 1200px;
+        }
+        .eyebrow {
+            font-size: 14px;
+            font-weight: 600;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: var(--color-primary);
+            margin-bottom: 24px;
+        }
+        h1 {
+            font-family: var(--font-heading);
+            font-size: 96px;
+            font-weight: 700;
+            line-height: 1.0;
+            color: var(--color-text-heading);
+            margin-bottom: 32px;
+            letter-spacing: -2px;
+        }
+        h1 .highlight { color: var(--color-primary); }
+        .subtitle {
+            font-size: 28px;
+            font-weight: 400;
+            color: var(--color-text-muted);
+            max-width: 700px;
+            line-height: 1.4;
+        }
+        .footer {
             position: absolute;
-            top: 60px;
-            left: 80px;
-            right: 80px;
+            bottom: 60px;
+            left: 120px;
+            right: 120px;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            z-index: 1;
         }
-
-        .logo {
+        .week-badge {
             display: flex;
             align-items: center;
             gap: 12px;
         }
-
-        .logo-icon {
-            width: 40px;
-            height: 40px;
+        .week-number {
             background: var(--color-primary);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .logo-icon svg {
-            width: 24px;
-            height: 24px;
-        }
-
-        .logo-text {
-            font-family: var(--font-heading);
-            font-weight: 600;
-            font-size: 20px;
-            color: var(--color-text-on-dark);
-            letter-spacing: 0.5px;
-        }
-
-        .header-meta {
-            font-family: var(--font-body);
+            color: var(--color-bg-default);
+            font-weight: 700;
             font-size: 14px;
-            text-transform: uppercase;
-            letter-spacing: 2px;
+            padding: 8px 16px;
+            letter-spacing: 1px;
+        }
+        .week-label {
+            font-size: 14px;
             color: var(--color-text-muted);
         }
-
-        /* Main content */
-        .content {
-            position: absolute;
-            top: 50%;
-            left: 80px;
-            right: 80px;
-            transform: translateY(-50%);
-        }
-
-        .eyebrow {
-            font-family: var(--font-body);
+        .duration {
             font-size: 14px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 3px;
-            color: var(--color-primary);
-            margin-bottom: 24px;
+            color: var(--color-text-muted);
             display: flex;
             align-items: center;
-            gap: 16px;
-        }
-
-        .eyebrow::before {
-            content: '';
-            width: 40px;
-            height: 2px;
-            background: var(--color-primary);
-        }
-
-        .title {
-            font-family: var(--font-heading);
-            font-size: var(--size-hero);
-            font-weight: 600;
-            color: var(--color-text-on-dark);
-            line-height: 1.1;
-            letter-spacing: -1px;
-            margin-bottom: 32px;
-            max-width: 1200px;
-        }
-
-        .title em {
-            font-style: normal;
-            color: var(--color-primary);
-        }
-
-        .subtitle {
-            font-family: var(--font-body);
-            font-size: var(--size-h3);
-            font-weight: 300;
-            color: var(--color-text-muted);
-            line-height: 1.5;
-            max-width: 800px;
-        }
-
-        /* Terminal visual element */
-        .terminal-accent {
-            position: absolute;
-            right: 80px;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 480px;
-            opacity: 0.15;
-        }
-
-        .terminal-window {
-            background: var(--color-bg-dark-alt);
-            border: 1px solid #2a2a2a;
-            padding: 20px;
-        }
-
-        .terminal-header {
-            display: flex;
             gap: 8px;
-            margin-bottom: 16px;
         }
-
-        .terminal-dot {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            background: #3a3a3a;
-        }
-
-        .terminal-content {
-            font-family: var(--font-mono);
-            font-size: 14px;
-            color: var(--color-text-muted);
-            line-height: 1.6;
-        }
-
-        .terminal-prompt {
-            color: var(--color-primary);
-        }
-
-        /* Footer */
-        .footer {
+        .duration-icon { color: var(--color-secondary); }
+        .corner-accent {
             position: absolute;
-            bottom: 60px;
-            left: 80px;
-            right: 80px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding-top: 20px;
-            border-top: 1px solid #2a2a2a;
+            bottom: 0;
+            right: 0;
+            width: 200px;
+            height: 200px;
+            border-left: 3px solid var(--color-primary);
+            border-top: 3px solid var(--color-primary);
+            z-index: 1;
         }
-
-        .footer::before {
-            content: '';
-            position: absolute;
-            top: -1px;
-            left: 0;
-            width: 80px;
-            height: 2px;
-            background: var(--color-primary);
-        }
-
-        .footer-left {
-            font-family: var(--font-body);
-            font-size: 14px;
-            color: var(--color-text-muted);
-        }
-
-        .footer-center {
-            font-family: var(--font-body);
-            font-size: 12px;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-            color: var(--color-text-muted);
-        }
-
-        .slide-number {
-            width: 32px;
-            height: 32px;
-            background: var(--color-primary);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-family: var(--font-body);
-            font-size: 14px;
-            font-weight: 600;
-            color: var(--color-bg-dark);
-        }
-
-        /* Contenteditable focus styles */
         [contenteditable]:focus {
             outline: 2px solid var(--color-primary);
             outline-offset: 4px;
-        }
-
-        [contenteditable]:hover {
-            outline: 1px dashed var(--color-text-muted);
-            outline-offset: 2px;
         }
     </style>
 </head>
 <body>
     <div class="slide" data-slide-id="1">
         <div class="accent-bar"></div>
-
-        <header class="header">
-            <div class="logo">
-                <div class="logo-icon">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <polyline points="4 17 10 11 4 5"></polyline>
-                        <line x1="12" y1="19" x2="20" y2="19"></line>
-                    </svg>
-                </div>
-                <span class="logo-text" contenteditable="true" data-field="logo">Claude Code</span>
+        <div class="content">
+            <div class="eyebrow" contenteditable="true" data-field="eyebrow">SE Curriculum • Week 1 of 12</div>
+            <h1 contenteditable="true" data-field="title">Claude Code <span class="highlight">Fundamentals</span></h1>
+            <p class="subtitle" contenteditable="true" data-field="subtitle">Automate the hard stuff. Build AI expertise. Have fun.</p>
+        </div>
+        <div class="footer">
+            <div class="week-badge">
+                <span class="week-number">WEEK 1</span>
+                <span class="week-label" contenteditable="true" data-field="week-label">Foundation Phase</span>
             </div>
-            <div class="header-meta" contenteditable="true" data-field="header-meta">Workshop</div>
-        </header>
-
-        <main class="content">
-            <div class="eyebrow" contenteditable="true" data-field="eyebrow">From Chat to Agent</div>
-            <h1 class="title" contenteditable="true" data-field="title">Claude Code <em>Fundamentals</em></h1>
-            <p class="subtitle" contenteditable="true" data-field="subtitle">Transform how you work with AI. From asking questions to working alongside an agent that takes action in your environment.</p>
-        </main>
-
-        <div class="terminal-accent">
-            <div class="terminal-window">
-                <div class="terminal-header">
-                    <div class="terminal-dot"></div>
-                    <div class="terminal-dot"></div>
-                    <div class="terminal-dot"></div>
-                </div>
-                <div class="terminal-content">
-                    <span class="terminal-prompt">$</span> claude<br>
-                    <span style="color: var(--color-secondary);">Claude Code v1.0</span><br>
-                    <span style="color: var(--color-text-muted);">Ready to assist...</span>
-                </div>
+            <div class="duration">
+                <svg class="duration-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <polyline points="12 6 12 12 16 14"></polyline>
+                </svg>
+                <span contenteditable="true" data-field="duration">30 minutes</span>
             </div>
         </div>
-
-        <footer class="footer">
-            <div class="footer-left" contenteditable="true" data-field="footer-left">Solutions Engineering</div>
-            <div class="footer-center" contenteditable="true" data-field="footer-center">Training Workshop</div>
-            <div class="slide-number">1</div>
-        </footer>
+        <div class="corner-accent"></div>
     </div>
-
     <script>
-        // Auto-save script for contenteditable elements
-        const isLocalStorageAvailable = () => {
-            try {
-                const test = '__localStorage_test__';
-                localStorage.setItem(test, test);
-                localStorage.removeItem(test);
-                return true;
-            } catch (e) {
-                return false;
-            }
-        };
-
-        const localStorageEnabled = isLocalStorageAvailable();
-        if (!localStorageEnabled) {
-            console.warn('[Slide Auto-Save] localStorage is disabled.');
-        }
-
         const saveEdits = () => {
-            if (!localStorageEnabled) return;
-            try {
-                const edits = [];
-                document.querySelectorAll('[contenteditable]').forEach(el => {
-                    const field = el.getAttribute('data-field');
-                    if (field) {
-                        edits.push({ selector: `[data-field='${field}']`, content: el.innerHTML });
-                    }
-                });
-                localStorage.setItem('slide-1-edits', JSON.stringify({
-                    slide: 1,
-                    edits: edits,
-                    lastModified: new Date().toISOString()
-                }));
-            } catch (e) {
-                console.error('[Slide Auto-Save] Failed to save:', e.message);
-            }
+            const edits = [];
+            document.querySelectorAll('[contenteditable]').forEach(el => {
+                const field = el.getAttribute('data-field');
+                if (field) edits.push({ selector: '[data-field="' + field + '"]', content: el.innerHTML });
+            });
+            localStorage.setItem('slide-1-edits', JSON.stringify({ slide: 1, edits: edits, lastModified: new Date().toISOString() }));
         };
-
         document.querySelectorAll('[contenteditable]').forEach(el => {
             el.addEventListener('blur', saveEdits);
             el.addEventListener('input', () => setTimeout(saveEdits, 1000));
         });
-
-        // Restore edits on load
-        const restoreEdits = () => {
-            if (!localStorageEnabled) return;
+        const stored = localStorage.getItem('slide-1-edits');
+        if (stored) {
             try {
-                const stored = localStorage.getItem('slide-1-edits');
-                if (stored) {
-                    const data = JSON.parse(stored);
-                    if (data.slide === 1 && Array.isArray(data.edits)) {
-                        data.edits.forEach(edit => {
-                            const el = document.querySelector(edit.selector);
-                            if (el) el.innerHTML = edit.content;
-                        });
-                    }
+                const data = JSON.parse(stored);
+                if (data.slide === 1 && Array.isArray(data.edits)) {
+                    data.edits.forEach(edit => {
+                        const el = document.querySelector(edit.selector);
+                        if (el) el.innerHTML = edit.content;
+                    });
                 }
-            } catch (e) {
-                localStorage.removeItem('slide-1-edits');
-            }
-        };
-
-        restoreEdits();
+            } catch (e) { localStorage.removeItem('slide-1-edits'); }
+        }
     </script>
 </body>
 </html>

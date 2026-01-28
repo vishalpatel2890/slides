@@ -1,82 +1,58 @@
 # Build Workflow Instructions
 
-This workflow generates slides from plans.
+This workflow routes to the appropriate build workflow.
 
 ```xml
-<critical>This workflow generates HTML slides from plan.yaml</critical>
-<critical>Requires theme.json and a plan (single or deck mode)</critical>
-<critical>Supports build-one (next slide) and build-all (all remaining)</critical>
+<critical>This is a router workflow - it delegates to build-one or build-all</critical>
 
 <workflow>
 
-  <step n="1" goal="Determine mode and load context">
-    <action>Read status.yaml to determine current mode (single/deck)</action>
-    <action>Load theme.json</action>
+  <step n="1" goal="Check for existing plan">
+    <action>Read status.yaml to check current mode</action>
 
-    <check if="no mode set">
+    <check if="no mode set or no plan exists">
       <output>
 **No Plan Found**
 
 You need to plan your slides first:
-- `/sb-plan-one` for a single slide
-- `/sb-plan-deck` for a full presentation
+- `/sb:plan-one` for a single slide
+- `/sb:plan-deck` for a full presentation
       </output>
       <action>HALT</action>
     </check>
-
-    <check if="mode is single">
-      <action>Load output/singles/plan.yaml</action>
-    </check>
-
-    <check if="mode is deck">
-      <action>Get current_deck_slug from status.yaml</action>
-      <action>Load output/{{deck_slug}}/plan.yaml</action>
-      <action>Identify next unbuilt slide</action>
-    </check>
   </step>
 
-  <step n="2" goal="Select layout approach">
-    <action>Check slide intent against available templates</action>
+  <step n="2" goal="Determine build mode">
+    <ask>
+**Slide Building**
 
-    <check if="template matches intent">
-      <action>Load matching template from templates/</action>
-      <action>Proceed with template-based generation</action>
-    </check>
+What would you like to build?
 
-    <check if="no template matches">
-      <action>Invoke frontend-design skill for custom layout</action>
-      <action>Proceed with custom generation</action>
-    </check>
+1. **Next Slide** - Build the next pending slide from your plan
+2. **All Remaining** - Build all unbuilt slides in sequence
+
+Enter 1 or 2 (or describe what you need):
+    </ask>
   </step>
 
-  <step n="3" goal="Generate slide">
-    <action>Apply theme CSS variables</action>
-    <action>Inject content from plan</action>
-    <action>Add contenteditable attributes to text elements</action>
-    <action>Add auto-save script</action>
-
-    <check if="single mode">
-      <action>Save to output/singles/{{slide_slug}}.html</action>
+  <step n="3" goal="Route to appropriate workflow">
+    <check if="user chose next slide or 1">
+      <action>Invoke build-one workflow</action>
+      <invoke-workflow>{project-root}/.slide-builder/workflows/build-one/workflow.yaml</invoke-workflow>
     </check>
 
-    <check if="deck mode">
-      <action>Save to output/{{deck_slug}}/slides/slide-{{n}}.html</action>
-      <action>Update output/{{deck_slug}}/plan.yaml slide status to "built"</action>
+    <check if="user chose all remaining or 2">
+      <action>Invoke build-all workflow</action>
+      <invoke-workflow>{project-root}/.slide-builder/workflows/build-all/workflow.yaml</invoke-workflow>
     </check>
-  </step>
 
-  <step n="4" goal="Complete and report">
-    <action>Update status.yaml with last_action and history</action>
-
-    <output>
-**Slide Generated**
-
-{{slide_location}}
-
-Open in browser to preview and edit text directly.
-
-{{next_steps}}
-    </output>
+    <check if="user intent unclear">
+      <ask>
+I'm not sure which mode you need. Would you like:
+- **Next slide** (type "next" or "1")
+- **All remaining** (type "all" or "2")
+      </ask>
+    </check>
   </step>
 
 </workflow>

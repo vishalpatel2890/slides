@@ -4,104 +4,85 @@
 # Current operating mode
 mode: deck
 
-# Deck tracking
-current_deck_slug: "claude-code-fundamentals"
-deck_slug: "claude-code-fundamentals"
-current_slide: 14
-total_slides: 14
-built_count: 14
+# Current deck tracking
+current_deck_slug: "claude-code-fundamentals-week-2"
+deck_slug: "claude-code-fundamentals-week-2"
+current_slide: 12
+total_slides: 12
+built_count: 12
+output_folder: "output/claude-code-fundamentals-week-2"
 
-# Setup workflow tracking
+# Setup workflow tracking (preserved from setup)
 phase: complete
-workflow_version: "2.0"
+workflow_version: "3.0"
+feedback_iteration: 0
 
 # Assets collected
 assets:
   website_url: https://amperity.com
+  style_reference: /Users/vishalpatel/Documents/rocd-reccomender/outputs/Alice and Olivia/value-roadmap-editable.html
   pdf_paths: []
   image_paths: []
-  brand_description: "Bold & innovative - Tech-forward, startup energy, stands out from competition"
+  brand_description: "Helpful, Clear, Innovative, Motivating, with Zing! Upbeat and inspiring, cut to the chase with brevity and precision, push beyond expected, boldly spur action, unexpected fun and wit."
 
 # Extraction status
 extraction:
   website_analysis: complete
+  style_reference_analysis: complete
   pdf_analysis: skipped
   image_analysis: skipped
 
 # Theme status
 theme:
   file: .slide-builder/config/theme.json
-  status: locked
+  status: approved
   personality: bold
-  confidence: 0.85
-  approved: "2026-01-27"
+  confidence: 0.9
 
-# Template files
-templates:
-  directory: .slide-builder/config/templates/
-  count: 6
-  files:
-    - 01-title.html
-    - 02-agenda.html
-    - 03-flow.html
-    - 04-comparison.html
-    - 05-callout.html
-    - 06-technical.html
+# Catalog templates
+catalog:
+  directory: .slide-builder/config/catalog/
+  manifest: .slide-builder/config/catalog/catalog.json
+  count: 7
+  templates:
+    - id: title
+      name: Title Slide
+    - id: agenda
+      name: Agenda/List
+    - id: process-flow
+      name: Process Flow
+    - id: comparison
+      name: Comparison
+    - id: callout
+      name: Key Insight
+    - id: technical
+      name: Technical/Code
+    - id: rocd-initiative-template
+      name: ROCD Initiative Template
 
 # Last action tracking
-last_action: "Batch built all 14 slides for Claude Code Fundamentals deck"
-last_modified: "2026-01-28T00:00:00Z"
-output_folder: "output/claude-code-fundamentals"
+last_action: "Build-all complete - 12/12 slides built for Claude Code Fundamentals - Week 2"
+last_modified: "2026-01-29T00:00:00Z"
 
 # Action history
 history:
   - action: "Setup workflow started fresh"
-    timestamp: "2026-01-27T12:00:00Z"
-  - action: "Assets collected (1 website)"
-    timestamp: "2026-01-27T12:00:00Z"
-  - action: "Brand primitives extracted"
-    timestamp: "2026-01-27T12:05:00Z"
-  - action: "Theme.json generated with Outfit font"
-    timestamp: "2026-01-27T12:10:00Z"
-  - action: "Sample slides generated for review"
-    timestamp: "2026-01-27T12:15:00Z"
-  - action: "Theme approved and locked"
-    timestamp: "2026-01-27T12:20:00Z"
-  - action: "Single slide planned"
-    timestamp: "2026-01-27T18:45:00Z"
-  - action: "Built slide using layout-title template"
-    timestamp: "2026-01-27T19:30:00Z"
-  - action: "Custom Venn diagram slide planned"
-    timestamp: "2026-01-27T20:00:00Z"
-  - action: "Built custom slide via frontend-design skill"
-    timestamp: "2026-01-27T20:15:00Z"
-  - action: "Deck plan created with 9 slides"
-    timestamp: "2026-01-27T00:00:00Z"
-  - action: "Built slide 1: Title - Claude Code Fundamentals"
-    timestamp: "2026-01-27T16:00:00Z"
-  - action: "Built slide 2: What is Claude Code?"
-    timestamp: "2026-01-27T16:05:00Z"
-  - action: "Batch built 8 slides (slides 3-10)"
-    timestamp: "2026-01-27T18:30:00Z"
-  - action: "Single slide planned - Activation Hub concept"
-    timestamp: "2026-01-27T10:00:00Z"
-  - action: "Theme viewed via /theme"
-    timestamp: "2026-01-27T20:30:00Z"
-  - action: "Built custom Activation Hub slide via frontend-design skill"
-    timestamp: "2026-01-27T21:00:00Z"
-  - action: "Single slide planned - Household Constellation concept"
-    timestamp: "2026-01-27T21:30:00Z"
-  - action: "Built custom Household Constellation slide via frontend-design skill"
-    timestamp: "2026-01-27T21:45:00Z"
-  - action: "Built custom Household Transformation slide via frontend-design skill"
-    timestamp: "2026-01-27T22:35:00Z"
-  - action: "Single slide planned - Household ID outcome using layout-rocd-initiative"
-    timestamp: "2026-01-27T23:00:00Z"
-  - action: "Built slide using layout-rocd-initiative template"
-    timestamp: "2026-01-27T23:05:00Z"
-  - action: "Deck plan 'Claude Code Fundamentals' created with 14 slides"
-    timestamp: "2026-01-27T23:30:00Z"
-  - action: "Built slide 1: Title - Claude Code Fundamentals"
-    timestamp: "2026-01-27T23:35:00Z"
-  - action: "Batch built slides 2-14 for Claude Code Fundamentals deck"
     timestamp: "2026-01-28T00:00:00Z"
+  - action: "Assets collected (1 website, 1 HTML style reference)"
+    timestamp: "2026-01-28T00:00:00Z"
+  - action: "Brand primitives extracted with Outfit font"
+    timestamp: "2026-01-28T00:00:00Z"
+  - action: "Theme.json v3.0 generated"
+    timestamp: "2026-01-28T00:00:00Z"
+  - action: "6 catalog templates generated"
+    timestamp: "2026-01-28T00:00:00Z"
+  - action: "Deck plan 'Claude Code Fundamentals' created with 13 slides"
+    timestamp: "2026-01-28T12:00:00Z"
+  - action: "Single slide planned - Week 2: Context & Conversation Management"
+    timestamp: "2026-01-28T22:00:00Z"
+  - action: "Build-all complete - 13/13 slides built for Claude Code Fundamentals"
+    timestamp: "2026-01-28T23:00:00Z"
+  - action: "Deck plan 'Claude Code Fundamentals - Week 2' created with 12 slides"
+    timestamp: "2026-01-28T23:30:00Z"
+  - action: "Build-all complete - 12/12 slides built for Claude Code Fundamentals - Week 2"
+    timestamp: "2026-01-29T00:00:00Z"

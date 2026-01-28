@@ -14,6 +14,10 @@ theme_file: "{config_path}/theme.json"
 templates_dir: "{config_path}/templates"
 samples_dir: "{config_path}/samples"
 
+# Catalog paths (template discovery)
+catalog_path: "{config_path}/catalog"
+catalog_manifest: "{catalog_path}/catalog.json"
+
 # Workflow components
 instructions: "{installed_path}/instructions.md"
 
@@ -30,68 +34,21 @@ deck_output_dir: "{output_root}"  # Deck slides go to output/{slug}/slides/
 # Legacy paths (for deck working files only)
 deck_working_dir: "{project-root}/.slide-builder/deck"
 
-# Template file mapping (suggested_template -> actual file)
-# Maps intent-based layout names to sample files for reference
-# Note: If templates/ dir is empty, samples are used as design reference
-template_mapping:
-  layout-title: "01-title.html"
-  layout-list: "02-agenda.html"
-  layout-flow: "03-flow.html"
-  layout-columns-2: "04-comparison.html"
-  layout-columns-3: "04-comparison.html"  # Fallback to 2-column
-  layout-callout: "05-callout.html"
-  layout-code: "06-technical.html"
-
-# Intent keyword to template mapping (from Architecture Novel Pattern 2)
-intent_keywords:
-  layout-title:
-    - "title"
-    - "intro"
-    - "opening"
-    - "cover"
-  layout-list:
-    - "list"
-    - "bullets"
-    - "points"
-    - "agenda"
-    - "steps"
-  layout-flow:
-    - "flow"
-    - "process"
-    - "timeline"
-    - "journey"
-    - "workflow"
-  layout-columns-2:
-    - "compare"
-    - "vs"
-    - "two"
-    - "side-by-side"
-    - "before/after"
-    - "ROI"
-    - "numbers"
-    - "metrics"
-    - "resources"
-  layout-columns-3:
-    - "three"
-    - "triad"
-    - "options"
-    - "landscape"
-    - "products"
-  layout-callout:
-    - "key"
-    - "insight"
-    - "callout"
-    - "cta"
-    - "important"
-    - "highlight"
-    - "exercise"
-    - "hands-on"
-  layout-code:
-    - "code"
-    - "technical"
-    - "api"
-    - "commands"
-    - "CLI"
+# Template discovery is now catalog-driven
+# Read catalog.json for template matching:
+# 1. Match against template `id` field (exact match)
+# 2. Fall back to `use_cases` array matching
+# 3. Fall back to custom generation via frontend-design skill
+#
+# Legacy mappings below are kept for backward compatibility only
+# They are used as fallback if catalog.json is missing
+legacy_template_mapping:
+  title: "title.html"
+  agenda: "agenda.html"
+  process-flow: "process-flow.html"
+  comparison: "comparison.html"
+  callout: "callout.html"
+  technical: "technical.html"
 
 # Slide status enum
 slide_status:

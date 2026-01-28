@@ -14,6 +14,10 @@ instructions: "{installed_path}/instructions.md"
 config_path: "{project-root}/.slide-builder/config"
 theme_file: "{config_path}/theme.json"
 
+# Catalog paths (template discovery)
+catalog_path: "{config_path}/catalog"
+catalog_manifest: "{catalog_path}/catalog.json"
+
 # State management
 status_file: "{project-root}/.slide-builder/status.yaml"
 
@@ -21,61 +25,16 @@ status_file: "{project-root}/.slide-builder/status.yaml"
 output_dir: "{project-root}/output/singles"
 plan_file: "{output_dir}/plan.yaml"
 
-# Template matching keywords (for reference)
-template_keywords:
-  layout-title:
-    - title
-    - intro
-    - opening
-    - welcome
-    - cover
-  layout-list:
-    - list
-    - bullets
-    - points
-    - agenda
-    - items
-    - features
-  layout-flow:
-    - flow
-    - process
-    - timeline
-    - steps
-    - sequence
-    - pipeline
-    - workflow
-  layout-columns-2:
-    - compare
-    - vs
-    - versus
-    - two
-    - side-by-side
-    - before
-    - after
-    - pros
-    - cons
-  layout-columns-3:
-    - three
-    - triad
-    - options
-    - pillars
-    - trio
-  layout-callout:
-    - key
-    - insight
-    - callout
-    - cta
-    - highlight
-    - quote
-    - stat
-    - metric
-  layout-code:
-    - code
-    - technical
-    - api
-    - snippet
-    - demo
-    - terminal
+# Template matching is now catalog-driven
+# Read use_cases from catalog.json for intelligent template suggestions
+# Legacy keywords below kept for fallback if catalog is unavailable
+legacy_template_keywords:
+  title: [title, intro, opening, welcome, cover]
+  agenda: [list, bullets, points, agenda, items, features]
+  process-flow: [flow, process, timeline, steps, sequence, pipeline, workflow]
+  comparison: [compare, vs, versus, two, side-by-side, before, after, pros, cons]
+  callout: [key, insight, callout, cta, highlight, quote, stat, metric]
+  technical: [code, technical, api, snippet, demo, terminal]
 
 # Variables
 variables:

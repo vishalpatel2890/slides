@@ -3,349 +3,103 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=1920, height=1080">
-    <title>Slide 6: Installation & Setup</title>
+    <title>Slide 6: Install Claude Code</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
     <style>
         :root {
             --color-primary: #d4e94c;
             --color-secondary: #4ecdc4;
-            --color-bg-dark: #0a0a0a;
-            --color-bg-dark-alt: #1a1a1a;
-            --color-mid-gray: #2a2a2a;
-            --color-text-on-dark: #FFFFFF;
+            --color-bg-default: #0a0a0a;
+            --color-bg-alt: #1a1a1a;
+            --color-bg-code: #111111;
+            --color-text-heading: #ffffff;
+            --color-text-body: #f5f5f5;
             --color-text-muted: #888888;
+            --color-border: #2a2a2a;
             --font-heading: 'Outfit', system-ui, sans-serif;
             --font-body: 'Outfit', system-ui, sans-serif;
-            --font-mono: 'SF Mono', Monaco, Consolas, monospace;
+            --font-mono: 'Fira Code', monospace;
         }
-
         * { margin: 0; padding: 0; box-sizing: border-box; }
-
-        body {
-            width: 1920px;
-            height: 1080px;
-            overflow: hidden;
-            font-family: var(--font-body);
-        }
-
-        .slide {
-            width: 1920px;
-            height: 1080px;
-            background: var(--color-bg-dark);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .slide::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background-image:
-                linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
-            background-size: 40px 40px;
-            pointer-events: none;
-        }
-
-        .header {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            padding: 20px 80px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid var(--color-mid-gray);
-        }
-
-        .header::after {
-            content: '';
-            position: absolute;
-            bottom: -1px;
-            left: 80px;
-            width: 120px;
-            height: 2px;
-            background: var(--color-primary);
-        }
-
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .logo-icon {
-            width: 36px;
-            height: 36px;
-            background: var(--color-primary);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .logo-text {
-            font-weight: 600;
-            font-size: 18px;
-            color: var(--color-text-on-dark);
-        }
-
-        .header-meta {
-            font-size: 12px;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            color: var(--color-text-muted);
-        }
-
-        .content {
-            position: absolute;
-            top: 100px;
-            left: 80px;
-            right: 80px;
-            bottom: 100px;
-        }
-
-        .section-header {
-            margin-bottom: 48px;
-        }
-
-        .section-label {
-            font-size: 11px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            color: var(--color-text-muted);
-            margin-bottom: 12px;
-        }
-
-        .page-title {
-            font-family: var(--font-heading);
-            font-size: 48px;
-            font-weight: 600;
-            color: var(--color-text-on-dark);
-        }
-
-        .page-title em {
-            font-style: normal;
-            color: var(--color-primary);
-        }
-
-        .code-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 32px;
-            margin-bottom: 40px;
-        }
-
-        .code-block {
-            background: var(--color-bg-dark-alt);
-            border: 1px solid var(--color-mid-gray);
-            overflow: hidden;
-        }
-
-        .code-header {
-            background: var(--color-mid-gray);
-            padding: 12px 20px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .code-dots {
-            display: flex;
-            gap: 8px;
-        }
-
-        .code-dot {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-        }
-
-        .code-dot.red { background: #ff6b6b; }
-        .code-dot.yellow { background: #ffd93d; }
-        .code-dot.green { background: var(--color-secondary); }
-
-        .code-label {
-            font-family: var(--font-body);
-            font-size: 12px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: var(--color-text-muted);
-        }
-
-        .code-body {
-            padding: 28px;
-            font-family: var(--font-mono);
-            font-size: 16px;
-            line-height: 2;
-            color: var(--color-text-on-dark);
-        }
-
-        .code-comment { color: var(--color-text-muted); }
-        .code-command { color: var(--color-primary); }
-        .code-flag { color: var(--color-secondary); }
-
-        .info-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 24px;
-        }
-
-        .info-card {
-            background: var(--color-bg-dark-alt);
-            border: 1px solid var(--color-mid-gray);
-            padding: 28px;
-            border-left: 3px solid var(--color-secondary);
-        }
-
-        .info-label {
-            font-size: 11px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-            color: var(--color-text-muted);
-            margin-bottom: 12px;
-        }
-
-        .info-value {
-            font-family: var(--font-mono);
-            font-size: 18px;
-            font-weight: 500;
-            color: var(--color-text-on-dark);
-        }
-
-        .footer {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            padding: 20px 80px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-top: 1px solid var(--color-mid-gray);
-        }
-
-        .footer::before {
-            content: '';
-            position: absolute;
-            top: -1px;
-            left: 80px;
-            width: 60px;
-            height: 2px;
-            background: var(--color-primary);
-        }
-
-        .footer-left { font-size: 14px; color: var(--color-text-muted); }
-        .footer-center { font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--color-text-muted); }
-
-        .slide-number {
-            width: 32px;
-            height: 32px;
-            background: var(--color-primary);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 14px;
-            font-weight: 600;
-            color: var(--color-bg-dark);
-        }
-
+        body { font-family: var(--font-body); background: var(--color-bg-default); width: 1920px; height: 1080px; overflow: hidden; }
+        .slide { width: 1920px; height: 1080px; background: var(--color-bg-default); padding: 80px; display: flex; flex-direction: column; }
+        .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 48px; }
+        .section-label { font-size: 12px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: var(--color-secondary); margin-bottom: 16px; }
+        h1 { font-family: var(--font-heading); font-size: 48px; font-weight: 700; color: var(--color-text-heading); line-height: 1.1; }
+        .content { flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 40px; max-width: 1400px; margin: 0 auto; }
+        .step { display: grid; grid-template-columns: 80px 1fr; gap: 32px; align-items: start; }
+        .step-number { font-family: var(--font-heading); font-size: 48px; font-weight: 700; color: var(--color-primary); line-height: 1; }
+        .step-content h3 { font-size: 24px; font-weight: 600; color: var(--color-text-heading); margin-bottom: 16px; }
+        .code-block { background: var(--color-bg-code); border: 1px solid var(--color-border); padding: 20px 28px; font-family: var(--font-mono); font-size: 20px; color: var(--color-text-body); display: flex; align-items: center; justify-content: space-between; }
+        .code-block code { color: var(--color-primary); }
+        .copy-hint { font-size: 12px; color: var(--color-text-muted); text-transform: uppercase; letter-spacing: 1px; }
+        .note { background: rgba(212, 233, 76, 0.08); border-left: 3px solid var(--color-primary); padding: 16px 24px; margin-top: 16px; }
+        .note-text { font-size: 16px; color: var(--color-text-muted); }
+        .note-text strong { color: var(--color-primary); }
         [contenteditable]:focus { outline: 2px solid var(--color-primary); outline-offset: 4px; }
-        [contenteditable]:hover { outline: 1px dashed var(--color-text-muted); outline-offset: 2px; }
     </style>
 </head>
 <body>
     <div class="slide" data-slide-id="6">
-        <header class="header">
-            <div class="logo">
-                <div class="logo-icon">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <polyline points="4 17 10 11 4 5"></polyline>
-                        <line x1="12" y1="19" x2="20" y2="19"></line>
-                    </svg>
-                </div>
-                <span class="logo-text" contenteditable="true" data-field="logo">Claude Code</span>
+        <div class="header">
+            <div>
+                <div class="section-label" contenteditable="true" data-field="section-label">Installation</div>
+                <h1 contenteditable="true" data-field="title">Install Claude Code</h1>
             </div>
-            <div class="header-meta" contenteditable="true" data-field="header-meta">Workshop</div>
-        </header>
-
-        <main class="content">
-            <div class="section-header">
-                <div class="section-label" contenteditable="true" data-field="section-label">Getting Started</div>
-                <h1 class="page-title" contenteditable="true" data-field="title">Installation & Setup — <em>2 Minutes to Start</em></h1>
-            </div>
-
-            <div class="code-grid">
-                <div class="code-block">
-                    <div class="code-header">
-                        <div class="code-dots">
-                            <div class="code-dot red"></div>
-                            <div class="code-dot yellow"></div>
-                            <div class="code-dot green"></div>
-                        </div>
-                        <span class="code-label">Option 1: npm</span>
+        </div>
+        <div class="content">
+            <div class="step">
+                <div class="step-number">1</div>
+                <div class="step-content">
+                    <h3 contenteditable="true" data-field="step1-title">Install via Homebrew</h3>
+                    <div class="code-block">
+                        <code contenteditable="true" data-field="step1-cmd">brew install claude</code>
+                        <span class="copy-hint">Copy & paste</span>
                     </div>
-                    <div class="code-body">
-                        <span class="code-comment"># Install via npm (recommended)</span><br>
-                        <span class="code-command">npm install</span> <span class="code-flag">-g</span> @anthropic-ai/claude-code<br><br>
-                        <span class="code-comment"># Verify installation</span><br>
-                        <span class="code-command">claude</span> <span class="code-flag">--version</span>
-                    </div>
-                </div>
-
-                <div class="code-block">
-                    <div class="code-header">
-                        <div class="code-dots">
-                            <div class="code-dot red"></div>
-                            <div class="code-dot yellow"></div>
-                            <div class="code-dot green"></div>
-                        </div>
-                        <span class="code-label">Option 2: Homebrew (macOS)</span>
-                    </div>
-                    <div class="code-body">
-                        <span class="code-comment"># Install via Homebrew</span><br>
-                        <span class="code-command">brew install</span> anthropic/tap/claude-code<br><br>
-                        <span class="code-comment"># Start using Claude Code</span><br>
-                        <span class="code-command">claude</span>
+                    <div class="note">
+                        <p class="note-text" contenteditable="true" data-field="step1-note"><strong>Note:</strong> npm install is blocked on corporate networks. Use Homebrew.</p>
                     </div>
                 </div>
             </div>
-
-            <div class="info-grid">
-                <div class="info-card">
-                    <div class="info-label" contenteditable="true" data-field="req-1-label">Node.js</div>
-                    <div class="info-value" contenteditable="true" data-field="req-1-value">v18.0.0+</div>
-                </div>
-                <div class="info-card">
-                    <div class="info-label" contenteditable="true" data-field="req-2-label">Supported OS</div>
-                    <div class="info-value" contenteditable="true" data-field="req-2-value">macOS / Linux / WSL</div>
-                </div>
-                <div class="info-card">
-                    <div class="info-label" contenteditable="true" data-field="req-3-label">Setup Time</div>
-                    <div class="info-value" contenteditable="true" data-field="req-3-value">~2 minutes</div>
+            <div class="step">
+                <div class="step-number">2</div>
+                <div class="step-content">
+                    <h3 contenteditable="true" data-field="step2-title">Verify Installation</h3>
+                    <div class="code-block">
+                        <code contenteditable="true" data-field="step2-cmd">claude --version</code>
+                        <span class="copy-hint">Should show version</span>
+                    </div>
                 </div>
             </div>
-        </main>
-
-        <footer class="footer">
-            <div class="footer-left" contenteditable="true" data-field="footer-left">Claude Code Fundamentals</div>
-            <div class="footer-center" contenteditable="true" data-field="footer-center">Training Workshop</div>
-            <div class="slide-number">6</div>
-        </footer>
+            <div class="step">
+                <div class="step-number">✓</div>
+                <div class="step-content">
+                    <h3 contenteditable="true" data-field="step3-title">Expected Output</h3>
+                    <div class="code-block">
+                        <code contenteditable="true" data-field="step3-output" style="color: var(--color-text-muted);">claude-code v1.0.x</code>
+                        <span class="copy-hint" style="color: var(--color-primary);">Success!</span>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-
     <script>
-        const isLocalStorageAvailable = () => { try { const t = '__test__'; localStorage.setItem(t, t); localStorage.removeItem(t); return true; } catch (e) { return false; } };
-        const localStorageEnabled = isLocalStorageAvailable();
-        const saveEdits = () => { if (!localStorageEnabled) return; const edits = []; document.querySelectorAll('[contenteditable]').forEach(el => { const field = el.getAttribute('data-field'); if (field) edits.push({ selector: `[data-field='${field}']`, content: el.innerHTML }); }); localStorage.setItem('slide-6-edits', JSON.stringify({ slide: 6, edits, lastModified: new Date().toISOString() })); };
-        document.querySelectorAll('[contenteditable]').forEach(el => { el.addEventListener('blur', saveEdits); el.addEventListener('input', () => setTimeout(saveEdits, 1000)); });
-        const restoreEdits = () => { if (!localStorageEnabled) return; try { const stored = localStorage.getItem('slide-6-edits'); if (stored) { const data = JSON.parse(stored); if (data.slide === 6 && Array.isArray(data.edits)) { data.edits.forEach(edit => { const el = document.querySelector(edit.selector); if (el) el.innerHTML = edit.content; }); } } } catch (e) { localStorage.removeItem('slide-6-edits'); } };
-        restoreEdits();
+        const saveEdits = () => {
+            const edits = [];
+            document.querySelectorAll('[contenteditable]').forEach(el => {
+                const field = el.getAttribute('data-field');
+                if (field) edits.push({ selector: '[data-field="' + field + '"]', content: el.innerHTML });
+            });
+            localStorage.setItem('slide-6-edits', JSON.stringify({ slide: 6, edits: edits, lastModified: new Date().toISOString() }));
+        };
+        document.querySelectorAll('[contenteditable]').forEach(el => {
+            el.addEventListener('blur', saveEdits);
+            el.addEventListener('input', () => setTimeout(saveEdits, 1000));
+        });
+        const stored = localStorage.getItem('slide-6-edits');
+        if (stored) { try { const data = JSON.parse(stored); if (data.slide === 6 && Array.isArray(data.edits)) { data.edits.forEach(edit => { const el = document.querySelector(edit.selector); if (el) el.innerHTML = edit.content; }); } } catch (e) { localStorage.removeItem('slide-6-edits'); } }
     </script>
 </body>
 </html>
