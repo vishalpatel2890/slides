@@ -7,15 +7,9 @@ node_modules/
 # Credentials (OAuth tokens - security sensitive)
 .slide-builder/credentials/
 
-# Theme configuration (user's brand)
-.slide-builder/theme.json
-.slide-builder/theme-history/
-
-# Generated templates (created from user's theme during /setup)
-.slide-builder/templates/
-
-# Sample slides (generated during theme setup)
-.slide-builder/samples/
+# User/Org Configuration (shareable brand assets)
+# Zip .slide-builder/config/ to share your brand with others
+.slide-builder/config/
 
 # User's slide workspaces
 .slide-builder/single/
