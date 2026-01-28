@@ -69,7 +69,7 @@ development_status:
   epic-4-retrospective: optional
 
   # Epic 5: Full Deck Mode
-  epic-5: contexted
+  epic-5: done
   5-1-deck-planning-initiation: done
   5-2-plan-modification: done
   5-3-incremental-slide-building: done
@@ -77,7 +77,7 @@ development_status:
   epic-5-retrospective: optional
 
   # Epic 6: Theme Management
-  epic-6: contexted
+  epic-6: done
   6-1-theme-summary-view: done
   6-2-theme-editing: done
   6-3-theme-version-history: done
@@ -85,7 +85,7 @@ development_status:
   epic-6-retrospective: optional
 
   # Epic 7: Google Slides Export
-  epic-7: contexted
+  epic-7: voided
   7-1-google-oauth-setup: ready-for-dev
   7-2-html-to-image-conversion: backlog
   7-3-google-slides-creation: backlog
@@ -93,20 +93,20 @@ development_status:
   epic-7-retrospective: optional
 
   # Epic 8: Slide Viewer & Output Architecture
-  epic-8: contexted
+  epic-8: done
   8-1-output-folder-architecture: done
   8-2-core-viewer-component: done
   8-3-presentation-mode-polish: done
   epic-8-retrospective: optional
 
   # Epic 9: Dynamic Viewer Loading
-  epic-9: contexted
-  9-1-dynamic-manifest-viewer: review
+  epic-9: done
+  9-1-dynamic-manifest-viewer: done
   epic-9-retrospective: optional
 
   # Epic 10: Config Folder Refactor (Mini-Epic)
-  epic-10-config-folder: contexted
+  epic-10-config-folder: done
   config-folder-1-create-structure: done
   config-folder-2-update-workflow-paths: done
-  config-folder-3-gitignore-updates: drafted
+  config-folder-3-gitignore-updates: done
   epic-10-retrospective: optional

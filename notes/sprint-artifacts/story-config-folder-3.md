@@ -1,6 +1,6 @@
 # Story 3: Update Documentation
 
-**Status:** Draft
+**Status:** Done
 
 ---
 
@@ -28,13 +28,13 @@ So that **the project structure is accurately documented**.
 
 ### Tasks / Subtasks
 
-- [ ] **Task 3.1:** Update `notes/architecture.md` - Project Structure section (lines 37-101)
+- [x] **Task 3.1:** Update `notes/architecture.md` - Project Structure section (lines 37-101)
   - Add config/ folder to the tree diagram
   - Update descriptions to reflect new locations
-- [ ] **Task 3.2:** Verify `.gitignore` has descriptive comment for config/
-- [ ] **Task 3.3:** Review `.slide-builder/CONVENTIONS.md` for any path references that need updating
-- [ ] **Task 3.4:** Verify the new structure matches documentation by running `tree .slide-builder/`
-- [ ] **Task 3.5:** Commit: "docs: update architecture for config folder"
+- [x] **Task 3.2:** Verify `.gitignore` has descriptive comment for config/
+- [x] **Task 3.3:** Review `.slide-builder/CONVENTIONS.md` for any path references that need updating
+- [x] **Task 3.4:** Verify the new structure matches documentation by running `tree .slide-builder/`
+- [x] **Task 3.5:** Commit: "docs: update architecture for config folder"
 
 ### Technical Summary
 
@@ -96,23 +96,47 @@ Documentation updates to ensure the project structure is accurately documented. 
 
 ### Agent Model Used
 
-<!-- Will be populated during dev-story execution -->
+Claude Opus 4.5 (global.anthropic.claude-opus-4-5-20251101-v1:0)
 
 ### Debug Log References
 
-<!-- Will be populated during dev-story execution -->
+```
+Plan: Story config-folder-3 - Update Documentation
+1. Task 3.1: Update architecture.md project structure (lines 37-101)
+2. Task 3.2: Verify .gitignore - ALREADY DONE (had comment for config/)
+3. Task 3.3: Update CONVENTIONS.md file structure (lines 34-61)
+4. Task 3.4: Verify with find command (tree not installed)
+5. Task 3.5: Commit changes
+```
 
 ### Completion Notes
 
-<!-- Will be populated during dev-story execution -->
+**Completed:** 2026-01-28
+**Definition of Done:** All acceptance criteria met, code reviewed, tests passing
+
+All documentation updated to reflect the new `.slide-builder/config/` folder structure:
+
+1. **architecture.md**: Updated project structure diagram to show config/ folder with theme.json, theme-history/, samples/, and templates/ nested inside. Also updated workflow directory names (build-one/, build-all/) and added output/ folder.
+
+2. **.gitignore**: Already contained correct comment explaining config/ folder purpose ("Zip .slide-builder/config/ to share your brand with others").
+
+3. **CONVENTIONS.md**: Updated file structure section to show config/ folder organization and corrected workflow names.
+
+4. **Structure verified**: Confirmed actual directory structure matches documentation.
+
+5. **Commit**: `30843ba` - "docs: update architecture for config folder"
 
 ### Files Modified
 
-<!-- Will be populated during dev-story execution -->
+- `notes/architecture.md` - Project structure section updated
+- `.slide-builder/CONVENTIONS.md` - File structure section updated
 
 ### Test Results
 
-<!-- Will be populated during dev-story execution -->
+Manual verification completed:
+- `.slide-builder/config/` exists with correct contents (theme.json, theme-history/, samples/, templates/)
+- Documentation accurately reflects current file structure
+- All acceptance criteria met
 
 ---
 

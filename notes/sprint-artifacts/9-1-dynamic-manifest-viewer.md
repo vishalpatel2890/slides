@@ -1,7 +1,7 @@
 # Story 9.1: Dynamic Manifest-Based Viewer
 
 **Epic:** 9 - Dynamic Viewer Loading
-**Status:** Review
+**Status:** Done
 **Created:** 2026-01-28
 
 ---
@@ -231,6 +231,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 - Created `/sb:refresh` command for manual viewer/manifest updates
 - Updated `build-one` and `build-all` workflows to call `regenerate-viewer.js` script (generates both manifest.json and index.html)
 - ✅ Test Gate PASSED by Vishal (2026-01-28)
+
+### Definition of Done
+**Completed:** 2026-01-28
+**Definition of Done:** All acceptance criteria met, code reviewed, tests passing
 
 ### File List
 | File | Action | Description |
