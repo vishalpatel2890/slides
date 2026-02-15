@@ -9,6 +9,7 @@ Version 3.0 implements the full 6-phase workflow per Epic 6 Tech Spec, plus roll
 <critical>Regenerate samples after EVERY feedback round for visual validation</critical>
 <critical>Never save theme.json until user approves - cancel restores from version</critical>
 <critical>Rollback flow: User can request "rollback" to restore a previous theme version</critical>
+<critical>Validate typography against design standards minimums (.slide-builder/config/design-standards.md)</critical>
 
 <workflow>
 
@@ -124,6 +125,13 @@ Examples of gestalt feedback:
 • "More playful"
 • "rollback" / "rollback to v1" / "restore previous"
 
+**Slide rhythm examples:**
+• "More white slides" / "Too dark"
+• "More dark slides"
+• "Alternate more" / "More variety"
+• "Evidence should be light"
+• "Opening should be dark"
+
 Your feedback (or "cancel" to discard changes):
     </ask>
 
@@ -136,6 +144,26 @@ Your feedback (or "cancel" to discard changes):
       <action>Store feedback as {{rollback_request}}</action>
       <action>Parse for version number: check for patterns like "v1", "v2", "version 1", "previous"</action>
       <goto step="rollback-1">Start rollback flow</goto>
+    </check>
+
+    <!-- Rhythm Feedback Detection: Check if feedback is about slide rhythm/background patterns -->
+    <action>Analyze feedback for rhythm-related keywords:
+      - Background patterns: "white slides", "dark slides", "light slides", "backgrounds"
+      - Alternation: "alternate", "variety", "consistent", "switch", "rhythm"
+      - Role overrides: "{role} should be {mode}" pattern (e.g., "evidence should be dark")
+    </action>
+    <action>Set {{is_rhythm_feedback}} = true if rhythm keywords detected, else false</action>
+
+    <!-- Ambiguous Feedback Detection: If feedback could mean visual style OR rhythm -->
+    <check if="feedback is ambiguous (e.g., 'bolder' could mean typography OR more dark slides, 'lighter' could mean colors OR more white slides)">
+      <ask context="I'm not sure how to interpret that feedback.
+
+Are you asking about:" header="Clarify">
+        <choice label="Visual Style" description="Colors, typography, shapes, shadows" />
+        <choice label="Slide Rhythm" description="Dark/light background balance and alternation" />
+        <choice label="Both" description="Apply changes to both visual style and slide rhythm" />
+      </ask>
+      <action>Store response as {{feedback_type}} and route accordingly</action>
     </check>
   </step>
 
@@ -227,8 +255,109 @@ Your feedback (or "cancel" to discard changes):
       <action>Add to {{changes_made}}: "Adjusted shadow styling"</action>
     </check>
 
+    <!-- ═══════════════════════════════════════════════════════════════════════════
+         RHYTHM FEEDBACK HANDLING (workflowRules.rhythm modifications)
+         ═══════════════════════════════════════════════════════════════════════════ -->
+
+    <check if="{{is_rhythm_feedback}} is true OR {{feedback_type}} contains 'Rhythm' OR {{feedback_type}} contains 'Both'">
+      <action>Initialize {{rhythm_changes_made}} as empty list</action>
+      <action>Store current workflowRules.rhythm values:
+        - {{old_maxConsecutiveDark}} = working_theme.workflowRules.rhythm.maxConsecutiveDark
+        - {{old_maxConsecutiveLight}} = working_theme.workflowRules.rhythm.maxConsecutiveLight
+        - {{old_forceBreakAfter}} = working_theme.workflowRules.rhythm.forceBreakAfter
+        - {{old_roleOverrides}} = working_theme.workflowRules.rhythm.roleOverrides (deep copy)
+      </action>
+
+      <!-- More white/light slides feedback -->
+      <check if="feedback contains 'more white' or 'more light' or 'too dark' or 'less dark'">
+        <action>Decrease maxConsecutiveDark by 1 (minimum 1)</action>
+        <action>Optionally decrease forceBreakAfter by 1 (minimum 1) if currently > 1</action>
+        <action>Add to {{rhythm_changes_made}}: "Reduced consecutive dark slides limit"</action>
+      </check>
+
+      <!-- More dark slides feedback -->
+      <check if="feedback contains 'more dark' or 'too light' or 'too white' or 'less white'">
+        <action>Increase maxConsecutiveDark by 1 (maximum 5)</action>
+        <action>Optionally decrease maxConsecutiveLight by 1 (minimum 1)</action>
+        <action>Add to {{rhythm_changes_made}}: "Increased dark slide emphasis"</action>
+      </check>
+
+      <!-- More alternation/variety feedback -->
+      <check if="feedback contains 'alternate more' or 'more variety' or 'switch more' or 'more rhythm'">
+        <action>Decrease forceBreakAfter by 1 (minimum 1)</action>
+        <action>Decrease maxConsecutiveDark by 1 (minimum 1)</action>
+        <action>Decrease maxConsecutiveLight by 1 (minimum 1)</action>
+        <action>Add to {{rhythm_changes_made}}: "Increased background alternation frequency"</action>
+      </check>
+
+      <!-- Less alternation/more consistency feedback -->
+      <check if="feedback contains 'consistent' or 'less variety' or 'alternate less' or 'less switching'">
+        <action>Increase forceBreakAfter by 1 (maximum 4)</action>
+        <action>Increase maxConsecutiveDark by 1 (maximum 5)</action>
+        <action>Add to {{rhythm_changes_made}}: "Reduced background alternation for consistency"</action>
+      </check>
+
+      <!-- Role override feedback: "{role} should be {mode}" -->
+      <check if="feedback matches pattern '{role} should be {mode}' where role is (opening|context|problem|solution|evidence|cta) and mode is (dark|light)">
+        <action>Parse role and mode from feedback</action>
+        <action>Update working_theme.workflowRules.rhythm.roleOverrides[{{role}}] = {{mode}}</action>
+        <action>Add to {{rhythm_changes_made}}: "Set {{role}} sections to use {{mode}} background"</action>
+      </check>
+
+      <!-- Role override feedback: "{role} dark" or "{role} light" shorthand -->
+      <check if="feedback matches pattern '(opening|context|problem|solution|evidence|cta) (dark|light)'">
+        <action>Parse role and mode from feedback</action>
+        <action>Update working_theme.workflowRules.rhythm.roleOverrides[{{role}}] = {{mode}}</action>
+        <action>Add to {{rhythm_changes_made}}: "Set {{role}} sections to use {{mode}} background"</action>
+      </check>
+
+      <!-- Generate rhythm change report -->
+      <check if="{{rhythm_changes_made}} is not empty">
+        <action>Build rhythm change report comparing old vs new values:
+          - If maxConsecutiveDark changed: "maxConsecutiveDark: {{old_maxConsecutiveDark}} → {{new_value}}"
+          - If maxConsecutiveLight changed: "maxConsecutiveLight: {{old_maxConsecutiveLight}} → {{new_value}}"
+          - If forceBreakAfter changed: "forceBreakAfter: {{old_forceBreakAfter}} → {{new_value}}"
+          - If roleOverrides changed: List each changed role override
+        </action>
+        <action>Store report as {{rhythm_change_report}}</action>
+        <action>Add to {{changes_made}}: "Updated slide rhythm rules"</action>
+      </check>
+    </check>
+
     <!-- Apply changes to working_theme -->
     <action>Apply all identified changes to {{working_theme}}</action>
+
+    <!-- Validate against design standards minimums -->
+    <action>Check typography scale against design standards:
+      **Design Standards Minimums (.slide-builder/config/design-standards.md):**
+      - Hero/Title: 64px minimum
+      - h1: 48px minimum
+      - h2: 36px minimum
+      - h3: 28px minimum
+      - Body: 24px minimum
+      - Labels/small: 18px minimum
+      - Captions: 16px minimum
+
+      For each typography.scale value in {{working_theme}}:
+      - If hero < 64px → WARN and suggest minimum
+      - If h1 < 48px → WARN and suggest minimum
+      - If h2 < 36px → WARN and suggest minimum
+      - If h3 < 28px → WARN and suggest minimum
+      - If body < 24px → WARN and enforce minimum (readability critical)
+      - If small < 18px → WARN and suggest minimum
+    </action>
+
+    <check if="any typography values below minimums">
+      <output>
+⚠️ **Design Standards Warning**
+
+Some typography values are below recommended minimums for readability:
+{{below_minimum_values}}
+
+At 50% zoom (typical laptop viewing), these sizes may be difficult to read.
+Recommend using design standards minimums for professional presentations.
+      </output>
+    </check>
 
     <!-- Update metadata -->
     <action>Calculate new version: {{new_version}} = {{version_num}} + 1</action>
@@ -246,6 +375,15 @@ Your feedback (or "cancel" to discard changes):
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 {{changes_made_list}}
+{{if rhythm_change_report is not empty}}
+
+**Workflow Rules Updated**
+
+Changes made to slide rhythm:
+{{rhythm_change_report}}
+
+Your next deck will reflect these rhythm preferences.
+{{endif}}
 
 Generating sample slides for preview...
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -371,12 +509,12 @@ Your response:
       </output>
 
       <action>Copy preview slides to catalog with updated styling:
-        - output/theme-preview/01-title.html → config/catalog/title.html
-        - output/theme-preview/02-agenda.html → config/catalog/agenda.html
-        - output/theme-preview/03-process-flow.html → config/catalog/process-flow.html
-        - output/theme-preview/04-comparison.html → config/catalog/comparison.html
-        - output/theme-preview/05-callout.html → config/catalog/callout.html
-        - output/theme-preview/06-technical.html → config/catalog/technical.html
+        - output/theme-preview/01-title.html → config/catalog/slide-templates/title.html
+        - output/theme-preview/02-agenda.html → config/catalog/slide-templates/agenda.html
+        - output/theme-preview/03-process-flow.html → config/catalog/slide-templates/process-flow.html
+        - output/theme-preview/04-comparison.html → config/catalog/slide-templates/comparison.html
+        - output/theme-preview/05-callout.html → config/catalog/slide-templates/callout.html
+        - output/theme-preview/06-technical.html → config/catalog/slide-templates/technical.html
       </action>
 
       <action>Update status.yaml templates section with regenerated files</action>
@@ -410,6 +548,11 @@ Previous version saved: theme-history/theme-v{{backup_version}}-{{date}}.json
 
 Changes applied:
 {{changes_made_summary}}
+{{if rhythm_change_report is not empty}}
+
+**Slide Rhythm Updates:**
+{{rhythm_change_report}}
+{{endif}}
 
 Your theme is ready for slide generation!
 
@@ -766,12 +909,12 @@ Please respond with "y" (yes) to proceed or "n" (no) to cancel.
       </output>
 
       <action>Copy preview slides to catalog with updated styling:
-        - output/theme-preview/01-title.html → config/catalog/title.html
-        - output/theme-preview/02-agenda.html → config/catalog/agenda.html
-        - output/theme-preview/03-process-flow.html → config/catalog/process-flow.html
-        - output/theme-preview/04-comparison.html → config/catalog/comparison.html
-        - output/theme-preview/05-callout.html → config/catalog/callout.html
-        - output/theme-preview/06-technical.html → config/catalog/technical.html
+        - output/theme-preview/01-title.html → config/catalog/slide-templates/title.html
+        - output/theme-preview/02-agenda.html → config/catalog/slide-templates/agenda.html
+        - output/theme-preview/03-process-flow.html → config/catalog/slide-templates/process-flow.html
+        - output/theme-preview/04-comparison.html → config/catalog/slide-templates/comparison.html
+        - output/theme-preview/05-callout.html → config/catalog/slide-templates/callout.html
+        - output/theme-preview/06-technical.html → config/catalog/slide-templates/technical.html
       </action>
 
       <action>Update status.yaml templates section with regenerated files</action>

@@ -37,7 +37,7 @@ Framework configuration and state.
 │   ├── build-all/
 │   ├── edit/
 │   ├── export/
-│   └── add-template/
+│   └── add-slide-template/
 │
 ├── config/                  # User configuration (shareable)
 │   ├── theme.json           # Current brand theme
@@ -77,7 +77,7 @@ Claude Code skill registrations.
 │       ├── build-all.md
 │       ├── edit.md
 │       ├── export.md
-│       ├── add-template.md
+│       ├── add-slide-template.md
 │       ├── refresh.md
 │       └── help.md
 └── skills/                  # Shared skills

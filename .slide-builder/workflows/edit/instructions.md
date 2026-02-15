@@ -17,26 +17,13 @@ This workflow enables slide layout editing via natural language while preserving
   <!-- PHASE 1: Mode Detection and Slide Targeting (AC4.1.1, AC4.1.2, AC4.1.6) -->
   <!-- ═══════════════════════════════════════════════════════════════════════ -->
   <step n="1" goal="Detect mode and determine target slide">
-    <action>Read .slide-builder/status.yaml to get current mode and slide count</action>
-    <action>Extract: mode (single|deck), total_slides, built_count, output_folder, deck_slug</action>
+    <action>Read .slide-builder/status.yaml to get current mode and decks registry</action>
+    <action>Extract: mode (single|deck)</action>
     <action>Parse command arguments for optional slide_number</action>
-
-    <!-- AC4.1.6: No slides exist -->
-    <check if="built_count == 0">
-      <output>
-**No Slides Found**
-
-There are no slides to edit yet.
-
-Run `/sb:build-one` first to create a slide, then come back to edit it.
-      </output>
-      <action>HALT</action>
-    </check>
 
     <!-- AC4.1.1: Single mode - no number needed -->
     <check if="mode == 'single'">
-      <!-- Get output_folder from status.yaml, default to output/singles if not set -->
-      <action>Set output_folder = status.output_folder OR "output/singles"</action>
+      <action>Set output_folder = "output/singles"</action>
       <action>Glob output/singles/*.html to find the single slide file</action>
       <action>Set target_slide_path = first matching file in output/singles/</action>
       <action>Set target_state_path = target_slide_path with .html replaced by -state.json</action>
@@ -56,19 +43,51 @@ Run `/sb:build-one` first to create your slide.
       <goto step="2">Load and analyze slide</goto>
     </check>
 
-    <!-- AC4.1.2, AC4.1.3: Deck mode - number required or prompt -->
+    <!-- AC4.1.2, AC4.1.3: Deck mode - deck selection from registry -->
     <check if="mode == 'deck'">
-      <!-- Get deck_slug from status.yaml to find output folder -->
-      <action>Set deck_slug = status.deck_slug (required for deck mode)</action>
+      <!-- Deck Selection Protocol: Select deck from decks: registry -->
+      <action>Read `decks:` registry from status.yaml</action>
+      <action>Filter decks by eligible statuses: `planned`, `building`, or `complete` (all non-setup statuses)</action>
+
+      <check if="zero eligible decks">
+        <output>
+**No Decks Available**
+
+No decks exist in the registry.
+
+Run `/sb:plan-deck` first to create a deck plan, then `/sb:build-one` to build slides.
+        </output>
+        <action>HALT</action>
+      </check>
+
+      <check if="exactly one eligible deck">
+        <action>Auto-select that deck</action>
+        <action>Set deck_slug = selected deck key</action>
+        <output>Working on deck: {{deck.name}}</output>
+      </check>
+
+      <check if="multiple eligible decks">
+        <action>Present numbered list to user:
+          1. "Deck Name A" (10/10 slides built, complete)
+          2. "Deck Name B" (3/8 slides built, building)
+        </action>
+        <ask>Which deck would you like to edit?</ask>
+        <action>Set deck_slug from user selection</action>
+      </check>
+
+      <action>Set output_folder = decks.{{deck_slug}}.output_folder</action>
+      <action>Set total_slides = decks.{{deck_slug}}.total_slides</action>
+      <action>Set built_count = decks.{{deck_slug}}.built_count</action>
       <action>Set slides_folder = output/{{deck_slug}}/slides</action>
 
-      <check if="deck_slug is not set">
+      <!-- AC4.1.6: No slides built for this deck -->
+      <check if="built_count == 0">
         <output>
-**Deck Not Built**
+**No Slides Built**
 
-No deck has been built yet. The deck_slug is not set in status.yaml.
+Deck "{{deck.name}}" has no slides built yet.
 
-Run `/sb:build-one` or `/sb:build-all` first to build your deck slides.
+Run `/sb:build-one` first to create a slide, then come back to edit it.
         </output>
         <action>HALT</action>
       </check>
@@ -256,7 +275,7 @@ No problem. Let's try again.
     <action>Parse theme JSON to extract colors, typography, shapes, components, and personality</action>
 
     <!-- Story 11.4: Load catalog for template awareness -->
-    <action>Read .slide-builder/config/catalog/catalog.json</action>
+    <action>Read .slide-builder/config/catalog/slide-templates.json</action>
     <action>Parse catalog to understand available template patterns:
       - Extract template IDs, names, and descriptions
       - Note use_cases for each template

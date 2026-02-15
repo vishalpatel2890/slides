@@ -29,11 +29,19 @@ Run `/sb:setup` to create your theme from brand assets.
     <check if="theme.json exists">
       <action>Load theme.json to understand available design primitives</action>
       <action>Note the theme personality ({{theme.personality.classification}})</action>
+      <action>Load Brand Asset Catalogs for visual element suggestions:
+        - Check if `.slide-builder/config/catalog/brand-assets/icons/icon-catalog.json` exists → load as `{{icon_catalog}}`, set `{{icon_catalog_available}}` = true
+        - Check if `.slide-builder/config/catalog/brand-assets/logos/logo-catalog.json` exists → load as `{{logo_catalog}}`, set `{{logo_catalog_available}}` = true
+        - Check if `.slide-builder/config/catalog/brand-assets/images/images-catalog.json` exists → load as `{{images_catalog}}`, set `{{images_catalog_available}}` = true
+      </action>
       <output>
 **Theme Verified**
 
 Found theme: {{theme.meta.name}}
 Personality: {{theme.personality.classification}}
+{{if any catalog available}}
+Brand assets: {{icon_count}} icons, {{logo_count}} logos, {{image_count}} images available
+{{end if}}
       </output>
     </check>
   </step>
@@ -74,7 +82,7 @@ What slide do you need?
   <step n="3" goal="Match intent to template using catalog">
     <critical>Template matching is now catalog-driven. Read catalog.json first.</critical>
 
-    <action>Read `.slide-builder/config/catalog/catalog.json`</action>
+    <action>Read `.slide-builder/config/catalog/slide-templates.json`</action>
     <action>Parse the `templates` array to get available templates</action>
 
     <action>Display available templates from catalog:
@@ -136,6 +144,15 @@ I understand you need:
 {{key_elements_formatted_list}}
 
 **Visual approach**: {{visual_guidance_or_default}}
+{{if icon_catalog_available or logo_catalog_available or images_catalog_available}}
+
+**Available brand assets to use:**
+{{if icon_catalog_available}}- Icons: {{icon_catalog.icons.length}} icons (e.g., {{sample_icon_ids}}){{end if}}
+{{if logo_catalog_available}}- Logos: {{logo_catalog.logos.length}} logos available{{end if}}
+{{if images_catalog_available}}- Images: {{images_catalog.images.length}} images by category{{end if}}
+
+*Note: Only catalog assets will be used - no generated/drawn elements.*
+{{end if}}
     </output>
 
     <ask>
@@ -173,11 +190,17 @@ This helps generate more targeted content but is not required.
     </ask>
 
     <check if="user chooses yes (y, yes, Y, Yes)">
+      <output>
+**Message Approach**
+
+What message approach works best for this slide?
+      </output>
+
       <action>Use AskUserQuestion tool to present framing options:
 
         {
           "questions": [{
-            "question": "What message approach works best for this slide?",
+            "question": "Select one:",
             "header": "Message",
             "options": [
               {"label": "Direct", "description": "Clear statement of the value or main point"},
@@ -282,9 +305,6 @@ Skipping discovery. Proceeding to save plan...
 
     <action>Update .slide-builder/status.yaml:
       - Set mode: "single"
-      - Set current_slide: 1
-      - Set total_slides: 1
-      - Set last_action: "Single slide planned"
       - Set last_modified: {{current_iso_timestamp}}
       - Append to history array: { action: "Single slide planned", timestamp: {{current_iso_timestamp}} }
     </action>
@@ -320,7 +340,7 @@ Your slide plan is ready at `output/singles/plan.yaml`
 
 ## Template Reference (Catalog-Driven)
 
-Templates are now loaded dynamically from `.slide-builder/config/catalog/catalog.json`.
+Templates are now loaded dynamically from `.slide-builder/config/catalog/slide-templates.json`.
 
 Each template entry includes:
 - **id**: Template identifier used in plan.yaml

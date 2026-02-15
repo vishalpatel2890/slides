@@ -3,7 +3,9 @@
  * Regenerate viewer index.html from template
  * Usage: node scripts/regenerate-viewer.js [deck-slug]
  *
- * If no deck-slug provided, reads from .slide-builder/status.yaml
+ * If no deck-slug provided, auto-detects from output/ directory.
+ * - One deck: auto-selects it
+ * - Multiple decks: lists them and exits with usage message
  */
 
 const fs = require('fs');
@@ -23,10 +25,20 @@ function readYaml(filePath) {
     return result;
 }
 
+function extractSlideId(htmlContent) {
+    // Extract data-slide-id from the .slide div
+    const match = htmlContent.match(/<div[^>]*class="slide"[^>]*data-slide-id="([^"]+)"/i) ||
+                  htmlContent.match(/data-slide-id="([^"]+)"[^>]*class="slide"/i);
+    return match ? match[1] : null;
+}
+
 function extractTitle(htmlContent, slideNum) {
-    // Try h1 first
-    const h1Match = htmlContent.match(/<h1[^>]*>([^<]+)<\/h1>/i);
-    if (h1Match) return h1Match[1].trim();
+    // Try h1 first (handle nested HTML by capturing all content then stripping tags)
+    const h1Match = htmlContent.match(/<h1[^>]*>([\s\S]*?)<\/h1>/i);
+    if (h1Match) {
+        const stripped = h1Match[1].replace(/<[^>]+>/g, '').trim();
+        if (stripped) return stripped;
+    }
 
     // Try title tag
     const titleMatch = htmlContent.match(/<title>Slide \d+:\s*([^<]+)<\/title>/i);
@@ -35,20 +47,39 @@ function extractTitle(htmlContent, slideNum) {
     return `Slide ${slideNum}`;
 }
 
+function findDecks() {
+    const outputDir = path.join(PROJECT_ROOT, 'output');
+    if (!fs.existsSync(outputDir)) return [];
+
+    return fs.readdirSync(outputDir)
+        .filter(d => {
+            const fullPath = path.join(outputDir, d);
+            const planPath = path.join(fullPath, 'plan.yaml');
+            return fs.statSync(fullPath).isDirectory() && fs.existsSync(planPath);
+        })
+        .map(d => ({
+            slug: d,
+            mtime: fs.statSync(path.join(outputDir, d)).mtimeMs
+        }))
+        .sort((a, b) => b.mtime - a.mtime);
+}
+
 function main() {
-    // Get deck slug from arg or status.yaml
+    // Get deck slug from arg or auto-detect from output/
     let deckSlug = process.argv[2];
 
     if (!deckSlug) {
-        const statusPath = path.join(PROJECT_ROOT, '.slide-builder', 'status.yaml');
-        if (!fs.existsSync(statusPath)) {
-            console.error('Error: No deck slug provided and no status.yaml found');
+        const decks = findDecks();
+        if (decks.length === 0) {
+            console.error('Error: No decks found in output/ directory.');
+            console.error('Run /sb:plan-deck to create a deck first.');
             process.exit(1);
-        }
-        const status = readYaml(statusPath);
-        deckSlug = status.current_deck_slug || status.deck_slug;
-        if (!deckSlug) {
-            console.error('Error: No deck_slug found in status.yaml');
+        } else if (decks.length === 1) {
+            deckSlug = decks[0].slug;
+        } else {
+            console.error('Multiple decks found. Please specify which deck:\n');
+            decks.forEach(d => console.error(`  node scripts/regenerate-viewer.js ${d.slug}`));
+            console.error('');
             process.exit(1);
         }
     }
@@ -88,12 +119,55 @@ function main() {
 
     console.log(`Found ${slideFiles.length} slides`);
 
-    // Build slide list
+    // Load existing manifest to preserve animations by data-slide-id (stable identity)
+    // Falls back to title matching for backwards compatibility
+    const manifestPath = path.join(slidesFolder, 'manifest.json');
+    let existingAnimationsById = {};
+    let existingAnimationsByTitle = {};
+    if (fs.existsSync(manifestPath)) {
+        try {
+            const existingManifest = JSON.parse(fs.readFileSync(manifestPath, 'utf-8'));
+            if (existingManifest.slides) {
+                existingManifest.slides.forEach(slide => {
+                    if (slide.animations) {
+                        if (slide.slideId) {
+                            existingAnimationsById[slide.slideId] = slide.animations;
+                        }
+                        if (slide.title) {
+                            existingAnimationsByTitle[slide.title] = slide.animations;
+                        }
+                    }
+                });
+                const idCount = Object.keys(existingAnimationsById).length;
+                const titleCount = Object.keys(existingAnimationsByTitle).length;
+                if (idCount > 0) {
+                    console.log(`Preserving animations for ${idCount} slides (matched by data-slide-id)`);
+                } else if (titleCount > 0) {
+                    console.log(`Preserving animations for ${titleCount} slides (matched by title, legacy)`);
+                }
+            }
+        } catch (e) {
+            console.warn('Warning: Could not parse existing manifest');
+        }
+    }
+
+    // Build slide list (preserving animations by slideId, falling back to title)
     const slideList = slideFiles.map(filename => {
         const num = parseInt(filename.match(/\d+/)[0]);
         const htmlContent = fs.readFileSync(path.join(slidesFolder, filename), 'utf-8');
+        const slideId = extractSlideId(htmlContent);
         const title = extractTitle(htmlContent, num);
-        return { number: num, filename, title };
+        const slide = { number: num, filename, title };
+        if (slideId) {
+            slide.slideId = slideId;
+        }
+        // Prefer slideId match, fall back to title match
+        if (slideId && existingAnimationsById[slideId]) {
+            slide.animations = existingAnimationsById[slideId];
+        } else if (existingAnimationsByTitle[title]) {
+            slide.animations = existingAnimationsByTitle[title];
+        }
+        return slide;
     });
 
     // Build separate HTML content map for export (base64 encoded to avoid JSON escaping issues)
@@ -109,8 +183,7 @@ function main() {
         deckName = plan.deck_name || deckSlug;
     }
 
-    // Generate manifest.json first
-    const manifestPath = path.join(slidesFolder, 'manifest.json');
+    // Generate manifest.json (manifestPath already defined above)
     const manifest = {
         deckName: deckName,
         generatedAt: new Date().toISOString(),
@@ -122,6 +195,7 @@ function main() {
     // Load and populate template
     let template = fs.readFileSync(templatePath, 'utf-8');
     template = template.replace(/\{\{DECK_NAME\}\}/g, deckName);
+    template = template.replace(/\{\{DECK_SLUG\}\}/g, deckSlug);
     template = template.replace(/\{\{TOTAL_SLIDES\}\}/g, slideList.length.toString());
     template = template.replace(/\{\{SLIDE_LIST\}\}/g, JSON.stringify(slideList, null, 2));
     template = template.replace(/\{\{SLIDE_HTML_BASE64\}\}/g, JSON.stringify(slideHtmlContent));

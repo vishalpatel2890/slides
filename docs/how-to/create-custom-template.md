@@ -8,9 +8,9 @@ A configured theme.
 
 ## Steps
 
-1. Run the add-template workflow:
+1. Run the add-slide-template workflow:
    ```
-   /sb:add-template
+   /sb-manage:add-slide-template
    ```
 
 2. Describe your template requirements:
@@ -57,7 +57,7 @@ After creation:
 
 1. Plan a slide matching your template:
    ```
-   /sb:plan-one
+   /sb-create:plan-one
    Create a case study slide for Acme Corp.
    ```
 
@@ -65,7 +65,7 @@ After creation:
 
 3. Build and review:
    ```
-   /sb:build-one
+   /sb-create:build-one
    ```
 
 ## Modifying later

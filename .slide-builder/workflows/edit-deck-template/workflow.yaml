@@ -1,0 +1,15 @@
+name: edit-deck-template
+description: "Add, edit, remove, or reorder slides in an existing deck template"
+author: "Slide Builder"
+
+installed_path: "{project-root}/.slide-builder/workflows/edit-deck-template"
+instructions: "{installed_path}/instructions.md"
+catalog_path: "{project-root}/.slide-builder/config/catalog"
+deck_templates_manifest: "{catalog_path}/deck-templates.json"
+deck_templates_folder: "{catalog_path}/deck-templates"
+theme_path: "{project-root}/.slide-builder/config/theme.json"
+design_standards: "{project-root}/.slide-builder/config/design-standards.md"
+slide_catalog: "{catalog_path}/slide-templates.json"
+
+template: false
+standalone: true

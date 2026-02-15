@@ -38,6 +38,21 @@ Before writing any HTML file, verify your output satisfies ALL of these. These a
 | 5 | Field identifiers | Every contenteditable element has unique `data-field="..."` attribute |
 | 6 | CSS variables | Use `--color-primary`, `--color-secondary`, etc. (not `--amp-*` or hardcoded values) |
 | 7 | Auto-save script | `saveEdits()` function present before `</body>` |
+| 8 | Animatable markers | Structural elements (boxes, cards, icons, images) have `data-animatable="true"` |
+| 9 | Slide identity | `.slide` div has `data-slide-id="{random-hex-8}"` for stable animation matching |
+
+---
+
+## Variable Convention
+
+<context>
+Throughout these instructions, `{{variable}}` means "substitute the actual value at runtime."
+</context>
+
+<example title="Variable substitution">
+- If `deck_slug` is `"q1-strategy"`, then `output/{{deck_slug}}/` becomes `output/q1-strategy/`
+- If `slide.intent` is `"Show quarterly revenue growth"`, use that text to inform your title
+</example>
 
 ---
 
@@ -45,9 +60,14 @@ Before writing any HTML file, verify your output satisfies ALL of these. These a
 
 <important>
 This is the exact structure your output must follow. The catalog templates in `.slide-builder/config/catalog/` show visual design patterns and ARE fully compliant with contenteditable/data-field attributes. Use them as the primary structural reference.
+
+**Background Mode:** The example below shows a dark-mode slide. For `background_mode: light` slides, resolve colors from `theme.workflowRules.colorSchemes.light`:
+- Use resolved `background` value for body/slide background
+- Use resolved `textHeading` and `textBody` for text colors
+- Use resolved `accent` for accent color
 </important>
 
-<example title="Compliant slide HTML">
+<example title="Compliant slide HTML (dark mode)">
 ```html
 <!DOCTYPE html>
 <html lang="en">
@@ -136,10 +156,10 @@ This is the exact structure your output must follow. The catalog templates in `.
   </style>
 </head>
 <body>
-  <div class="slide" data-slide-id="1">
-    <p class="eyebrow" contenteditable="true" data-field="eyebrow">Category Label</p>
-    <h1 class="title" contenteditable="true" data-field="title">Main Title Goes Here</h1>
-    <p class="subtitle" contenteditable="true" data-field="subtitle">Supporting subtitle with additional context.</p>
+  <div class="slide" data-slide-id="a1b2c3d4">
+    <p class="eyebrow" contenteditable="true" data-field="eyebrow" data-animatable="true">Category Label</p>
+    <h1 class="title" contenteditable="true" data-field="title" data-animatable="true">Main Title Goes Here</h1>
+    <p class="subtitle" contenteditable="true" data-field="subtitle" data-animatable="true">Supporting subtitle with additional context.</p>
   </div>
 
   <script>
@@ -185,6 +205,29 @@ This is the exact structure your output must follow. The catalog templates in `.
     });
 
     restoreEdits();
+
+    // Animation Builder support
+    window.addEventListener('message', (event) => {
+      if (event.data?.type === 'getBuilderElements') {
+        const selectors = '[data-animatable], [contenteditable], h1, h2, h3, p, li, img, svg, [class*="-box"], [class*="-card"], [class*="-panel"], [class*="-window"], [class*="-item"]';
+        const elements = [];
+        let idCounter = 1;
+        document.querySelectorAll(selectors).forEach(el => {
+          const rect = el.getBoundingClientRect();
+          if (rect.width < 10 || rect.height < 10) return;
+          if (rect.width > 1536 || rect.height > 864) return;
+          let buildId = el.getAttribute('data-build-id') || `build-${idCounter++}`;
+          el.setAttribute('data-build-id', buildId);
+          elements.push({
+            id: buildId,
+            rect: { x: rect.left, y: rect.top, width: rect.width, height: rect.height },
+            tagName: el.tagName.toLowerCase(),
+            text: el.textContent?.substring(0, 30) || ''
+          });
+        });
+        window.parent.postMessage({ type: 'builderElements', elements }, '*');
+      }
+    });
   </script>
 </body>
 </html>
@@ -193,22 +236,7 @@ This is the exact structure your output must follow. The catalog templates in `.
 
 ---
 
-## Variable Convention
-
-<context>
-Throughout these instructions, `{{variable}}` means "substitute the actual value at runtime."
-</context>
-
-<example title="Variable substitution">
-- If `deck_slug` is `"q1-strategy"`, then `output/{{deck_slug}}/` becomes `output/q1-strategy/`
-- If `slide.intent` is `"Show quarterly revenue growth"`, use that text to inform your title
-</example>
-
----
-
-## Workflow
-
-### Phase 1: Determine Mode and Load Plan
+## Phase 1: Determine Mode and Load Plan
 
 <critical>
 Read status.yaml FIRST. Do not proceed without knowing the mode.
@@ -225,91 +253,67 @@ Read status.yaml FIRST. Do not proceed without knowing the mode.
 
 ---
 
-### Phase 1A: Deck Mode Setup
+## Phase 1A: Deck Mode Setup
 
 <steps>
-1. Read `current_deck_slug` from status.yaml
-2. Verify `output/{{deck_slug}}/plan.yaml` exists
-   - If missing → Stop, tell user to run `/sb:plan-deck`
-3. Load `output/{{deck_slug}}/plan.yaml`
-4. Find the first slide in `slides` array with `status: "pending"`
-   - If no pending slides → Inform user all slides built, suggest `/sb:edit` or `/sb:export`
-5. Extract slide context from the pending slide:
-   - `number`: Slide position (1, 2, 3...)
-   - `intent`: What this slide should communicate
-   - `template`: Which layout to use
-   - `key_points`: Array of content points
-   - `visual_guidance`: Design hints
-   - `tone`: Voice (professional, bold, warm, technical, urgent)
-   - `storyline_role`: Narrative function (opening, tension, evidence, resolution, cta)
-6. Set output paths:
-   - `output_folder` = `output/{{deck_slug}}`
-   - `slides_folder` = `output/{{deck_slug}}/slides`
-   - `output_path` = `output/{{deck_slug}}/slides/slide-{{number}}.html`
-   - `state_path` = `output/{{deck_slug}}/slides/slide-{{number}}-state.json`
-7. Briefly confirm to user: which slide you're building, its intent, and the template
+1. Read `decks:` registry from status.yaml
+2. Filter decks by eligible statuses: `planned` or `building`
+3. Deck selection:
+   - Zero eligible → Stop: "No decks available to build. Run `/sb:plan-deck` first."
+   - One eligible → auto-select, report: "Working on deck: {{deck.name}}"
+   - Multiple eligible → present numbered list, ask user to choose
+4. Set `{{deck_slug}}` from selected deck key
+5. Set `{{output_folder}}` from `decks.{{deck_slug}}.output_folder`
+6. Verify `output/{{deck_slug}}/plan.yaml` exists (stop if missing)
+7. Load plan.yaml
+8. Select target slide:
+   - If `{{target_slide_number}}` is provided → find that specific slide by number
+   - Otherwise → find first slide with `status: "pending"`
+   - If no slide found → inform user all slides built, stop
+9. Extract slide context (detect schema):
+   - **New schema** (has `description`): number, description, design_plan, background_mode, tone, storyline_role
+   - **Legacy schema** (has `intent`): number, intent, template, key_points, visual_guidance, tone, storyline_role, background_mode (default: dark)
+10. Set output paths:
+    - `output_folder` = `output/{{deck_slug}}`
+    - `slides_folder` = `output/{{deck_slug}}/slides`
+    - `output_path` = `output/{{deck_slug}}/slides/slide-{{number}}.html`
+    - `state_path` = `output/{{deck_slug}}/slides/slide-{{number}}-state.json`
+11. Confirm to user: slide number, description/intent, build approach
 </steps>
 
 → Continue to Phase 1A.5
 
 ---
 
-### Phase 1A.5: Load Section Context (Story 13.4)
+## Phase 1A.5: Load Section Context
 
 <critical>This step enriches slide generation with discovery data from the agenda section</critical>
 
 <steps>
-1. Check if slide has `agenda_section_id` field in plan.yaml
-2. If present, find matching section in `agenda.sections` array:
-   ```
-   section = plan.agenda.sections.find(s => s.id == slide.agenda_section_id)
-   ```
-3. If section found, extract section discovery data:
-   - `section_title`: Section title for context
-   - `section_key_message`: section.discovery.key_message (core message for this section's slides)
-   - `section_diagram_requirements`: section.discovery.diagram_requirements (preferred diagram styles)
-   - `section_visual_metaphor`: section.discovery.visual_metaphor (visual themes to incorporate)
-   - `section_research_findings`: section.discovery.research_findings (supporting data to reference)
-4. Enhance slide context with section data:
-   - If `section_key_message` exists:
-     * Use it to inform slide title generation
-     * Include key message themes in content
-   - If `section_diagram_requirements` has values:
-     * Override/supplement `visual_guidance` with diagram hints
-     * Example: ["Flowchart", "Timeline"] → "Use flowchart or timeline layout"
-   - If `section_visual_metaphor` has values:
-     * Add imagery suggestions to visual_guidance
-     * Example: ["Journey", "Growth"] → "Incorporate journey or growth imagery"
-   - If `section_research_findings` has selected items:
-     * Include findings as potential content (statistics, quotes)
-     * Reference source in content if appropriate
-5. Store enriched context for use in Phase 3:
-   - `enriched_visual_guidance`: Original visual_guidance + section discovery hints
-   - `enriched_key_message`: section.discovery.key_message (for slide messaging)
-   - `available_research`: List of research findings to potentially include
+1. Check if slide has `agenda_section_id` field
+2. If present, find matching section in `plan.agenda.sections` array
+3. If section found, extract discovery data:
+   - **New schema** (has `goals`): communication_objective, audience_takeaway, narrative_advancement, content_requirements
+   - **Legacy schema** (has `key_message`): section_key_message
+4. Enhance slide context:
+   - Use goals/key_message to inform title and messaging
+5. Store as `enriched_section_goals` or `enriched_key_message`
 </steps>
 
 <note>
-If slide has no agenda_section_id or section not found, proceed with original slide context.
-This maintains backwards compatibility with plans created before Story 13.4.
+If slide has no agenda_section_id or section not found, proceed with original slide context (backwards compatible).
 </note>
 
 → Continue to Phase 2
 
 ---
 
-### Phase 1B: Single Mode Setup
+## Phase 1B: Single Mode Setup
 
 <steps>
-1. Verify `output/singles/plan.yaml` exists
-   - If missing → Stop, tell user to run `/sb:plan-one`
-2. Load `output/singles/plan.yaml`
-3. Generate filename slug from the intent:
-   - Lowercase
-   - Spaces → hyphens
-   - Remove special characters (keep a-z, 0-9, hyphens)
-   - Truncate to 30 characters
-   - Remove trailing hyphens
+1. Verify `output/singles/plan.yaml` exists (stop if missing)
+2. Load plan.yaml
+3. Generate filename slug from intent (lowercase, spaces→hyphens, remove special chars, truncate to 30 chars)
 4. Set output paths:
    - `output_folder` = `output/singles`
    - `output_path` = `output/singles/{{slug}}.html`
@@ -319,101 +323,843 @@ This maintains backwards compatibility with plans created before Story 13.4.
 
 ---
 
-### Phase 2: Determine Build Strategy (Catalog-Driven)
+## Phase 2: Determine Build Strategy
 
 <critical>
-Template selection is now catalog-driven. Read catalog.json and match using the algorithm below.
+Template selection is catalog-driven with transparent LLM semantic scoring.
 </critical>
 
+<reference title="LLM Template Scoring Prompt">
+Given this slide request:
+- Description: {{slide.description || slide.intent}}
+- Design Plan: {{slide.design_plan || slide.visual_guidance || "not specified"}}
+- Storyline Role: {{slide.storyline_role || "not specified"}}
+- Background Mode: {{slide.background_mode || "dark"}}
+
+Score each template's semantic match to this slide intent (0-100) and provide brief match reasons.
+
+Templates to evaluate:
+{{#each catalog.templates}}
+- {{this.id}}: {{this.description}}
+  Use cases: {{this.use_cases.join(", ")}}
+{{/each}}
+
+Return JSON:
+{
+  "scores": [
+    {"id": "template-id", "score": 85, "reasons": ["reason 1", "reason 2"]},
+    ...
+  ]
+}
+
+Score based on: layout type match, content structure fit, presentation purpose alignment, visual approach compatibility.
+</reference>
+
 <steps>
-1. Read the `template` field from the slide plan (this is the "requested template")
-2. Load `.slide-builder/config/catalog/catalog.json`
-3. Apply the Catalog Matching Algorithm (see below)
-4. Route based on match result
+1. Load `.slide-builder/config/catalog/slide-templates.json`
+2. **LLM Semantic Scoring** (run for all template selections):
+   - Build slide context string from description/intent, design_plan, storyline_role, background_mode
+   - Call LLM with the Template Scoring Prompt (evaluates ALL templates in single call)
+   - Parse JSON response into `{{template_candidates}}` array
+   - Sort by score descending, keep top 5
+   - Store highest-scoring template as `{{top_candidate}}`
+3. **Display Template Selection Reasoning**:
+   - Output formatted reasoning to user (see format below)
+   - Log: "Selected {{top_candidate.id}} with {{top_candidate.score}}% confidence"
+4. **Interactive Template Override** (present after reasoning display):
+   - Set `{{selected_template}}` = `{{top_candidate}}`
+   - Present `<ask>` block with alternatives (see Interactive Override section below)
+   - Wait for user response
+   - Route based on selection (see selection handling)
+6. Check for `suggested_template` from plan-deck (skip if user already selected via override):
+   - If `suggested_template` exists and is not "custom":
+     - Find in `{{template_candidates}}` by ID
+     - If found → use it (pre-selected), show its score in reasoning
+     - If not found → warn, use `{{top_candidate}}` instead
+   - If `suggested_template` is "custom" → proceed to Phase 3B
+7. Match template based on schema (when no suggested_template and no user override):
+   - Use `{{top_candidate}}` from LLM scoring as the match
+   - **Legacy fallback** (if LLM scoring unavailable): Parse design_plan for layout keywords
+8. Route to build phase:
+   - If user selected "Generate Custom" → proceed to Phase 3B
+   - Otherwise → proceed to Phase 3A with `{{selected_template}}`
 </steps>
 
-<reference title="Catalog Matching Algorithm">
+<reference title="Template Selection Reasoning Output Format">
 ```
-matchTemplate(requestedTemplate, catalog):
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🎯 Template Selection for "{{slide.description || slide.intent}}"
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  Step 1: Try exact ID match
-  ─────────────────────────
-  For each template in catalog.templates:
-    If template.id == requestedTemplate (case-insensitive):
-      Return { match: template, matchType: "id" }
+Candidates evaluated:
+{{#each template_candidates}}
+{{#if @first}}▶ {{else}}  {{/if}}{{this.id}}: {{this.reasons.join(", ")}} → {{this.score}}% confidence
+{{/each}}
 
-  Step 2: Try use_cases match
-  ───────────────────────────
-  For each template in catalog.templates:
-    If requestedTemplate is in template.use_cases array (case-insensitive):
-      Return { match: template, matchType: "use_case" }
-
-  Step 3: Fallback to custom generation
-  ─────────────────────────────────────
-  Log: "No matching catalog template, using custom generation"
-  Return { match: null, matchType: "fallback" }
+✓ Selected: {{selected_template.id}} ({{selected_template.score}}% confidence)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 </reference>
 
-<reference title="Template routing (catalog-driven)">
-| Match Result | Build Strategy | Template File |
-|--------------|----------------|---------------|
-| `matchType: "id"` | Template Build (Phase 3A) | `catalog/{match.file}` |
-| `matchType: "use_case"` | Template Build (Phase 3A) | `catalog/{match.file}` |
-| `matchType: "fallback"` | Custom Build (Phase 3B) | — |
-| `template == "custom"` | Custom Build (Phase 3B) | — |
+<reference title="Confidence Thresholds">
+| Threshold | Behavior |
+|-----------|----------|
+| 80-100% | High confidence - proceed with brief confirmation |
+| 50-79% | Medium confidence - show alternatives prominently |
+| <50% | Low confidence - strongly suggest custom generation |
 </reference>
 
-<example title="Catalog matching examples">
-- Request: "title" → ID match → uses `catalog/title.html`
-- Request: "layout-title" → use_cases match ("title" in use_cases) → uses `catalog/title.html`
-- Request: "opening" → use_cases match → uses `catalog/title.html`
-- Request: "hero" → use_cases match → uses `catalog/title.html`
-- Request: "exotic-layout" → No match → Falls back to frontend-design skill
-</example>
+### Interactive Template Override
 
-- Catalog match found → Continue to Phase 3A
-- No match or `custom` → Log fallback message, then proceed to Phase 3B
+After displaying template selection reasoning, present user with override options:
+
+<ask context="Template selection complete. Would you like to use a different template?
+
+**Selected:** {{selected_template.id}} ({{selected_template.score}}% confidence)
+
+**Alternatives:**
+• {{template_candidates[1].id}} ({{template_candidates[1].score}}%)
+• {{template_candidates[2].id}} ({{template_candidates[2].score}}%)"
+     header="Template">
+  <choice label="Continue" description="Build with {{selected_template.id}} ({{selected_template.score}}% confidence)" />
+  <choice label="{{template_candidates[1].id}}" description="Switch to {{template_candidates[1].id}} ({{template_candidates[1].score}}% confidence)" />
+  <choice label="{{template_candidates[2].id}}" description="Switch to {{template_candidates[2].id}} ({{template_candidates[2].score}}% confidence)" />
+  <choice label="Generate Custom" description="Create fully custom slide without template" />
+</ask>
+
+<check if="user selected Continue">
+  <action>Proceed to Phase 3A with {{selected_template}}</action>
+</check>
+<check if="user selected alternative template (template_candidates[1] or template_candidates[2])">
+  <action>Update {{selected_template}} to user's choice from {{template_candidates}}</action>
+  <action>Log: "User override: switched from {{top_candidate.id}} to {{selected_template.id}}"</action>
+  <action>Proceed to Phase 3A</action>
+</check>
+<check if="user selected Generate Custom">
+  <action>Log: "User selected custom generation over {{top_candidate.id}} ({{top_candidate.score}}%)"</action>
+  <action>Proceed to Phase 3B</action>
+</check>
+
+### Fallback: Low Confidence or No Match
+
+When LLM scoring returns low confidence (<50%) or no clear match:
+
+<steps>
+1. Use `{{template_candidates}}` from LLM scoring (already sorted by score)
+2. Present top 3-4 options to user via AskUserQuestion:
+   - Options 1-3: Top scored templates with confidence percentages
+   - Option 4: "Generate Custom" (use frontend-design skill) - prominently offered for low confidence
+3. Route based on selection:
+   - User selects template → proceed to Phase 3A with that template
+   - User selects "Generate Custom" → proceed to Phase 3B
+</steps>
+
+<reference title="AskUserQuestion for Low Confidence">
+<ask context="Template selection confidence is low. The best matches found:
+
+{{#each template_candidates limit=3}}
+• {{this.id}} ({{this.score}}%): {{this.reasons.join(", ")}}
+{{/each}}
+
+Would you like to use one of these templates, or generate a fully custom slide?"
+     header="Template">
+  <choice label="{{template_candidates[0].id}}" description="Use top match ({{template_candidates[0].score}}% confidence)" />
+  <choice label="{{template_candidates[1].id}}" description="Use second match ({{template_candidates[1].score}}% confidence)" />
+  <choice label="{{template_candidates[2].id}}" description="Use third match ({{template_candidates[2].score}}% confidence)" />
+  <choice label="Generate Custom" description="Create fully custom slide without template (recommended for unique layouts)" />
+</ask>
+</reference>
+
+<reference title="Design Plan Matching Algorithm (New Schema)">
+| Design Plan Keywords | Catalog Match |
+|---------------------|---------------|
+| "centered hero", "full-bleed", "single statement" | title |
+| "columns", "side-by-side", "comparison" | comparison |
+| "flowchart", "process", "steps", "pipeline" | process-flow |
+| "bullet", "list", "agenda", "items" | agenda |
+| "callout", "key insight", "quote", "statistic" | callout |
+| "code", "technical", "snippet" | technical |
+| "timeline", "chronological", "phases" | timeline |
+| "grid", "cards", "tiles" | grid |
+</reference>
+
+<reference title="Legacy Catalog Matching Algorithm">
+| Step | Action |
+|------|--------|
+| 1 | Try exact ID match (template.id == requestedTemplate) |
+| 2 | Try use_cases match (requestedTemplate in template.use_cases) |
+| 3 | If no match → fallback to custom or prompt user |
+</reference>
+
+→ Continue to Phase 2.5
 
 ---
 
-### Phase 3A: Template Build (Catalog-Driven)
+## Phase 2.5: Load Design Standards and Validate Theme
+
+<critical>
+Read and apply design standards BEFORE generating any HTML.
+These standards ensure slides remain readable at 50% zoom (typical laptop viewing).
+</critical>
 
 <steps>
-1. Read the matched template HTML from `.slide-builder/config/catalog/{{matched_template.file}}`
-   - The `matched_template` object comes from Phase 2's catalog matching
-   - Example: If matched_template.file is "title.html", read from `config/catalog/title.html`
-2. Read theme from `.slide-builder/config/theme.json`
-3. Study the template's visual structure:
-   - Layout arrangement (header, content, footer positions)
-   - Spacing and proportions
-   - Decorative elements (accent bars, lines, shapes)
-   - Typography hierarchy
-4. Map theme.json values to CSS custom properties (see reference below)
-5. Generate content from plan (enriched with section discovery from Phase 1A.5):
-   - `intent` → Inform title and overall message
-   - `enriched_key_message` → If available, use section's key message to shape the title/headline
-   - `key_points` → Body content, bullets, sections
-   - `enriched_visual_guidance` → Styling choices (includes diagram/metaphor hints from discovery)
-   - `available_research` → If available, incorporate statistics or quotes from research findings
-   - `tone` → Voice and word choice
-   - `storyline_role` → Emotional weight and pacing
+1. Read `.slide-builder/config/design-standards.md`
+2. Extract typography minimums: Hero 64px, h1 48px, h2 36px, h3 28px, Body 24px, Labels 18px, Captions 16px
+3. Extract spacing constraints: Slide padding 60px, Section gap 40px, Element gap 16px, Line-height 1.4
+4. Extract content density limits: Max 6 bullets, Max 15 words/bullet, Max 3 columns
+5. Store as `{{design_constraints}}`
+</steps>
 
-   <note>When section discovery data is available:
-   - Prefer the section's key_message for headline generation
-   - Use diagram_requirements to influence layout choice
-   - Incorporate visual_metaphor themes into imagery suggestions
-   - Include research_findings as supporting data points if relevant
-   </note>
-6. Assemble complete HTML following the Authoritative Example structure
-7. Verify compliance against Critical Requirements table
+<note>
+Design standards take precedence over theme values for readability.
+</note>
+
+### Validate workflowRules (Strict Enforcement)
+
+<critical>
+Theme must contain workflowRules section. No hardcoded fallbacks allowed.
+</critical>
+
+<steps>
+1. Read `.slide-builder/config/theme.json`
+2. Verify `theme.workflowRules` section exists
+3. Verify `theme.workflowRules.colorSchemes` section exists
+4. Verify both `colorSchemes.dark` and `colorSchemes.light` are defined
+5. If any validation fails → HALT with error (see below)
+6. Store theme as `{{theme}}`
+</steps>
+
+<reference title="workflowRules validation errors">
+| Missing | Error Message |
+|---------|---------------|
+| theme.json | "❌ theme.json not found. Run `/sb-brand:setup` to create your brand theme." |
+| workflowRules | "❌ theme.json is missing 'workflowRules' section. Run `/sb-brand:setup` or `/sb-brand:theme-edit` to add workflow rules." |
+| colorSchemes | "❌ theme.workflowRules is missing 'colorSchemes'. Run `/sb-brand:theme-edit` to fix." |
+| dark/light | "❌ colorSchemes must have both 'dark' and 'light' modes defined." |
+</reference>
+
+→ Continue to Phase 2.6
+
+---
+
+## Phase 2.6: Load Icon Catalog
+
+<critical>
+Icons MUST come from the brand-certified icon catalog.
+If an icon concept has no catalog match, OMIT it entirely — never use emoji or generate SVG.
+</critical>
+
+<steps>
+1. Check if `.slide-builder/config/catalog/brand-assets/icons/icon-catalog.json` exists
+2. If exists:
+   - Load catalog, store as `{{icon_catalog}}`
+   - Set `{{icon_catalog_available}}` = true
+3. If missing:
+   - Warn user: "Icon catalog not found. Run `/sb-manage:add-icon` to set up."
+   - Set `{{icon_catalog_available}}` = false
+   - Continue without icon constraints
+</steps>
+
+<reference title="Icon selection algorithm">
+| Step | Action |
+|------|--------|
+| 1 | Match concept to icon.id (case-insensitive) |
+| 2 | Match concept to icon.tags array |
+| 3 | If no match → OMIT icon entirely |
+</reference>
+
+<reference title="Icon variant by background">
+| Background Mode | Variant Folder |
+|-----------------|----------------|
+| `dark` | `white/` |
+| `light` | `dark/` |
+</reference>
+
+<reference title="Available icons">
+| ID | Tags |
+|----|------|
+| accuracy | target, precision, quality |
+| brainstorm | ideas, creativity, innovation |
+| business-network | networking, team, collaboration |
+| communication | messaging, chat, feedback |
+| customer-insight | customer, analysis, research |
+| customer-insights-manager | analytics, dashboard, metrics |
+| faq | questions, help, support |
+| idea-bank | innovation, lightbulb, solution |
+</reference>
+
+→ Continue to Phase 2.7
+
+---
+
+## Phase 2.7: Load Logo Catalog
+
+<critical>
+Logos MUST come from the brand-certified logo catalog.
+If a logo concept has no catalog match, OMIT it entirely — never draw or recreate logos.
+</critical>
+
+<steps>
+1. Check if `.slide-builder/config/catalog/brand-assets/logos/logo-catalog.json` exists
+2. If exists:
+   - Load catalog, store as `{{logo_catalog}}`
+   - Set `{{logo_catalog_available}}` = true
+3. If missing:
+   - Set `{{logo_catalog_available}}` = false
+   - Continue (logos optional)
+</steps>
+
+<reference title="Logo variant selection by background">
+| Background Mode | Variant |
+|-----------------|---------|
+| `dark` | variant where usage contains "dark background" or variant_id="light" |
+| `light` | variant where usage contains "light background" or variant_id="dark" |
+</reference>
+
+<reference title="Logo selection algorithm">
+| Step | Action |
+|------|--------|
+| 1 | Match concept to logo.id (case-insensitive) |
+| 2 | Match concept to logo.tags array |
+| 3 | If no match → OMIT logo entirely |
+| 4 | Select variant based on background_mode |
+</reference>
+
+→ Continue to Phase 2.8
+
+---
+
+## Phase 2.8: Load Images Catalog
+
+<critical>
+Decorative images and brand imagery MUST come from the images catalog when available.
+If a concept has no catalog match, OMIT it entirely — never generate or substitute images.
+</critical>
+
+<steps>
+1. Check if `.slide-builder/config/catalog/brand-assets/images/images-catalog.json` exists
+2. If exists:
+   - Load catalog, store as `{{images_catalog}}`
+   - Set `{{images_catalog_available}}` = true
+3. If missing:
+   - Set `{{images_catalog_available}}` = false
+   - Continue (images optional)
+</steps>
+
+<reference title="Image selection algorithm">
+| Step | Action |
+|------|--------|
+| 1 | Match concept to image.id (case-insensitive) |
+| 2 | Match concept to image.category |
+| 3 | Match concept to image.tags array |
+| 4 | If no match → OMIT image entirely |
+</reference>
+
+<reference title="Image categories">
+| Category | Use Case |
+|----------|----------|
+| `decorative` | Visual elements for column layouts, accents |
+| `hero` | Large featured images for title slides |
+| `background` | Full-slide background imagery |
+| `diagram` | Pre-made diagrams and illustrations |
+| `photo` | Photography assets |
+| `illustration` | Custom illustrations |
+</reference>
+
+→ Continue to Phase 2.9
+
+---
+
+## Phase 2.9: Content-Template Fit Validation
+
+<critical>
+Before building, validate that the matched template can actually accommodate the content structure.
+Adapting a close template is ALWAYS preferred over building from scratch.
+</critical>
+
+<steps>
+1. Parse `design_plan` (or `key_points` for legacy) to identify content structure:
+   - Count items: "2-4 cards", "3 columns", "5 bullet points"
+   - Identify layout type: grid, columns, single-focus, sequential
+   - Note special requirements: icons, images, stats
+2. Compare content structure against matched template capabilities:
+   - Single-stat templates (callout): Can only hold 1 main item
+   - Column templates (three-column-icons, comparison): Can hold 2-4 parallel items
+   - List templates (agenda): Can hold 3-8 sequential items
+   - Flow templates (process-flow): Can hold 3-6 connected steps
+3. If **content exceeds template capacity** → find better match:
+   - 4+ parallel items needed but callout matched → switch to three-column-icons
+   - 2 items needed but three-column matched → switch to comparison
+   - Sequential items needed but columns matched → switch to agenda or process-flow
+4. If **no catalog template fits**, find the CLOSEST adaptable template:
+   - Prefer templates that need minor adaptation (column count, background mode)
+   - Avoid templates requiring fundamental layout changes
+5. Set `{{selected_template}}` and `{{adaptation_required}}` (boolean)
+6. Log decision: "Selected [template] for [content structure]. Adaptation: [yes/no]"
+</steps>
+
+<reference title="Content-to-Template Fit Matrix">
+| Content Pattern | Best Templates | Avoid |
+|-----------------|---------------|-------|
+| Single stat/quote/insight | callout | columns, grid |
+| 2 parallel items | comparison | callout, three-column |
+| 3 parallel items with details | three-column-icons | callout, comparison |
+| 4 parallel items (cards/asks) | three-column-icons (adapt to 4) | callout |
+| 3-6 sequential steps | process-flow | columns, callout |
+| 4-8 bullet list | agenda | callout, columns |
+| Hero statement | title, title-hero-image | columns, agenda |
+| Team/people showcase | team-grid | callout, agenda |
+</reference>
+
+<important>
+If `suggested_template` from plan doesn't fit the content, override it with a better match.
+The plan's suggestion is a hint, not a mandate. Content structure determines the right template.
+</important>
+
+### Step 7: Identify Similar Templates for Few-Shot Learning
+
+<critical>
+ALWAYS identify 2-3 semantically similar templates regardless of whether a template match was found.
+These provide few-shot examples for custom generation in Phase 3B.
+</critical>
+
+<steps>
+1. Compile slide context for semantic analysis:
+   - **New schema**: description, design_plan keywords, storyline_role, background_mode
+   - **Legacy schema**: intent, template keywords, visual_guidance, storyline_role, background_mode
+2. Build template summaries for comparison:
+   - For each template in catalog: `{{template.id}}: {{template.description}} (use_cases: {{template.use_cases.join(", ")}})`
+3. Use LLM to rank templates by semantic similarity:
+
+<reference title="LLM Semantic Similarity Prompt">
+```
+Given this slide request:
+- Intent/Description: {{slide_description}}
+- Design Plan: {{design_plan}}
+- Storyline Role: {{storyline_role}}
+- Background Mode: {{background_mode}}
+
+Analyze these templates and rank by how well their PURPOSE matches the slide intent (1=best match):
+
+{{#each catalog.templates}}
+{{@index}}. {{this.id}}: {{this.description}}
+   Use cases: {{this.use_cases}}
+{{/each}}
+
+Return the top 3 most similar template IDs as a JSON array: ["id1", "id2", "id3"]
+Consider: layout type, content structure, presentation purpose, visual approach.
+```
+</reference>
+
+4. Store result as `{{similar_templates}}` array (2-3 template IDs)
+5. Log: "Similar templates identified: [{{similar_templates.join(", ")}}]"
+</steps>
+
+<note>
+This step runs regardless of whether Phase 2.9 found a matching template.
+- If template match found → similar_templates provides validation/alternatives
+- If no match found → similar_templates guides Phase 3B custom generation
+</note>
+
+→ Continue to Phase 2.9.5
+
+---
+
+## Phase 2.9.5: Extract Few-Shot Patterns
+
+<critical>
+Extract abbreviated structural excerpts from similar templates to guide custom generation.
+These excerpts provide concrete examples of CSS patterns, layout structure, and attribute conventions.
+</critical>
+
+<steps>
+1. For each template ID in `{{similar_templates}}`:
+   - Look up template in catalog by ID
+   - Read HTML file from `.slide-builder/config/catalog/{{template.file}}`
+2. Extract abbreviated structural excerpt from each template:
+   - **CSS :root block**: First 10-12 custom property declarations
+   - **Layout structure**: `.slide` CSS rules (display, grid/flex, padding)
+   - **Primary component**: First major content container (columns, cards, or main content div)
+   - **Attribute example**: One `contenteditable` element with `data-field` attribute
+3. Format each excerpt with clear structure:
+
+<reference title="Few-Shot Excerpt Format">
+```
+═══════════════════════════════════════
+TEMPLATE: {{template.id}}
+PURPOSE: {{template.description}}
+BACKGROUND MODE: {{template.background_mode}} (this excerpt)
+═══════════════════════════════════════
+
+{{#if template.background_mode == "dark"}}
+For LIGHT mode slides using this pattern:
+- background: var(--color-bg-light) → #FFFFFF
+- text: var(--color-text-on-light) → #0C0C0C
+- accent: var(--color-accent-light) → #004b57 (Dusk)
+{{else}}
+For DARK mode slides using this pattern:
+- background: var(--color-bg-dark) → #0C0C0C
+- text: var(--color-text-on-dark) → #FFFFFF
+- accent: var(--color-accent) → #EAFF5F (Amp Yellow)
+{{/if}}
+
+CSS CUSTOM PROPERTIES:
+```css
+:root {
+  --color-primary: ...;
+  --color-secondary: ...;
+  /* First 10 variables */
+}
+```
+
+LAYOUT STRUCTURE:
+```css
+.slide {
+  /* Main container styles */
+}
+```
+
+PRIMARY COMPONENT (abbreviated):
+```html
+<div class="[main-component-class]">
+  <!-- First child structure only -->
+</div>
+```
+
+ATTRIBUTE PATTERN:
+```html
+<h1 class="title" contenteditable="true" data-field="title">...</h1>
+```
+═══════════════════════════════════════
+```
+</reference>
+
+<reference title="Color Scheme Values for Mode Adaptation">
+When adapting a template to a different background mode, use these resolved values:
+
+DARK MODE (from theme.workflowRules.colorSchemes.dark):
+- background: #0C0C0C (colors.background.dark)
+- textHeading: #FFFFFF (colors.text.onDark)
+- textBody: #E8EDEF (colors.text.body)
+- accent: #EAFF5F (colors.accent / Amp Yellow)
+
+LIGHT MODE (from theme.workflowRules.colorSchemes.light):
+- background: #FFFFFF (colors.background.light)
+- textHeading: #0C0C0C (colors.text.onLight)
+- textBody: #0C0C0C (colors.text.onLight)
+- accent: #004b57 (colors.brand.dusk)
+</reference>
+
+4. Concatenate all excerpts into `{{few_shot_excerpts}}` variable
+5. Log: "Extracted few-shot patterns from {{similar_templates.length}} templates"
 </steps>
 
 <important>
-The catalog template files in `config/catalog/` are fully compliant with contenteditable and data-field attributes. Use them as the primary structural reference.
+Keep excerpts ABBREVIATED - extract patterns, not full templates.
+Goal is to show structural conventions, not provide copy-paste code.
 </important>
 
-<reference title="CSS variable mapping from theme.json">
+→ Continue to Phase 2.95 (Design Checkpoint)
+
+---
+
+## Phase 2.95: Design Checkpoint
+
+<critical>
+This checkpoint presents an AI-generated design proposal using context unavailable at planning time:
+the previous slide's actual template and background, section progress, and rhythm calculations.
+Users approve or modify before generation proceeds.
+</critical>
+
+### Step 1: Check Skip Conditions
+
+<steps>
+1. Check if `{{skip_all_checkpoints}}` session flag is set (from previous "Skip All Checkpoints" selection)
+   - If set → skip to Phase 3A/3B with current selections, log: "Checkpoint skipped (YOLO mode active)"
+2. Check if invoked with `--yolo` or `#yolo` flag
+   - If set → skip to Phase 3A/3B, log: "Checkpoint skipped (YOLO flag)"
+3. Check if this is build-all context AND `{{yolo_batch}}` is true
+   - If true → skip to Phase 3A/3B, log: "Checkpoint skipped (batch mode)"
+4. Otherwise → proceed to Step 2
+</steps>
+
+### Step 2: Load Previous Slide Context
+
+<critical>Load context about the previous slide to inform design decisions and maintain visual rhythm.</critical>
+
+<steps>
+1. Get current slide number from `{{slide.number}}`
+2. If slide number > 1:
+   - Find previous slide in `plan.yaml` slides array (number = current - 1)
+   - Extract from previous slide:
+     - `{{prev_template}}` = previous slide's `suggested_template` or template used
+     - `{{prev_background_mode}}` = previous slide's `background_mode` (default: "dark")
+     - `{{prev_status}}` = previous slide's build status
+   - Check for previous slide's built HTML at `output/{{deck_slug}}/slides/slide-{{prev_number}}.html`
+     - If exists → `{{prev_thumbnail_path}}` = that path
+     - If not exists → `{{prev_thumbnail_path}}` = null
+3. If slide number == 1:
+   - Set `{{prev_template}}` = null
+   - Set `{{prev_background_mode}}` = null
+   - Set `{{prev_thumbnail_path}}` = null
+   - Set `{{is_first_slide}}` = true
+4. Store context as `{{previous_slide_context}}`
+</steps>
+
+### Step 3: Calculate Section Progress
+
+<steps>
+1. Get current slide's `agenda_section_id` (if present)
+2. If agenda_section_id exists:
+   - Count total slides in plan with same `agenda_section_id` → `{{section_total}}`
+   - Count slides with same section before current slide → `{{section_position}}`
+   - Format: "Slide {{section_position}} of {{section_total}} in '{{section_title}}'"
+   - Store as `{{section_progress}}`
+3. If no agenda_section_id:
+   - Use overall position: "Slide {{slide.number}} of {{total_slides}}"
+   - Store as `{{section_progress}}`
+</steps>
+
+### Step 4: Calculate Optimal Background Mode
+
+<critical>Apply rhythm rules from theme to determine optimal background mode for visual variety.</critical>
+
+<steps>
+1. Load rhythm rules from `theme.workflowRules.rhythm`:
+   - `{{max_consecutive_dark}}` = rhythm.maxConsecutiveDark (default: 3)
+   - `{{max_consecutive_light}}` = rhythm.maxConsecutiveLight (default: 2)
+   - `{{role_overrides}}` = rhythm.roleOverrides
+2. Count consecutive slides with same background mode (look back from previous slide):
+   - Scan backwards until mode changes
+   - Store count as `{{consecutive_same_mode}}`
+3. Check for role override:
+   - If `{{slide.storyline_role}}` exists in `{{role_overrides}}`
+     - `{{role_suggested_mode}}` = role_overrides[storyline_role]
+4. Calculate optimal mode:
+   - If role override exists → prefer `{{role_suggested_mode}}`
+   - Else if consecutive dark >= max_consecutive_dark → suggest "light" (rhythm break)
+   - Else if consecutive light >= max_consecutive_light → suggest "dark" (rhythm break)
+   - Else → use plan's `background_mode` or default to "dark"
+5. Store as `{{optimal_background_mode}}`
+6. If optimal differs from plan's mode, note: "Rhythm adjustment: {{reason}}"
+</steps>
+
+### Step 5: Generate Design Proposal
+
+<steps>
+1. Compile proposal components:
+   - `{{proposed_template}}` = `{{selected_template.id}}` from Phase 2 scoring
+   - `{{proposed_background_mode}}` = `{{optimal_background_mode}}` from Step 4
+   - `{{proposed_layout_approach}}` = summarize from `{{slide.design_plan}}` or generate brief description
+   - `{{proposed_assets}}` = list any icons/images identified in Phase 2.6-2.8 that match slide content
+2. Generate confidence indicator:
+   - Template confidence: `{{selected_template.score}}%`
+   - Background mode: "Based on rhythm rules" or "Plan specified"
+3. Store complete proposal as `{{design_proposal}}`
+</steps>
+
+### Step 6: Display Design Checkpoint
+
+<reference title="Checkpoint Display Format">
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🎨 DESIGN CHECKPOINT — Slide {{slide.number}} of {{total_slides}}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📋 SLIDE INTENT
+───────────────────────────────────────────────────────────────────────────────
+{{slide.description || slide.intent}}
+
+Role: {{slide.storyline_role}}  |  Tone: {{slide.tone}}
+{{section_progress}}
+
+📊 CONTEXT (Previous Slide)
+───────────────────────────────────────────────────────────────────────────────
+{{#if is_first_slide}}
+This is the first slide — no previous context to reference.
+{{else}}
+Previous: Slide {{prev_number}} used **{{prev_template}}** template with **{{prev_background_mode}}** background
+{{#if consecutive_same_mode > 1}}
+⚠️ {{consecutive_same_mode}} consecutive {{prev_background_mode}} slides — consider rhythm break
+{{/if}}
+{{/if}}
+
+🎯 DESIGN PROPOSAL
+───────────────────────────────────────────────────────────────────────────────
+**Template:** {{proposed_template}} ({{selected_template.score}}% confidence)
+  → {{selected_template.reasons.join(", ")}}
+
+**Background:** {{proposed_background_mode}}
+  {{#if background_rhythm_note}}→ {{background_rhythm_note}}{{/if}}
+
+**Layout Approach:**
+  {{proposed_layout_approach}}
+
+**Suggested Assets:**
+  {{#each proposed_assets}}• {{this.type}}: {{this.name}} ({{this.path}}){{/each}}
+  {{#if proposed_assets.length == 0}}No specific assets identified — will use theme defaults{{/if}}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+```
+</reference>
+
+<steps>
+1. Output the formatted checkpoint display (above)
+2. Present options using AskUserQuestion
+</steps>
+
+### Step 7: Handle User Response
+
+<ask context="Review the design proposal above. How would you like to proceed?"
+     header="Design">
+  <choice label="Approve" description="Build with proposed design ({{proposed_template}}, {{proposed_background_mode}})" />
+  <choice label="Change Template" description="Select a different template from the catalog" />
+  <choice label="Change Background" description="Toggle between dark/light background mode" />
+  <choice label="Edit Layout" description="Provide custom layout instructions" />
+  <choice label="Skip All Checkpoints" description="Auto-approve all remaining slides (YOLO mode)" />
+</ask>
+
+<check if="user selected Approve">
+  <action>Log: "Design approved: {{proposed_template}}, {{proposed_background_mode}}"</action>
+  <action>Set `{{selected_template}}` = template from proposal</action>
+  <action>Set `{{background_mode}}` = `{{proposed_background_mode}}`</action>
+  <goto>Phase 3A or 3B based on template selection</goto>
+</check>
+
+<check if="user selected Change Template">
+  <action>Display filtered template matches (top 5 from Phase 2 scoring)</action>
+  <ask context="Available templates (sorted by match score):
+
+{{#each template_candidates limit=5}}
+{{@index + 1}}. **{{this.id}}** ({{this.score}}%): {{this.reasons.join(', ')}}
+{{/each}}
+
+Or type 'all' to see all {{catalog_total}} templates."
+       header="Template">
+    <choice label="{{template_candidates[0].id}}" description="{{template_candidates[0].score}}% match" />
+    <choice label="{{template_candidates[1].id}}" description="{{template_candidates[1].score}}% match" />
+    <choice label="{{template_candidates[2].id}}" description="{{template_candidates[2].score}}% match" />
+    <choice label="Show all templates..." description="Browse complete template catalog" />
+  </ask>
+  <check if="user selected 'Show all templates...'">
+    <action>List all templates from catalog with IDs and descriptions</action>
+    <action>Ask user to select by name or number</action>
+  </check>
+  <action>Update `{{selected_template}}` to user's choice</action>
+  <action>Log: "Template changed: {{previous_template}} → {{selected_template.id}}"</action>
+  <goto>Phase 3A with new template</goto>
+</check>
+
+<check if="user selected Change Background">
+  <action>Toggle background mode: dark ↔ light</action>
+  <action>Show rhythm impact: "Changing to {{new_mode}} would result in {{new_consecutive}} consecutive {{new_mode}} slides"</action>
+  <ask context="Background mode: **{{current_mode}}** → **{{new_mode}}**
+
+Rhythm impact: {{rhythm_impact_message}}"
+       header="Confirm">
+    <choice label="Confirm {{new_mode}}" description="Use {{new_mode}} background for this slide" />
+    <choice label="Keep {{current_mode}}" description="Stay with original background mode" />
+  </ask>
+  <action>Update `{{background_mode}}` to confirmed choice</action>
+  <action>Log: "Background changed: {{previous_mode}} → {{background_mode}}"</action>
+  <goto>Phase 3A or 3B with updated background</goto>
+</check>
+
+<check if="user selected Edit Layout">
+  <action>Accept freeform text input for layout adjustments</action>
+  <ask>Describe your layout adjustments (e.g., "Add a third column", "Use horizontal layout instead", "Include an icon for each point"):</ask>
+  <action>Store input as `{{layout_adjustments}}`</action>
+  <action>Merge adjustments with `{{slide.design_plan}}`</action>
+  <action>Log: "Layout customized: {{layout_adjustments}}"</action>
+  <goto>Phase 3A or 3B with merged design plan</goto>
+</check>
+
+<check if="user selected Skip All Checkpoints">
+  <action>Set `{{skip_all_checkpoints}}` = true (session flag)</action>
+  <action>Log: "YOLO mode activated — skipping all remaining checkpoints"</action>
+  <output>✅ **YOLO mode activated** — remaining slides will auto-approve with AI-proposed designs.</output>
+  <goto>Phase 3A or 3B with current proposal</goto>
+</check>
+
+### Step 8: Update Status with Design Choices
+
+<steps>
+1. After checkpoint approval (any path), record the final design choices in status.yaml:
+   - `decks.{{deck_slug}}.last_slide_template` = `{{selected_template.id}}`
+   - `decks.{{deck_slug}}.last_slide_background` = `{{background_mode}}`
+   - This provides context for the NEXT slide's checkpoint
+2. Proceed to appropriate build phase
+</steps>
+
+→ Continue to Phase 3A (if template selected) or Phase 3B (if custom generation needed)
+
+---
+
+## Phase 3A: Template Build
+
+<critical>
+Brand assets MUST come from approved catalogs when available.
+- Icons: ONLY from icon-catalog.json — NEVER emoji or generated SVG
+- Logos: ONLY from logo-catalog.json — NEVER draw or recreate
+- Images: ONLY from images-catalog.json when decorative elements needed
+If concept has no catalog match → OMIT element entirely. Do NOT substitute.
+</critical>
+
+<steps>
+1. Read matched template HTML from `.slide-builder/config/catalog/{{matched_template.file}}`
+2. Read theme from `.slide-builder/config/theme.json`
+3. Study template structure: layout, spacing, decorative elements, typography
+4. **If `{{adaptation_required}}` is true**, apply template adaptations (see rules below)
+5. Map theme.json values to CSS custom properties
+6. Generate content from plan (enriched with section discovery):
+   - **New schema**: description → title/messaging, design_plan → layout, enriched_section_goals → content direction
+   - **Legacy schema**: intent → title, key_points → body, enriched_key_message → headline guidance
+   - Include `available_research` as supporting data if relevant
+7. Apply brand asset selection from catalogs:
+   **Icons** (if `{{icon_catalog_available}}`):
+   - Match concept against `{{icon_catalog}}` using id or tags
+   - Use variant folder based on `background_mode` (dark bg → white/, light bg → dark/)
+   - If no match → OMIT icon entirely (no emoji, no generated SVG)
+   **Logos** (if `{{logo_catalog_available}}`):
+   - Match concept against `{{logo_catalog}}` using id or tags
+   - Select variant based on `background_mode` (dark bg → light variant, light bg → dark variant)
+   - If no match → OMIT logo entirely (no drawing, no recreation)
+   **Images** (if `{{images_catalog_available}}`):
+   - Match concept against `{{images_catalog}}` using id, category, or tags
+   - If no match → OMIT image entirely (no generation, no substitution)
+8. Apply `{{design_constraints}}`: font sizes, spacing, content density limits
+9. Assemble complete HTML following Authoritative Example structure
+10. **Verify compliance** against Critical Requirements table AND design standards
+</steps>
+
+<reference title="Template Adaptation Rules">
+**Adaptations ALLOWED** (preserve template visual language):
+| Adaptation | How to Apply |
+|------------|--------------|
+| Column count (3→4) | Duplicate column div, adjust `grid-template-columns` or flex proportions |
+| Column count (3→2) | Remove one column div, adjust grid/flex |
+| Background mode (light→dark) | Swap CSS variables: `--color-bg-light` → `--color-bg-dark`, text colors accordingly |
+| Background mode (dark→light) | Swap CSS variables: `--color-bg-dark` → `--color-bg-light`, text colors accordingly |
+| Content density | Add/remove bullet items, card items within same structure |
+| Icon substitution | Replace icon paths with catalog matches |
+
+**Adaptations NOT ALLOWED** (would break template identity):
+| Change | Why Not |
+|--------|---------|
+| Callout → Multi-column | Fundamentally different layout purpose |
+| Columns → Single-focus | Would lose the parallel comparison intent |
+| Process-flow → Grid | Sequential vs. parallel are incompatible |
+| Adding entirely new sections | Template structure should remain recognizable |
+
+**Preserve these template elements**:
+- Spacing ratios (padding, gaps, margins)
+- Border styles and radii
+- Typography hierarchy (relative sizes)
+- Decorative elements (gradients, accents, dividers)
+- Footer/header patterns
+</reference>
+
+<reference title="CSS variable mapping">
 ```css
 :root {
   --color-primary: {{theme.colors.primary}};
@@ -422,9 +1168,11 @@ The catalog template files in `config/catalog/` are fully compliant with content
   --color-bg-default: {{theme.colors.background.default}};
   --color-bg-alt: {{theme.colors.background.alt}};
   --color-bg-dark: {{theme.colors.background.dark}};
+  --color-bg-light: {{theme.colors.background.light}};
   --color-text-heading: {{theme.colors.text.heading}};
   --color-text-body: {{theme.colors.text.body}};
   --color-text-on-dark: {{theme.colors.text.onDark}};
+  --color-text-on-light: {{theme.colors.text.onLight}};
   --font-heading: {{theme.typography.fonts.heading}};
   --font-body: {{theme.typography.fonts.body}};
   --font-mono: {{theme.typography.fonts.mono}};
@@ -432,196 +1180,362 @@ The catalog template files in `config/catalog/` are fully compliant with content
 ```
 </reference>
 
-<important>
-Remember: Samples show design patterns but LACK contenteditable attributes. You MUST add `contenteditable="true"` and `data-field="..."` to every text element.
-</important>
+<reference title="Color scheme resolution from theme">
+Color values MUST come from `theme.workflowRules.colorSchemes`, not hardcoded values.
+
+**Resolution Algorithm:**
+1. Get `background_mode` from slide plan (default: "dark" if missing)
+2. Look up scheme: `scheme = theme.workflowRules.colorSchemes[background_mode]`
+3. For each key in scheme (background, textHeading, textBody, accent):
+   - If value contains "." (is a path like "colors.background.dark"):
+     - Resolve path against theme object (e.g., theme.colors.background.dark → "#0C0C0C")
+   - Else use value directly
+4. Store resolved colors as `{{resolved_colors}}`
+
+**Example Resolution (dark mode):**
+```
+Input scheme:
+  background: "colors.background.dark"
+  textHeading: "colors.text.onDark"
+  textBody: "colors.text.body"
+  accent: "colors.accent"
+
+Resolved:
+  background: "#0C0C0C"    (from theme.colors.background.dark)
+  textHeading: "#FFFFFF"   (from theme.colors.text.onDark)
+  textBody: "#E8EDEF"      (from theme.colors.text.body)
+  accent: "#EAFF5F"        (from theme.colors.accent)
+```
+</reference>
+
+<critical>
+If `background_mode` is missing from the slide, default to `dark` for backwards compatibility.
+All color values must be resolved from theme - no hardcoded hex values in this workflow.
+</critical>
 
 → Continue to Phase 4
 
 ---
 
-### Phase 3B: Custom Build (Frontend Design Skill)
+## Phase 3B: Custom Build (Frontend Design Skill) — LAST RESORT
 
-Use this path when the template is `custom` or unrecognized.
+<critical>
+Custom builds should be rare. Only use this path when:
+1. `suggested_template` is explicitly `"custom"` in the plan, OR
+2. NO catalog template can be reasonably adapted (must justify why)
+
+If you reach this phase without explicit `"custom"` in plan, you MUST first present alternatives to the user.
+</critical>
+
+### Pre-Custom Gate (skip if `suggested_template: "custom"`)
+
+<steps>
+1. Identify the 2 closest catalog templates that COULD be adapted
+2. Present to user via AskUserQuestion:
+   - Option 1: "[Template A] - adapt by [specific changes]"
+   - Option 2: "[Template B] - adapt by [specific changes]"
+   - Option 3: "Build fully custom (no template base)"
+3. If user selects Option 1 or 2 → return to Phase 3A with that template
+4. If user selects Option 3 → proceed with custom build below
+5. Log: "Custom build selected. Closest alternatives were: [A], [B]"
+</steps>
+
+### Custom Build Steps
 
 <steps>
 1. Read `.slide-builder/config/theme.json`
-2. Invoke the frontend-design skill (see prompt below)
-3. Validate the skill output (see checklist below)
-4. Fix any compliance issues
-5. Verify against Critical Requirements table
+2. Read design standards from `{{design_constraints}}`
+3. Invoke frontend-design skill with slide requirements (see prompt below)
+4. Validate skill output against checklist and design standards
+5. Fix any compliance issues
+6. **Verify compliance** against Critical Requirements table
 </steps>
 
 <important>
-To invoke the skill, call the **Skill tool** with:
-- `skill`: `"frontend-design"`
-- Include all context in your request to the skill
+Invoke the skill using the **Skill tool** with `skill: "frontend-design"`.
 </important>
+
+### Pre-Generation Confirmation Gate
+
+<critical>
+BEFORE invoking the frontend-design skill, confirm ALL of the following.
+These are the most common failure points requiring post-generation fixes.
+</critical>
+
+<pre-generation-checklist>
+CONFIRM your generated HTML will include:
+
+[ ] CSS VARIABLES in :root:
+    --color-primary, --color-secondary, --color-accent
+    --color-bg-default, --color-bg-dark, --color-bg-light
+    --color-text-heading, --color-text-body
+    --font-heading, --font-body
+
+[ ] DATA-FIELD NAMING: lowercase-hyphenated
+    CORRECT: data-field="point-1", data-field="column-header"
+    WRONG: data-field="Point1", data-field="column_header"
+
+[ ] CONTENTEDITABLE on EVERY visible text element
+    Each with both contenteditable="true" AND unique data-field
+
+[ ] NESTING DEPTH: ≤ 4 levels from .slide to deepest text
+
+[ ] CSS COLORS: var(--color-*) for all values (no hardcoded hex in component CSS)
+
+[ ] VIEWPORT: width=1920, height=1080
+
+[ ] DIMENSIONS: body AND .slide = 1920px x 1080px
+
+[ ] AUTO-SAVE: saveEdits() function before </body>
+</pre-generation-checklist>
 
 <reference title="Prompt for frontend-design skill">
 ```
 Create a presentation slide as a single HTML file.
 
-SLIDE REQUIREMENTS:
-- Intent: {{slide.intent}}
-- Key Points: {{slide.key_points}}
-- Visual Guidance: {{slide.visual_guidance}}
-- Tone: {{slide.tone}}
-- Storyline Role: {{slide.storyline_role}}
+SLIDE REQUIREMENTS (use whichever schema applies):
+- New schema: Description, Design Plan, Background Mode, Tone, Storyline Role, Section Goals
+- Legacy schema: Intent, Key Points, Visual Guidance, Background Mode, Tone, Storyline Role
 
-TECHNICAL REQUIREMENTS:
-- Exactly 1920x1080 pixels
-- Viewport meta: width=1920, height=1080
-- All text elements must have contenteditable="true"
-- All text elements must have unique data-field attribute
-- Use CSS custom properties for colors (--color-primary, etc.)
-- Include auto-save script for contenteditable elements
+BACKGROUND MODE COLORS (resolved from theme):
+- Background: {{resolved_colors.background}}
+- Text Heading: {{resolved_colors.textHeading}}
+- Text Body: {{resolved_colors.textBody}}
+- Accent: {{resolved_colors.accent}}
 
-BRAND THEME:
-- Primary: {{theme.colors.primary}}
-- Secondary: {{theme.colors.secondary}}
-- Background dark: {{theme.colors.background.dark}}
-- Text on dark: {{theme.colors.text.onDark}}
-- Heading font: {{theme.typography.fonts.heading}}
-- Body font: {{theme.typography.fonts.body}}
-- Personality: {{theme.personality.classification}}
-- Traits: {{theme.personality.traits}}
+═══════════════════════════════════════════════════════════════
+STRUCTURAL EXAMPLES (follow these patterns):
+{{few_shot_excerpts}}
+═══════════════════════════════════════════════════════════════
 
-Output only the complete HTML file starting with <!DOCTYPE html>.
+CRITICAL: Your output MUST follow the structural patterns demonstrated above:
+- Use the SAME CSS variable naming conventions (--color-primary, --color-secondary, --font-heading, --font-body, etc.)
+- Follow the SAME component structure patterns (grid/flex layouts, nesting depth)
+- Apply contenteditable + data-field to ALL text elements exactly as shown
+- Match spacing and typography scale patterns from examples
+- Use the SAME data-field naming conventions: lowercase, hyphenated (title, subtitle, point-1, description)
+
+PATTERN REQUIREMENTS (non-negotiable):
+1. CSS Variables: :root MUST declare --color-primary, --color-secondary, --color-accent, --color-bg-*, --color-text-*, --font-heading, --font-body
+2. data-field Naming: ALL values must be lowercase, hyphenated (e.g., "title", "subtitle", "point-1", "column-header")
+3. Structure: Main content nesting depth should be ≤4 levels, similar to examples
+4. Spacing: Slide padding 60-80px, section gaps 40px, element gaps 16-24px (match example patterns)
+
+TECHNICAL: 1920x1080px, contenteditable on all text, unique data-field, CSS variables, auto-save script
+
+BRAND ASSET RULES (if catalogs available):
+Icons:
+- ONLY from icon-catalog.json, NEVER emoji or generated SVG
+- Variant: dark bg → white/, light bg → dark/
+- Sizes: 50px or 100px
+- If concept not in catalog → OMIT icon
+
+Logos:
+- ONLY from logo-catalog.json, NEVER draw or recreate
+- Variant: dark bg → light variant, light bg → dark variant
+- If concept not in catalog → OMIT logo
+
+Images:
+- ONLY from images-catalog.json for decorative elements
+- Match by id, category, or tags
+- If concept not in catalog → OMIT image
+
+CRITICAL: If ANY asset type has no catalog match → OMIT entirely. Do NOT substitute.
+
+═══════════════════════════════════════
+PRE-OUTPUT CHECK:
+✓ :root declares all --color-* and --font-* variables
+✓ ALL text has contenteditable="true" + unique data-field
+✓ data-field values are lowercase-hyphenated
+✓ No hardcoded colors (use var(--color-*))
+✓ Nesting ≤ 4 levels | saveEdits() present
+═══════════════════════════════════════
+
+Output only complete HTML starting with <!DOCTYPE html>.
 ```
 </reference>
 
 <checklist title="Validate skill output">
-- [ ] All text elements (h1-h6, p, li, span, td) have `contenteditable="true"`
-- [ ] All contenteditable elements have unique `data-field` attributes
+- [ ] All text elements have `contenteditable="true"`
+- [ ] All contenteditable elements have unique `data-field`
 - [ ] Viewport meta is `width=1920, height=1080`
 - [ ] Body and .slide are 1920x1080px
-- [ ] `saveEdits()` function exists in script
-- [ ] CSS uses `--color-*` variables, not hardcoded colors
+- [ ] `saveEdits()` function exists
+- [ ] CSS uses `--color-*` variables
+- [ ] Background matches `background_mode`
+- [ ] Text colors appropriate for background
+- [ ] Icons use catalog paths only (no emoji, no generated SVG)
+- [ ] Logos use catalog paths only (no drawn or recreated logos)
+- [ ] Images use catalog paths only (no generated or substitute images)
+- [ ] Missing catalog assets are OMITTED, not substituted
 </checklist>
+
+→ Continue to Phase 3B.5
+
+---
+
+## Phase 3B.5: Quality Validation (Few-Shot Pattern Compliance)
+
+<critical>
+After custom generation, validate that output matches the quality characteristics of the example templates.
+This ensures custom slides feel cohesive with template-based slides in the same deck.
+</critical>
+
+<steps>
+1. Compare generated HTML against `{{few_shot_excerpts}}` patterns
+2. Run through compliance checklist below
+3. For each failed check:
+   - Log the specific issue
+   - Attempt automatic fix if possible
+   - If unfixable, warn user and note in output
+4. Track compliance score: count passed checks / total checks
+5. Log: "Pattern compliance: {{passed}}/{{total}} checks passed"
+</steps>
+
+<checklist title="CSS Variable Naming Compliance">
+- [ ] :root block declares `--color-primary`
+- [ ] :root block declares `--color-secondary`
+- [ ] :root block declares `--color-accent`
+- [ ] :root block declares `--color-bg-default` or `--color-bg-dark`/`--color-bg-light`
+- [ ] :root block declares `--color-text-heading`
+- [ ] :root block declares `--color-text-body`
+- [ ] :root block declares `--font-heading`
+- [ ] :root block declares `--font-body`
+- [ ] No hardcoded color values in body/component CSS (use var(--color-*))
+- [ ] CSS variable names match example template conventions exactly
+</checklist>
+
+<checklist title="data-field Convention Compliance">
+- [ ] ALL contenteditable elements have unique `data-field` attributes
+- [ ] data-field values are lowercase (no uppercase letters)
+- [ ] data-field values use hyphens for multi-word names (e.g., "point-1", not "point1" or "point_1")
+- [ ] data-field naming follows semantic patterns: title, subtitle, eyebrow, body, point-N, stat-value, stat-label
+- [ ] No duplicate data-field values in the document
+- [ ] data-field coverage: every visible text element has a field identifier
+</checklist>
+
+<checklist title="Structural Similarity Compliance">
+- [ ] Layout uses similar approach as closest example (grid/flex, not absolute positioning)
+- [ ] Main content nesting depth ≤ 4 levels (count from .slide to deepest text element)
+- [ ] Component organization follows example patterns (header → content → footer flow)
+- [ ] Spacing values are within expected ranges: slide padding 60-80px, gaps 16-40px
+- [ ] Typography hierarchy is clear: headings > subheadings > body > captions
+- [ ] Visual weight distribution similar to examples (not top-heavy or unbalanced)
+</checklist>
+
+<reference title="Auto-fix Rules">
+| Issue | Auto-fix Action |
+|-------|-----------------|
+| Missing CSS variable | Add to :root block with theme value |
+| Hardcoded color | Replace with appropriate var(--color-*) |
+| Missing data-field | Generate semantic field name from element context |
+| Uppercase in data-field | Convert to lowercase |
+| Underscore in data-field | Replace with hyphen |
+| Missing contenteditable | Add contenteditable="true" to text elements |
+</reference>
+
+<important>
+If compliance score is below 80% (fewer than 80% of checks passed), warn user:
+"⚠️ Custom slide has pattern compliance issues. Consider reviewing against template examples."
+</important>
 
 → Continue to Phase 4
 
 ---
 
-### Phase 4: Save Output Files
+## Phase 4: Save Output Files
 
 <steps>
-1. Ensure output directory exists:
-   - Deck mode: `output/{{deck_slug}}/slides/`
-   - Single mode: `output/singles/`
-2. Write the HTML file to `output_path`
-3. (Deck mode only) Create state file at `state_path`:
+1. Ensure output directory exists
+2. Generate unique 8-character hex slide ID (e.g., `a1b2c3d4`)
+3. Add `data-slide-id="{id}"` to `.slide` div
+4. Write HTML file to `output_path`
+5. (Deck mode) Create state file at `state_path`:
+   ```json
+   { "slide": {{number}}, "edits": [], "lastModified": null }
+   ```
 </steps>
-
-<example title="State file schema">
-```json
-{
-  "slide": {{number}},
-  "edits": [],
-  "lastModified": null
-}
-```
-</example>
 
 → Continue to Phase 5
 
 ---
 
-### Phase 5: Update Viewer (Deck Mode Only)
+## Phase 5: Update Viewer (Deck Mode Only)
 
-<context>
-Skip this phase entirely for single mode slides.
-</context>
+<context>Skip this phase for single mode slides.</context>
 
 <steps>
-1. Run the regenerate script:
-   ```bash
-   node scripts/regenerate-viewer.js {{deck_slug}}
-   ```
-2. This updates:
-   - `output/{{deck_slug}}/slides/manifest.json`
-   - `output/{{deck_slug}}/index.html`
+1. Run: `node scripts/regenerate-viewer.js {{deck_slug}}`
+2. This updates manifest.json and index.html
 </steps>
 
 → Continue to Phase 6
 
 ---
 
-### Phase 6: Update Status
+## Phase 6: Update Status
 
 <steps>
 1. (Deck mode) Update `output/{{deck_slug}}/plan.yaml`:
-   - Find slide by number
-   - Change status: `"pending"` → `"built"`
-   - Save file
-2. Update `.slide-builder/status.yaml`:
-   - `last_action`: Brief description of what was built
-   - `last_modified`: Current ISO 8601 timestamp
-   - `current_slide`: Slide number just built (deck mode)
-   - `output_folder`: Path to output directory
-   - Append entry to `history` array
+   - Find slide by number, change status to "built"
+2. (Deck mode) Update `.slide-builder/status.yaml`:
+   - `decks.{{deck_slug}}.built_count`: Increment by 1
+   - `decks.{{deck_slug}}.current_slide`: Slide number just built
+   - `decks.{{deck_slug}}.last_action`: Description
+   - `decks.{{deck_slug}}.last_modified`: ISO 8601 timestamp
+   - Status transitions: `planned` + first build → `building`; built_count == total → `complete`
+3. Update top-level status.yaml: `last_modified`, append to `history`
 </steps>
 
 → Continue to Phase 7
 
 ---
 
-### Phase 7: Report Success
+## Phase 7: Report Success
 
-<context>
-Communicate results clearly to the user. Adapt your message based on mode.
-</context>
+**Report to user based on mode:**
 
-**For deck mode, include:**
-- Which slide was built (number and intent)
-- Progress: X of Y slides complete
-- How many slides remain
-- Output file location
-- Next steps: `/sb:build-one`, `/sb:build-all`, or `/sb:edit`
+- **Deck mode**: Slide built (number + intent), progress (X of Y), remaining count, output path, next steps (`/sb:build-one`, `/sb:build-all`, `/sb:edit`)
+- **Single mode**: Confirmation, output path, features (editable, auto-save, themed), next steps (open browser, `/sb:edit`, `/sb:export`)
 
-**For single mode, include:**
-- Confirmation slide was generated
-- Output file location
-- Features: editable text, auto-save, theme applied
-- Next steps: open in browser, `/sb:edit`, `/sb:export`
-
-<optional title="Browser preview">
-Ask if user wants to preview. If yes, run appropriate command:
-- macOS: `open "{{absolute_path}}"`
-- Linux: `xdg-open "{{absolute_path}}"`
-- Windows: `start "" "{{absolute_path}}"`
+<optional>
+Ask if user wants browser preview. If yes, run platform-appropriate command:
+- macOS: `open "{{path}}"`
+- Linux: `xdg-open "{{path}}"`
+- Windows: `start "" "{{path}}"`
 </optional>
 
 ---
 
 ## Quick Reference
 
-<reference title="data-field naming conventions">
-| Field Name | Use For |
-|------------|---------|
+<reference title="data-field naming">
+| Field | Use For |
+|-------|---------|
 | `title` | Main heading |
 | `subtitle` | Secondary heading |
-| `eyebrow` | Category/section label above title |
-| `body` | Main paragraph text |
-| `point-1`, `point-2`, `point-3` | List items or numbered points |
-| `quote` | Quoted text |
-| `attribution` | Quote source |
-| `stat-value` | Numerical statistic |
-| `stat-label` | Statistic description |
-| `column-1-title`, `column-2-title` | Column headers |
-| `footer-left`, `footer-right` | Footer text |
+| `eyebrow` | Category label |
+| `body` | Main paragraph |
+| `point-1`, `point-2` | List items |
+| `quote`, `attribution` | Quoted text |
+| `stat-value`, `stat-label` | Statistics |
+| `column-1-title` | Column headers |
 </reference>
 
-<reference title="Common mistakes to avoid">
-| Mistake | Correct Approach |
-|---------|------------------|
-| Hardcoded colors like `#d4e94c` | Use `var(--color-primary)` |
+<reference title="data-animatable elements">
+| Add to | Skip for |
+|--------|----------|
+| Headings, text blocks, cards, list items, icons, images, SVG | Decorative elements, container wrappers |
+</reference>
+
+<reference title="Common mistakes">
+| Mistake | Fix |
+|---------|-----|
+| Hardcoded colors | Use `var(--color-*)` |
 | Missing contenteditable | Check EVERY text element |
-| Duplicate data-field values | Each field must be unique |
-| `width=device-width` viewport | Must be `width=1920, height=1080` |
-| No auto-save script | Include `saveEdits()` function |
-| Using `--amp-*` variable names | Use `--color-*` naming |
+| Duplicate data-field | Each must be unique |
+| `width=device-width` | Must be `width=1920, height=1080` |
+| No auto-save script | Include `saveEdits()` |
 </reference>
 
 ---
@@ -631,13 +1545,13 @@ Ask if user wants to preview. If yes, run appropriate command:
 <reference title="Error responses">
 | Problem | Action |
 |---------|--------|
-| Plan file missing | Stop → tell user which `/sb:plan-*` command to run |
+| Plan file missing | Stop → tell user which `/sb:plan-*` to run |
 | Theme file missing | Stop → tell user to run `/sb:setup` |
-| No pending slides | Inform all slides built → suggest `/sb:edit` or `/sb:export` |
-| Template unknown | Fall back to custom build via frontend-design skill |
-| Skill output invalid | Fix issues (add missing attributes) rather than failing |
+| No pending slides | Inform all built → suggest `/sb:edit` or `/sb:export` |
+| Template unknown | Fall back to custom build |
+| Skill output invalid | Fix issues rather than failing |
 </reference>
 
 <critical>
-Never output a non-compliant slide. If you cannot fix an issue, explain what's wrong and what the user should do.
+Never output a non-compliant slide. If unfixable, explain what's wrong.
 </critical>

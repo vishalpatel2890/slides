@@ -49,7 +49,7 @@ What brand assets would you like me to analyze?
 | build-all | `/sb:build-all` | Build all slides |
 | edit | `/sb:edit` | Edit slide layout |
 | export | `/sb:export` | Export to Google Slides |
-| add-template | `/sb:add-template` | Create custom template |
+| add-slide-template | `/sb-manage:add-slide-template` | Create custom slide template |
 
 ## Status tracking
 

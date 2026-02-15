@@ -86,7 +86,7 @@ Place the HTML file in `.slide-builder/config/catalog/`.
 ## Extensibility
 
 The catalog supports:
-- User-created templates via `/sb:add-template`
+- User-created templates via `/sb-manage:add-slide-template`
 - Manual template additions
 - Custom use case definitions
 

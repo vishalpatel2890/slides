@@ -1,0 +1,21 @@
+# Delete Deck Workflow - Remove a deck and all its files
+# Deletes deck directory, removes registry entry, logs to history
+name: delete-deck
+description: "Delete a deck with all its files, removing it from the registry"
+author: "Slide Builder"
+version: "1.0"
+
+# Path variables
+installed_path: "{project-root}/.slide-builder/workflows/delete-deck"
+
+# Workflow components
+instructions: "{installed_path}/instructions.md"
+
+# State file
+status_file: "{project-root}/.slide-builder/status.yaml"
+
+# Output locations
+output_root: "{project-root}/output"
+
+template: false
+standalone: true

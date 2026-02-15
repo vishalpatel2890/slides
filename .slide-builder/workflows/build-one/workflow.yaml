@@ -16,7 +16,7 @@ samples_dir: "{config_path}/samples"
 
 # Catalog paths (template discovery)
 catalog_path: "{config_path}/catalog"
-catalog_manifest: "{catalog_path}/catalog.json"
+catalog_manifest: "{catalog_path}/slide-templates.json"
 
 # Workflow components
 instructions: "{installed_path}/instructions.md"
@@ -35,13 +35,13 @@ deck_output_dir: "{output_root}"  # Deck slides go to output/{slug}/slides/
 deck_working_dir: "{project-root}/.slide-builder/deck"
 
 # Template discovery is now catalog-driven
-# Read catalog.json for template matching:
+# Read slide-templates.json for template matching:
 # 1. Match against template `id` field (exact match)
 # 2. Fall back to `use_cases` array matching
 # 3. Fall back to custom generation via frontend-design skill
 #
 # Legacy mappings below are kept for backward compatibility only
-# They are used as fallback if catalog.json is missing
+# They are used as fallback if slide-templates.json is missing
 legacy_template_mapping:
   title: "title.html"
   agenda: "agenda.html"
@@ -64,7 +64,20 @@ state_file_schema:
 
 # Variables
 variables:
-  workflow_version: "2.0"
+  workflow_version: "2.1"
+
+# Design Checkpoint configuration
+checkpoint:
+  enabled: true  # Set to false to skip checkpoints by default
+  skip_for_batch: true  # Skip checkpoints when invoked from build-all
+  session_flags:
+    skip_all_checkpoints: false  # Set true after user selects "Skip All Checkpoints"
+    yolo_batch: false  # Set true when running in batch mode
+
+# Previous slide tracking (populated per-deck in status.yaml)
+# These fields are stored at decks.{deck_slug} level:
+#   last_slide_template: "template-id"
+#   last_slide_background: "dark" | "light"
 
 template: false
 standalone: true

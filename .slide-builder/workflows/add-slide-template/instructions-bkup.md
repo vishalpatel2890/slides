@@ -257,7 +257,7 @@ File created: `.slide-builder/config/catalog/{{template_id}}.html`
         "file": "{{template_id}}.html",
         "preview": null,
         "created_at": "{{timestamp}}",
-        "source": "add-template"
+        "source": "add-slide-template"
       }
     </action>
     <action>Append new entry to templates array</action>
@@ -269,7 +269,7 @@ File created: `.slide-builder/config/catalog/{{template_id}}.html`
 
 - New template added to `catalog.json`
 - Template count: {{new_template_count}}
-- Source: "add-template"
+- Source: "add-slide-template"
     </output>
   </step>
 
@@ -309,9 +309,9 @@ open .slide-builder/config/catalog/{{template_id}}.html
     <output>
 **What's Next?**
 
-- Run `/sb:add-template` again to create more templates
-- Run `/sb:plan-one` to plan a slide using your new template
-- Run `/sb:theme` to see your current theme settings
+- Run `/sb-manage:add-slide-template` again to create more templates
+- Run `/sb-create:plan-one` to plan a slide using your new template
+- Run `/sb-brand:theme` to see your current theme settings
     </output>
   </step>
 

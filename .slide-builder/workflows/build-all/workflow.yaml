@@ -1,104 +1,26 @@
 # Build All Workflow - Batch Slide Generation
-# Builds all remaining slides in a deck plan in sequence
+# Thin wrapper that delegates to build-one for each pending slide
 name: build-all
-description: "Build all remaining slides in deck plan with progress tracking and error continuation"
+description: "Build all remaining slides by delegating to build-one with progress tracking and error continuation"
 author: "Slide Builder"
-version: "1.0"
+version: "2.0"
+
+# Dependencies - build-one handles all slide generation logic
+dependencies:
+  - build-one
 
 # Path variables
 installed_path: "{project-root}/.slide-builder/workflows/build-all"
 
-# Config paths (shareable brand assets)
-config_path: "{project-root}/.slide-builder/config"
-theme_file: "{config_path}/theme.json"
-templates_dir: "{config_path}/templates"
-samples_dir: "{config_path}/samples"
-
 # Workflow components
 instructions: "{installed_path}/instructions.md"
 
-# State and plan files
+# State files
 status_file: "{project-root}/.slide-builder/status.yaml"
 # deck_plan is dynamic: output/{deck_slug}/plan.yaml (read deck_slug from status.yaml)
 
-# Output locations - now uses project-root/output/ for clean separation
+# Output locations
 output_root: "{project-root}/output"
-deck_output_dir: "{output_root}"  # Deck slides go to output/{slug}/slides/
-
-# Legacy paths (for internal working files)
-deck_working_dir: "{project-root}/.slide-builder/deck"
-
-# Template file mapping (reused from build-one)
-template_mapping:
-  layout-title: "01-title.html"
-  layout-list: "02-agenda.html"
-  layout-flow: "03-process-flow.html"
-  layout-columns-2: "05-comparison.html"
-  layout-columns-3: "05-comparison.html"  # Fallback to comparison layout
-  layout-callout: "04-key-insight.html"
-  layout-code: "06-technical.html"
-
-# Intent keyword to template mapping (from Architecture Novel Pattern 2)
-intent_keywords:
-  layout-title:
-    - "title"
-    - "intro"
-    - "opening"
-    - "cover"
-  layout-list:
-    - "list"
-    - "bullets"
-    - "points"
-    - "agenda"
-    - "steps"
-    - "installation"
-    - "setup"
-    - "authentication"
-  layout-flow:
-    - "flow"
-    - "process"
-    - "timeline"
-    - "journey"
-    - "workflow"
-    - "task"
-  layout-columns-2:
-    - "compare"
-    - "vs"
-    - "two"
-    - "side-by-side"
-    - "before/after"
-    - "ROI"
-    - "numbers"
-    - "metrics"
-    - "resources"
-    - "application"
-  layout-columns-3:
-    - "three"
-    - "triad"
-    - "options"
-    - "landscape"
-    - "products"
-    - "product"
-  layout-callout:
-    - "key"
-    - "insight"
-    - "callout"
-    - "cta"
-    - "important"
-    - "highlight"
-    - "exercise"
-    - "hands-on"
-    - "what is"
-    - "why"
-    - "matters"
-    - "career"
-  layout-code:
-    - "code"
-    - "technical"
-    - "api"
-    - "commands"
-    - "CLI"
-    - "basic"
 
 # Slide status enum
 slide_status:
@@ -106,15 +28,10 @@ slide_status:
   - "built"
   - "failed"
 
-# State file schema for deck slides
-state_file_schema:
-  slide: "number"
-  edits: "[]"
-  lastModified: "null"
-
 # Variables
 variables:
-  workflow_version: "1.0"
+  workflow_version: "2.1"
+  build_mode: ""  # User selection: "interactive" or "yolo" — controls checkpoint behavior in build-one
 
 template: false
 standalone: true

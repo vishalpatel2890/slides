@@ -365,6 +365,296 @@
         }
 
         /* ═══════════════════════════════════════════════════════════════════════ */
+        /* ANIMATION BUILDER                                                         */
+        /* ═══════════════════════════════════════════════════════════════════════ */
+        .build-btn {
+            background: transparent;
+            border: 1px solid var(--amp-mid-gray);
+            color: var(--amp-white);
+            width: 36px;
+            height: 36px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .build-btn:hover {
+            border-color: var(--amp-lime);
+            color: var(--amp-lime);
+        }
+
+        .build-btn.active {
+            border-color: var(--amp-lime);
+            color: var(--amp-lime);
+            background: rgba(212, 233, 76, 0.1);
+        }
+
+        .build-btn svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        .animation-builder-panel {
+            position: fixed;
+            left: 0;
+            top: 57px;
+            width: 200px;
+            height: calc(100vh - 57px);
+            background: var(--amp-dark-alt);
+            border-right: 1px solid var(--amp-mid-gray);
+            overflow-y: auto;
+            padding: 16px;
+            z-index: 1001;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .animation-builder-panel.hidden {
+            display: none;
+        }
+
+        .animation-builder-panel::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .animation-builder-panel::-webkit-scrollbar-track {
+            background: var(--amp-dark-alt);
+        }
+
+        .animation-builder-panel::-webkit-scrollbar-thumb {
+            background: var(--amp-mid-gray);
+        }
+
+        .animation-builder-panel::-webkit-scrollbar-thumb:hover {
+            background: var(--amp-light-gray);
+        }
+
+        .builder-header {
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--amp-mid-gray);
+        }
+
+        .builder-title {
+            font-family: var(--font-heading);
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--amp-white);
+            margin: 0 0 8px 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .builder-done-btn {
+            background: transparent;
+            border: 1px solid var(--amp-mid-gray);
+            color: var(--amp-white);
+            font-family: var(--font-body);
+            font-size: 11px;
+            padding: 4px 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .builder-done-btn:hover {
+            border-color: var(--amp-lime);
+            color: var(--amp-lime);
+        }
+
+        .builder-instructions {
+            font-family: var(--font-body);
+            font-size: 11px;
+            color: var(--amp-light-gray);
+            line-height: 1.5;
+        }
+
+        .builder-selection-count {
+            font-family: var(--font-body);
+            font-size: 12px;
+            color: var(--amp-lime);
+            margin: 12px 0;
+            padding: 8px;
+            background: rgba(212, 233, 76, 0.1);
+            text-align: center;
+        }
+
+        .builder-create-group-btn {
+            width: 100%;
+            background: transparent;
+            border: 1px dashed var(--amp-mid-gray);
+            color: var(--amp-white);
+            font-family: var(--font-body);
+            font-size: 12px;
+            padding: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-bottom: 12px;
+        }
+
+        .builder-create-group-btn:hover:not(:disabled) {
+            border-color: var(--amp-lime);
+            color: var(--amp-lime);
+        }
+
+        .builder-create-group-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .builder-groups-list {
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .builder-group {
+            margin-bottom: 8px;
+            background: var(--amp-black);
+            border: 1px solid var(--amp-mid-gray);
+            border-left: 3px solid var(--amp-mid-gray);
+            padding: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .builder-group:hover {
+            background: var(--amp-dark-alt);
+        }
+
+        .builder-group.group-color-0 { border-left-color: var(--amp-lime); }
+        .builder-group.group-color-1 { border-left-color: var(--amp-teal); }
+        .builder-group.group-color-2 { border-left-color: #a78bfa; }
+        .builder-group.group-color-3 { border-left-color: #f97316; }
+        .builder-group.group-color-4 { border-left-color: #ec4899; }
+
+        /* Selected group states */
+        .builder-group.group-selected {
+            background: rgba(212, 233, 76, 0.1);
+            border-color: var(--amp-lime);
+        }
+        .builder-group.group-selected.group-color-0 { border-left-color: var(--amp-lime); border-color: var(--amp-lime); }
+        .builder-group.group-selected.group-color-1 { border-left-color: var(--amp-teal); border-color: var(--amp-teal); }
+        .builder-group.group-selected.group-color-2 { border-left-color: #a78bfa; border-color: #a78bfa; }
+        .builder-group.group-selected.group-color-3 { border-left-color: #f97316; border-color: #f97316; }
+        .builder-group.group-selected.group-color-4 { border-left-color: #ec4899; border-color: #ec4899; }
+
+        .builder-group-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 6px;
+        }
+
+        .builder-group-title {
+            font-family: var(--font-body);
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--amp-white);
+        }
+
+        .builder-group-count {
+            font-family: var(--font-body);
+            font-size: 10px;
+            color: var(--amp-light-gray);
+        }
+
+        .builder-group-controls {
+            display: flex;
+            gap: 4px;
+            margin-top: 8px;
+        }
+
+        .group-btn {
+            background: transparent;
+            border: 1px solid var(--amp-mid-gray);
+            color: var(--amp-light-gray);
+            padding: 4px 8px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: border-color 0.2s ease, color 0.2s ease;
+        }
+
+        .group-btn:hover:not(:disabled) {
+            border-color: var(--amp-lime);
+            color: var(--amp-lime);
+        }
+
+        .group-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .group-delete:hover:not(:disabled) {
+            border-color: #ff6b6b;
+            color: #ff6b6b;
+        }
+
+        .builder-footer {
+            margin-top: auto;
+            padding-top: 12px;
+            border-top: 1px solid var(--amp-mid-gray);
+        }
+
+        .builder-footer-note {
+            font-family: var(--font-body);
+            font-size: 10px;
+            color: var(--amp-light-gray);
+            line-height: 1.4;
+        }
+
+        .builder-export-btn {
+            width: 100%;
+            margin-top: 12px;
+            padding: 8px 12px;
+            background: var(--amp-lime);
+            color: var(--amp-black);
+            border: none;
+            font-family: var(--font-body);
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .builder-export-btn:hover {
+            background: #e5f75d;
+        }
+
+        /* ═══════════════════════════════════════════════════════════════════════ */
+        /* BUILD PLAYBACK ANIMATIONS (Fullscreen Only)                              */
+        /* ═══════════════════════════════════════════════════════════════════════ */
+
+        /* Elements hidden before their build step */
+        [data-build-id].build-hidden {
+            opacity: 0 !important;
+            visibility: hidden !important;
+        }
+
+        /* Fade-in animation when revealed */
+        [data-build-id].build-revealing {
+            animation: buildFadeIn 0.4s ease-out forwards;
+        }
+
+        /* Elements that have been revealed */
+        [data-build-id].build-visible {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        @keyframes buildFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ═══════════════════════════════════════════════════════════════════════ */
         /* PRESENTATION SIDEBAR                                                     */
         /* ═══════════════════════════════════════════════════════════════════════ */
         .presentation-sidebar {
@@ -524,23 +814,78 @@
         /* FULLSCREEN MODE - Hide sidebar for distraction-free presentation        */
         /* ═══════════════════════════════════════════════════════════════════════ */
         #presentation-view:fullscreen .presentation-sidebar,
-        #presentation-view:-webkit-full-screen .presentation-sidebar {
+        #presentation-view:-webkit-full-screen .presentation-sidebar,
+        #presentation-view:fullscreen .animation-builder-panel,
+        #presentation-view:-webkit-full-screen .animation-builder-panel {
             display: none;
         }
 
         #presentation-view:fullscreen .presentation-main,
         #presentation-view:-webkit-full-screen .presentation-main {
             margin-left: 0;
+            padding: 0;
         }
 
         #presentation-view:fullscreen .keyboard-hint,
         #presentation-view:-webkit-full-screen .keyboard-hint {
-            left: 50%;
+            display: none;
+        }
+
+        #presentation-view:fullscreen .slide-container,
+        #presentation-view:-webkit-full-screen .slide-container {
+            border: none;
         }
 
         #presentation-view:fullscreen .presentation-header,
         #presentation-view:-webkit-full-screen .presentation-header {
             display: none;
+        }
+
+        /* Connection Status Indicator */
+        .connection-status {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-family: var(--font-body);
+            font-size: 12px;
+            color: var(--amp-light-gray);
+            padding: 4px 10px;
+            border-radius: 4px;
+            background: rgba(255, 255, 255, 0.05);
+            transition: all 0.3s ease;
+        }
+
+        .connection-status .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            transition: background-color 0.3s ease;
+        }
+
+        .connection-status.connected .status-dot {
+            background: var(--amp-lime);
+        }
+
+        .connection-status.saving .status-dot {
+            background: var(--amp-teal);
+            animation: pulse 1s infinite;
+        }
+
+        .connection-status.saved .status-dot {
+            background: var(--amp-lime);
+        }
+
+        .connection-status.disconnected .status-dot {
+            background: #ef4444;
+        }
+
+        .connection-status.saved .status-text::after {
+            content: ' ✓';
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
         }
     </style>
 </head>
@@ -565,7 +910,13 @@
     <!-- ═══════════════════════════════════════════════════════════════════════ -->
     <div id="presentation-view" class="hidden">
         <div class="presentation-header">
-            <span class="presentation-title">{{DECK_NAME}}</span>
+            <div style="display: flex; align-items: center; gap: 16px;">
+                <span class="presentation-title">{{DECK_NAME}}</span>
+                <div class="connection-status" id="connection-status" title="Server connection status">
+                    <span class="status-dot"></span>
+                    <span class="status-text">Checking...</span>
+                </div>
+            </div>
             <div class="presentation-controls">
                 <button class="nav-btn" id="prev-btn" onclick="prevSlide()">← Previous</button>
                 <span class="slide-counter" id="slide-counter">1 / {{TOTAL_SLIDES}}</span>
@@ -607,6 +958,12 @@
                         </button>
                     </div>
                 </div>
+                <button class="build-btn" id="build-btn" onclick="toggleAnimationBuilder()" title="Animation Builder (B)">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="3" width="18" height="7" rx="1"/>
+                        <rect x="3" y="14" width="18" height="7" rx="1"/>
+                    </svg>
+                </button>
                 <button class="close-btn" onclick="exitToGallery()" title="Close (Esc)">×</button>
             </div>
         </div>
@@ -614,6 +971,35 @@
             <!-- Thumbnail Sidebar -->
             <div class="presentation-sidebar" id="sidebar">
                 <!-- Sidebar items will be rendered by JavaScript -->
+            </div>
+            <!-- Animation Builder Panel -->
+            <div class="animation-builder-panel hidden" id="animation-builder-panel">
+                <div class="builder-header">
+                    <div class="builder-title">
+                        Slide Builds
+                        <button class="builder-done-btn" onclick="exitAnimationBuilder()">Done</button>
+                    </div>
+                    <div class="builder-instructions">
+                        Click elements to select. Shift+click for multi-select. Group selected elements to animate together.
+                    </div>
+                </div>
+                <div class="builder-selection-count" id="builder-selection-count">
+                    0 selected
+                </div>
+                <button class="builder-create-group-btn" id="builder-create-group-btn" onclick="createAnimationGroup()" disabled>
+                    + Create Group
+                </button>
+                <div class="builder-groups-list" id="builder-groups-list">
+                    <!-- Groups will be rendered here -->
+                </div>
+                <div class="builder-footer">
+                    <div class="builder-footer-note">
+                        Ungrouped elements appear immediately. Groups animate in order during presentation.
+                    </div>
+                    <button class="builder-export-btn" onclick="exportAnimationsToManifest()" title="Save animations to manifest.json">
+                        Save to Manifest
+                    </button>
+                </div>
             </div>
             <!-- Main Content Area -->
             <div class="presentation-main">
@@ -628,6 +1014,7 @@
             <kbd>Home</kbd><kbd>End</kbd> First/Last
             <kbd>F</kbd> Fullscreen
             <kbd>D</kbd> Download
+            <kbd>B</kbd> Builds
             <kbd>Esc</kbd> Exit
         </div>
     </div>
@@ -661,19 +1048,1383 @@
         const SLIDE_HTML_BASE64 = {{SLIDE_HTML_BASE64}};
         let slides = FALLBACK_SLIDES;
         let deckName = '{{DECK_NAME}}';
+        let deckSlug = '{{DECK_SLUG}}';
         let totalSlides = {{TOTAL_SLIDES}};
 
         // ═══════════════════════════════════════════════════════════════════════
         // STATE
         // ═══════════════════════════════════════════════════════════════════════
         let currentSlide = 1;
+        let builderMode = false;
+        let selectedElements = new Set();
+        let selectedGroupId = null;  // Currently selected group for editing membership
+
+        // Build state for fullscreen presentation playback
+        let buildState = {
+            currentBuildStep: 0,    // 0 = no groups shown, 1+ = groups revealed
+            totalBuildSteps: 0,     // Number of animation groups for current slide
+            slideFullyBuilt: false, // True when all groups revealed or no groups exist
+            nextSlideFullyBuilt: false, // Flag: next slide should appear fully built
+            isTransitioning: false  // Flag: slide transition in progress, block navigation
+        };
+
+        // Server connection state for slide persistence
+        let serverConnection = {
+            connected: false,
+            checking: false,
+            saveTimeout: null,
+            lastSaveAttempt: null
+        };
+
+        // ═══════════════════════════════════════════════════════════════════════
+        // SERVER CONNECTION & SLIDE PERSISTENCE
+        // ═══════════════════════════════════════════════════════════════════════
+
+        /**
+         * Get the base URL for the save server
+         * Universal save server expects: /{deck-slug}/slides/{file}
+         * Dev server (serve-deck.js) expects: /slides/{file}
+         * /status endpoint never has deck slug prefix
+         */
+        function getSaveServerUrl(path) {
+            const isFileProtocol = window.location.protocol === 'file:';
+            const isDevServer = window.location.host === 'localhost:3000';
+
+            if (isFileProtocol || !isDevServer) {
+                // Universal save server
+                if (path === '/status') {
+                    return 'http://localhost:3000/status';
+                }
+                // Include deck slug for slide/manifest paths
+                return `http://localhost:3000/${deckSlug}${path}`;
+            }
+            // Dev server (serve-deck.js) - use relative path
+            return path;
+        }
+
+        /**
+         * Update the connection status indicator in the UI
+         * @param {string} status - 'connected', 'disconnected', 'saving', 'saved'
+         * @param {string} text - Optional text to display
+         */
+        function updateConnectionStatus(status, text) {
+            const indicator = document.getElementById('connection-status');
+            if (!indicator) return;
+
+            indicator.className = 'connection-status ' + status;
+            const textEl = indicator.querySelector('.status-text');
+            if (textEl) {
+                const statusText = {
+                    'connected': 'Connected',
+                    'disconnected': 'Offline',
+                    'saving': 'Saving...',
+                    'saved': 'Saved'
+                };
+                textEl.textContent = text || statusText[status] || status;
+            }
+
+            // For 'saved' status, revert to 'connected' after 2 seconds
+            if (status === 'saved') {
+                setTimeout(() => {
+                    if (serverConnection.connected) {
+                        updateConnectionStatus('connected');
+                    }
+                }, 2000);
+            }
+        }
+
+        /**
+         * Check if the development server is running
+         * @returns {Promise<boolean>} True if server is connected
+         */
+        async function checkServerConnection() {
+            if (serverConnection.checking) return serverConnection.connected;
+            serverConnection.checking = true;
+
+            try {
+                const response = await fetch(getSaveServerUrl('/status'), {
+                    method: 'GET',
+                    cache: 'no-store'
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    serverConnection.connected = data.status === 'connected';
+                    updateConnectionStatus(serverConnection.connected ? 'connected' : 'disconnected');
+                } else {
+                    serverConnection.connected = false;
+                    updateConnectionStatus('disconnected');
+                }
+            } catch (e) {
+                serverConnection.connected = false;
+                updateConnectionStatus('disconnected');
+            }
+
+            serverConnection.checking = false;
+            return serverConnection.connected;
+        }
+
+        /**
+         * Save slide content to server (with localStorage fallback)
+         * @param {number} slideNumber - 1-indexed slide number
+         * @param {string} htmlContent - Full HTML content of the slide
+         * @returns {Promise<boolean>} True if saved successfully
+         */
+        async function saveSlideToServer(slideNumber, htmlContent) {
+            const slideFile = `slide-${slideNumber}.html`;
+
+            // Try server first
+            if (serverConnection.connected) {
+                try {
+                    updateConnectionStatus('saving');
+                    const response = await fetch(getSaveServerUrl(`/slides/${slideFile}`), {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'text/html'
+                        },
+                        body: htmlContent
+                    });
+
+                    if (response.ok) {
+                        updateConnectionStatus('saved');
+                        // Also clear localStorage for this slide since server is source of truth
+                        localStorage.removeItem(`slide-${slideNumber}-edits`);
+                        return true;
+                    } else {
+                        console.warn('Server save failed:', await response.text());
+                    }
+                } catch (e) {
+                    console.warn('Server save error:', e);
+                    serverConnection.connected = false;
+                    updateConnectionStatus('disconnected');
+                }
+            }
+
+            // Fallback to localStorage
+            try {
+                localStorage.setItem(`slide-${slideNumber}-edits`, htmlContent);
+                updateConnectionStatus('disconnected', 'Saved locally');
+                return true;
+            } catch (e) {
+                console.error('localStorage save failed:', e);
+                return false;
+            }
+        }
+
+        /**
+         * Set up save handlers for editable content in an iframe
+         * @param {HTMLIFrameElement} iframe - The slide iframe
+         * @param {number} slideNumber - 1-indexed slide number
+         */
+        function setupSlideEditHandlers(iframe, slideNumber) {
+            if (!iframe || !iframe.contentDocument) return;
+
+            const doc = iframe.contentDocument;
+            const editableElements = doc.querySelectorAll('[contenteditable="true"]');
+
+            // Debounced save function
+            const debouncedSave = () => {
+                if (serverConnection.saveTimeout) {
+                    clearTimeout(serverConnection.saveTimeout);
+                }
+                serverConnection.saveTimeout = setTimeout(() => {
+                    const html = '<!DOCTYPE html>\n' + doc.documentElement.outerHTML;
+                    saveSlideToServer(slideNumber, html);
+                }, 500);
+            };
+
+            // Immediate save on blur
+            const saveOnBlur = () => {
+                if (serverConnection.saveTimeout) {
+                    clearTimeout(serverConnection.saveTimeout);
+                    serverConnection.saveTimeout = null;
+                }
+                const html = '<!DOCTYPE html>\n' + doc.documentElement.outerHTML;
+                saveSlideToServer(slideNumber, html);
+            };
+
+            editableElements.forEach(el => {
+                // Save on input (debounced)
+                el.addEventListener('input', debouncedSave);
+                // Save on blur (immediate)
+                el.addEventListener('blur', saveOnBlur);
+            });
+        }
+
+        // ═══════════════════════════════════════════════════════════════════════
+        // BUILD PLAYBACK FUNCTIONS (Fullscreen Only)
+        // ═══════════════════════════════════════════════════════════════════════
+
+        /**
+         * Check if currently in fullscreen mode
+         * @returns {boolean} True if in fullscreen
+         */
+        function isInFullscreen() {
+            return !!(document.fullscreenElement || document.webkitFullscreenElement);
+        }
+
+        /**
+         * Initialize build state for a slide
+         * Called when entering fullscreen or navigating slides in fullscreen
+         * @param {number} slideNumber - 1-indexed slide number
+         * @param {boolean} fullyBuilt - If true, show all groups (for navigating back)
+         * @param {boolean} immediate - If true, apply immediately; if false, wait for iframe load
+         */
+        function initializeBuildState(slideNumber, fullyBuilt = false, immediate = false) {
+            const slide = slides[slideNumber - 1];
+            const groups = slide?.animations?.groups || [];
+
+            buildState.totalBuildSteps = groups.length;
+            buildState.slideFullyBuilt = groups.length === 0;
+
+            if (fullyBuilt && groups.length > 0) {
+                // Coming from previous slide, show fully built
+                buildState.currentBuildStep = groups.length;
+                buildState.slideFullyBuilt = true;
+                if (immediate) {
+                    showAllGroupedElements();
+                } else {
+                    // Wait a bit for iframe to load
+                    setTimeout(() => showAllGroupedElements(), 200);
+                }
+            } else {
+                // Normal entry, hide all animated elements
+                buildState.currentBuildStep = 0;
+                if (groups.length > 0 && isInFullscreen() && !builderMode) {
+                    if (immediate) {
+                        hideAnimatedElements(groups);
+                    } else {
+                        // Wait a bit for iframe to load
+                        setTimeout(() => hideAnimatedElements(groups), 200);
+                    }
+                }
+            }
+
+            // Clear transition lock - slide is ready for interaction
+            buildState.isTransitioning = false;
+        }
+
+        /**
+         * Send a build command to the iframe via postMessage
+         * Works regardless of cross-origin restrictions
+         * @param {string} command - Command type: buildHideElements, buildRevealElements, buildShowAll
+         * @param {string[]} elementIds - Array of element IDs to target
+         */
+        function sendBuildCommand(command, elementIds = []) {
+            const iframe = document.getElementById('presentation-iframe');
+            if (!iframe || !iframe.contentWindow) return;
+
+            iframe.contentWindow.postMessage({
+                type: command,
+                elementIds: elementIds
+            }, '*');
+        }
+
+        /**
+         * Hide all animated elements that belong to groups
+         * Uses postMessage for cross-origin compatibility
+         * @param {Array} groups - Animation groups from slide data
+         */
+        function hideAnimatedElements(groups) {
+            // Collect all element IDs that are in groups
+            const elementIds = [];
+            groups.forEach(group => {
+                group.elementIds.forEach(id => elementIds.push(id));
+            });
+
+            if (elementIds.length > 0) {
+                sendBuildCommand('buildHideElements', elementIds);
+            }
+        }
+
+        /**
+         * Reveal a specific animation group
+         * Uses postMessage for cross-origin compatibility
+         * @param {number} stepNumber - The build step (1-indexed, matches group order)
+         */
+        function revealGroup(stepNumber) {
+            const slide = slides[currentSlide - 1];
+            const groups = slide?.animations?.groups || [];
+            const group = groups.find(g => g.order === stepNumber);
+            if (!group || !group.elementIds.length) return;
+
+            sendBuildCommand('buildRevealElements', group.elementIds);
+        }
+
+        /**
+         * Hide a specific animation group (reverse build)
+         * Uses postMessage for cross-origin compatibility
+         * @param {number} stepNumber - The build step (1-indexed, matches group order)
+         */
+        function hideGroup(stepNumber) {
+            const slide = slides[currentSlide - 1];
+            const groups = slide?.animations?.groups || [];
+            const group = groups.find(g => g.order === stepNumber);
+            if (!group || !group.elementIds.length) return;
+
+            sendBuildCommand('buildHideElements', group.elementIds);
+        }
+
+        /**
+         * Show all grouped elements (for exiting fullscreen or showing fully built)
+         * Uses postMessage for cross-origin compatibility
+         */
+        function showAllGroupedElements() {
+            sendBuildCommand('buildShowAll');
+        }
+
+        /**
+         * Advance to next build step or next slide
+         * Called on Right Arrow / Click / Space in fullscreen
+         */
+        function advanceBuild() {
+            // Block during slide transitions
+            if (buildState.isTransitioning) return;
+
+            // Skip build logic in builder mode or not in fullscreen
+            if (builderMode || !isInFullscreen()) {
+                nextSlide();
+                return;
+            }
+
+            if (buildState.currentBuildStep < buildState.totalBuildSteps) {
+                // Reveal next group
+                buildState.currentBuildStep++;
+                revealGroup(buildState.currentBuildStep);
+
+                if (buildState.currentBuildStep >= buildState.totalBuildSteps) {
+                    buildState.slideFullyBuilt = true;
+                }
+            } else {
+                // Slide fully built, go to next slide
+                buildState.isTransitioning = true; // Block until slide loads
+                nextSlide();
+            }
+        }
+
+        /**
+         * Reverse build step or go to previous slide (fully built)
+         * Called on Left Arrow in fullscreen
+         */
+        function reverseBuild() {
+            // Block during slide transitions
+            if (buildState.isTransitioning) return;
+
+            // Skip build logic in builder mode or not in fullscreen
+            if (builderMode || !isInFullscreen()) {
+                prevSlide();
+                return;
+            }
+
+            if (buildState.currentBuildStep > 0) {
+                // Hide current group
+                hideGroup(buildState.currentBuildStep);
+                buildState.currentBuildStep--;
+                buildState.slideFullyBuilt = false;
+            } else {
+                // At step 0, go to previous slide (show it fully built)
+                if (currentSlide > 1) {
+                    buildState.nextSlideFullyBuilt = true;
+                    buildState.isTransitioning = true;
+                    currentSlide--;
+                    updatePresentationSlide();
+                }
+            }
+        }
+
+        /**
+         * Handle fullscreen exit - show all elements
+         */
+        function onFullscreenExit() {
+            if (!isInFullscreen()) {
+                // Exited fullscreen, show all elements
+                showAllGroupedElements();
+                // Reset build state
+                buildState.currentBuildStep = 0;
+                buildState.slideFullyBuilt = true;
+                buildState.isTransitioning = false;
+            }
+        }
+
+        /**
+         * Handle fullscreen enter - initialize build state
+         */
+        function onFullscreenEnter() {
+            if (isInFullscreen() && !builderMode) {
+                // Slide is already loaded, apply immediately
+                initializeBuildState(currentSlide, false, true);
+            }
+        }
+
+        // ═══════════════════════════════════════════════════════════════════════
+        // ANIMATION DATA SCHEMA
+        // Each slide in the slides array can have an optional 'animations' field:
+        //
+        // slides[n].animations = {
+        //   groups: [
+        //     {
+        //       id: string,        // Unique group identifier (e.g., "group-1")
+        //       order: number,     // Build order (1 = first to appear)
+        //       elementIds: string[] // Array of data-build-id values
+        //     }
+        //   ]
+        // }
+        //
+        // Storage behavior:
+        // - http:// protocol: Save directly to manifest.json via PUT request
+        // - file:// protocol: Save to localStorage with key "animations-{deckName}"
+        // ═══════════════════════════════════════════════════════════════════════
+
+        /**
+         * Detect if running under file:// protocol (local file system)
+         * @returns {boolean} True if file:// protocol, false otherwise
+         */
+        function isFileProtocol() {
+            return window.location.protocol === 'file:';
+        }
+
+        /**
+         * Load animations from localStorage (used for file:// protocol)
+         * Only merges localStorage animations if manifest doesn't have them
+         * Manifest is the source of truth - localStorage is backup only
+         */
+        function loadAnimationsFromLocalStorage() {
+            try {
+                const storageKey = `animations-${deckName}`;
+                const storedData = localStorage.getItem(storageKey);
+                if (!storedData) return;
+
+                const storedSlides = JSON.parse(storedData);
+                if (!Array.isArray(storedSlides)) return;
+
+                // Only use localStorage animations if manifest doesn't have them
+                // This prevents stale localStorage from overwriting good manifest data
+                storedSlides.forEach((storedSlide, index) => {
+                    if (storedSlide.animations && slides[index]) {
+                        // Only use localStorage if current slide has no animations or empty groups
+                        const hasManifestAnimations = slides[index].animations?.groups?.length > 0;
+                        if (!hasManifestAnimations) {
+                            slides[index].animations = storedSlide.animations;
+                        }
+                    }
+                });
+            } catch (e) {
+                console.warn('Failed to load animations from localStorage:', e);
+            }
+        }
+
+        /**
+         * Save animations to persistent storage
+         * Uses manifest.json for http:// or localStorage for file://
+         * @param {number} [slideIndex] - Optional specific slide index to update
+         */
+        /**
+         * Save animations to persistent storage
+         * Primary: manifest.json (source of truth)
+         * Backup: localStorage (for when manifest write fails)
+         */
+        async function saveAnimations(slideIndex) {
+            const storageKey = `animations-${deckName}`;
+
+            // Always save to localStorage as backup
+            try {
+                localStorage.setItem(storageKey, JSON.stringify(slides));
+            } catch (e) {
+                console.warn('[Animations] localStorage backup failed:', e);
+            }
+
+            // Try to save to manifest.json via save server
+            try {
+                const response = await fetch(getSaveServerUrl('/slides/manifest.json'), {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        deckName,
+                        generatedAt: new Date().toISOString(),
+                        slides
+                    }, null, 2)
+                });
+                if (response.ok) {
+                    console.log('[Animations] Saved to manifest.json');
+                    return;
+                }
+            } catch (e) {
+                // PUT failed, localStorage backup is in place
+            }
+
+            console.log('[Animations] Saved to localStorage (manifest write not available)');
+        }
+
+        /**
+         * Export animations to a downloadable manifest.json file
+         * User should save this to output/{deck}/slides/manifest.json to persist animations
+         */
+        function exportAnimationsToManifest() {
+            const manifest = {
+                deckName,
+                generatedAt: new Date().toISOString(),
+                slides: slides
+            };
+
+            const blob = new Blob([JSON.stringify(manifest, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'manifest.json';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+
+            console.log('[Animations] Exported manifest.json with animations');
+            alert('Downloaded manifest.json\\n\\nSave it to: output/' + deckName.toLowerCase().replace(/\\s+/g, '-') + '/slides/manifest.json');
+        }
+
+        // ═══════════════════════════════════════════════════════════════════════
+        // ANIMATION BUILDER FUNCTIONS
+        // Uses overlay approach for file:// protocol compatibility
+        // ═══════════════════════════════════════════════════════════════════════
+
+        // Builder state
+        let builderElements = []; // Array of {id, rect} for current slide
+        let hoveredElementId = null;
+
+        /**
+         * Toggle animation builder mode on/off
+         */
+        function toggleAnimationBuilder() {
+            if (builderMode) {
+                exitAnimationBuilder();
+            } else {
+                enterAnimationBuilder();
+            }
+        }
+
+        /**
+         * Enter animation builder mode
+         */
+        function enterAnimationBuilder() {
+            builderMode = true;
+            selectedElements.clear();
+            builderElements = [];
+            hoveredElementId = null;
+
+            // Update UI
+            document.getElementById('build-btn').classList.add('active');
+            document.getElementById('sidebar').classList.add('hidden');
+            document.getElementById('animation-builder-panel').classList.remove('hidden');
+
+            // Close download menu if open
+            closeDownloadMenu();
+
+            // Create and show overlay
+            createBuilderOverlay();
+
+            // Scan iframe for elements after it loads
+            const iframe = document.getElementById('presentation-iframe');
+            if (iframe) {
+                // Wait a moment for iframe to be ready
+                setTimeout(() => {
+                    scanSlideElements();
+                }, 100);
+            }
+
+            // Render existing groups for this slide
+            renderGroups();
+            updateSelectionCount();
+            updateCreateGroupButton();
+
+            console.log('Entered animation builder mode');
+        }
+
+        /**
+         * Exit animation builder mode
+         */
+        function exitAnimationBuilder() {
+            builderMode = false;
+            selectedGroupId = null;  // Clear group selection
+            selectedElements.clear();
+            builderElements = [];
+            hoveredElementId = null;
+
+            // Clear any group highlights from slide
+            clearGroupHighlights();
+
+            // Remove overlay
+            removeBuilderOverlay();
+
+            // Update UI
+            document.getElementById('build-btn').classList.remove('active');
+            document.getElementById('animation-builder-panel').classList.add('hidden');
+            document.getElementById('sidebar').classList.remove('hidden');
+
+            console.log('Exited animation builder mode');
+        }
+
+        /**
+         * Create the builder overlay for element selection
+         */
+        function createBuilderOverlay() {
+            // Remove existing overlay if any
+            removeBuilderOverlay();
+
+            const container = document.querySelector('.slide-container');
+            if (!container) return;
+
+            // Create overlay div
+            const overlay = document.createElement('div');
+            overlay.id = 'builder-overlay';
+            overlay.style.cssText = `
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                z-index: 10;
+                cursor: crosshair;
+            `;
+
+            // Create SVG for drawing highlights
+            const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            svg.id = 'builder-highlights';
+            svg.style.cssText = `
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                pointer-events: none;
+            `;
+            overlay.appendChild(svg);
+
+            // Add event listeners
+            overlay.addEventListener('mousemove', handleOverlayMouseMove);
+            overlay.addEventListener('click', handleOverlayClick);
+
+            container.style.position = 'relative';
+            container.appendChild(overlay);
+        }
+
+        /**
+         * Remove the builder overlay
+         */
+        function removeBuilderOverlay() {
+            const overlay = document.getElementById('builder-overlay');
+            if (overlay) {
+                overlay.removeEventListener('mousemove', handleOverlayMouseMove);
+                overlay.removeEventListener('click', handleOverlayClick);
+                overlay.remove();
+            }
+        }
+
+        /**
+         * Scan slide iframe for buildable elements and store their positions
+         */
+        function scanSlideElements() {
+            builderElements = [];
+
+            const iframe = document.getElementById('presentation-iframe');
+            const container = document.querySelector('.slide-container');
+            if (!iframe || !container) return;
+
+            // Get iframe scale
+            const iframeRect = iframe.getBoundingClientRect();
+            const containerRect = container.getBoundingClientRect();
+            const scale = iframeRect.width / 1920; // Original slide width
+
+            try {
+                const slideDoc = iframe.contentDocument || iframe.contentWindow?.document;
+                if (!slideDoc) {
+                    console.warn('Cannot access iframe content - using fallback element detection');
+                    useFallbackElementDetection();
+                    return;
+                }
+
+                // Selectors for buildable elements - prefer specific/leaf elements
+                // Priority: contenteditable fields first, then structural elements
+                const selectors = [
+                    // User-editable fields (most important - these are what users want to animate)
+                    '[contenteditable="true"]',
+                    '[data-field]',
+                    // Text elements
+                    'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+                    'p:not(.key-point-text):not(.insight-text)', // Avoid duplicates with contenteditable
+                    'li',
+                    'blockquote',
+                    // Slide-specific components (from your generated slides)
+                    '.key-point',
+                    '.insight-box',
+                    '.section-label',
+                    '.logo',
+                    '.stat-item',
+                    '.timeline-item',
+                    '.feature-card',
+                    '.comparison-item',
+                    '.agenda-item',
+                    '.process-step',
+                    '.quote-block',
+                    // Generic components
+                    '.card',
+                    '.box',
+                    '.callout',
+                    '.stat',
+                    '.metric',
+                    '.step',
+                    '.item',
+                    '.point',
+                    // Media
+                    'img',
+                    // Icon containers with meaningful content
+                    '.key-point-icon',
+                    '.icon-box',
+                    '[class*="-icon"]:not(svg)'
+                ];
+
+                const elements = slideDoc.querySelectorAll(selectors.join(', '));
+                let idCounter = 1;
+                const tempElements = [];
+
+                elements.forEach(el => {
+                    // Skip very small elements or invisible ones
+                    const rect = el.getBoundingClientRect();
+                    if (rect.width < 10 || rect.height < 10) return;
+
+                    // Skip if element is too large (likely a container) - more than 80% of slide
+                    if (rect.width > 1536 || rect.height > 864) return; // 80% of 1920x1080
+
+                    // Skip elements that are mostly transparent/empty containers
+                    const computedStyle = slideDoc.defaultView.getComputedStyle(el);
+                    if (computedStyle.display === 'none' || computedStyle.visibility === 'hidden') return;
+
+                    // Assign build ID if not present
+                    let buildId = el.getAttribute('data-build-id');
+                    if (!buildId) {
+                        buildId = `build-${idCounter}`;
+                        el.setAttribute('data-build-id', buildId);
+                    }
+                    idCounter++;
+
+                    // Store scaled rect relative to overlay
+                    const area = rect.width * rect.height;
+                    tempElements.push({
+                        id: buildId,
+                        rect: {
+                            x: rect.left * scale,
+                            y: rect.top * scale,
+                            width: rect.width * scale,
+                            height: rect.height * scale
+                        },
+                        tagName: el.tagName.toLowerCase(),
+                        text: el.textContent?.substring(0, 50) || '',
+                        area: area * scale * scale
+                    });
+                });
+
+                // Sort by area (smallest first) so smaller elements take priority in hit detection
+                tempElements.sort((a, b) => a.area - b.area);
+                builderElements = tempElements;
+
+                console.log(`Scanned ${builderElements.length} buildable elements`);
+            } catch (e) {
+                console.warn('Error scanning iframe:', e);
+                useFallbackElementDetection();
+            }
+        }
+
+        /**
+         * Fallback when iframe content is not accessible
+         * Uses postMessage to ask the slide to report its elements
+         */
+        function useFallbackElementDetection() {
+            const iframe = document.getElementById('presentation-iframe');
+            if (!iframe || !iframe.contentWindow) {
+                console.warn('No iframe available for postMessage');
+                useStaticFallback();
+                return;
+            }
+
+            // Set up listener for response from iframe
+            const messageHandler = (event) => {
+                if (event.data && event.data.type === 'builderElements') {
+                    window.removeEventListener('message', messageHandler);
+
+                    const container = document.querySelector('.slide-container');
+                    if (!container) return;
+
+                    const containerRect = container.getBoundingClientRect();
+                    const scale = containerRect.width / 1920;
+
+                    // Convert received elements to overlay coordinates
+                    builderElements = event.data.elements.map(el => ({
+                        id: el.id,
+                        rect: {
+                            x: el.rect.x * scale,
+                            y: el.rect.y * scale,
+                            width: el.rect.width * scale,
+                            height: el.rect.height * scale
+                        },
+                        tagName: el.tagName,
+                        text: el.text,
+                        area: el.rect.width * el.rect.height * scale * scale
+                    }));
+
+                    // Sort by area (smallest first)
+                    builderElements.sort((a, b) => a.area - b.area);
+
+                    console.log(`Received ${builderElements.length} elements via postMessage`);
+                }
+            };
+
+            window.addEventListener('message', messageHandler);
+
+            // Request elements from iframe
+            iframe.contentWindow.postMessage({ type: 'getBuilderElements' }, '*');
+
+            // Timeout fallback if no response
+            setTimeout(() => {
+                if (builderElements.length === 0) {
+                    window.removeEventListener('message', messageHandler);
+                    console.warn('No postMessage response, using static fallback');
+                    useStaticFallback();
+                }
+            }, 500);
+        }
+
+        /**
+         * Static fallback when postMessage also fails
+         */
+        function useStaticFallback() {
+            const container = document.querySelector('.slide-container');
+            if (!container) return;
+
+            const containerRect = container.getBoundingClientRect();
+            const scale = containerRect.width / 1920;
+
+            // Create a more granular grid based on common slide layouts
+            builderElements = [
+                // Header region
+                { id: 'region-logo', rect: { x: 80, y: 60, width: 200, height: 40 } },
+                // Title area
+                { id: 'region-title', rect: { x: 80, y: 200, width: 1760, height: 150 } },
+                // Main content - split into sections
+                { id: 'region-content-1', rect: { x: 80, y: 380, width: 1760, height: 250 } },
+                { id: 'region-content-2', rect: { x: 80, y: 650, width: 560, height: 300 } },
+                { id: 'region-content-3', rect: { x: 680, y: 650, width: 560, height: 300 } },
+                { id: 'region-content-4', rect: { x: 1280, y: 650, width: 560, height: 300 } },
+            ].map(r => ({
+                id: r.id,
+                rect: {
+                    x: r.rect.x * scale,
+                    y: r.rect.y * scale,
+                    width: r.rect.width * scale,
+                    height: r.rect.height * scale
+                },
+                tagName: 'region',
+                text: r.id.replace('region-', ''),
+                area: r.rect.width * r.rect.height * scale * scale
+            }));
+
+            // Sort by area
+            builderElements.sort((a, b) => a.area - b.area);
+
+            console.log('Using static fallback regions');
+        }
+
+        /**
+         * Handle mouse move over the overlay
+         */
+        function handleOverlayMouseMove(e) {
+            if (!builderMode) return;
+
+            const overlay = document.getElementById('builder-overlay');
+            if (!overlay) return;
+
+            const rect = overlay.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+
+            // Find element under cursor
+            let foundElement = null;
+            for (const el of builderElements) {
+                if (x >= el.rect.x && x <= el.rect.x + el.rect.width &&
+                    y >= el.rect.y && y <= el.rect.y + el.rect.height) {
+                    foundElement = el;
+                    break;
+                }
+            }
+
+            const newHoveredId = foundElement?.id || null;
+            if (newHoveredId !== hoveredElementId) {
+                hoveredElementId = newHoveredId;
+                renderHighlights();
+            }
+        }
+
+        /**
+         * Handle click on the overlay
+         */
+        function handleOverlayClick(e) {
+            if (!builderMode) return;
+
+            const overlay = document.getElementById('builder-overlay');
+            if (!overlay) return;
+
+            const rect = overlay.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+
+            // Find element under cursor
+            let foundElement = null;
+            for (const el of builderElements) {
+                if (x >= el.rect.x && x <= el.rect.x + el.rect.width &&
+                    y >= el.rect.y && y <= el.rect.y + el.rect.height) {
+                    foundElement = el;
+                    break;
+                }
+            }
+
+            if (!foundElement) return;
+
+            const buildId = foundElement.id;
+
+            // If a group is selected, toggle membership instead of normal selection
+            if (selectedGroupId) {
+                toggleGroupMembership(buildId);
+                return;
+            }
+
+            // Normal selection behavior for creating new groups
+            if (e.shiftKey) {
+                // Shift+click: toggle selection
+                if (selectedElements.has(buildId)) {
+                    selectedElements.delete(buildId);
+                } else {
+                    selectedElements.add(buildId);
+                }
+            } else {
+                // Regular click: select only this element
+                selectedElements.clear();
+                selectedElements.add(buildId);
+            }
+
+            renderHighlights();
+            updateSelectionCount();
+            updateCreateGroupButton();
+        }
+
+        /**
+         * Render highlight rectangles on the overlay SVG
+         */
+        function renderHighlights() {
+            const svg = document.getElementById('builder-highlights');
+            if (!svg) return;
+
+            // Clear existing highlights
+            svg.innerHTML = '';
+
+            // Draw hover highlight
+            if (hoveredElementId && !selectedElements.has(hoveredElementId)) {
+                const el = builderElements.find(e => e.id === hoveredElementId);
+                if (el) {
+                    const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+                    rect.setAttribute('x', el.rect.x);
+                    rect.setAttribute('y', el.rect.y);
+                    rect.setAttribute('width', el.rect.width);
+                    rect.setAttribute('height', el.rect.height);
+                    rect.setAttribute('fill', 'none');
+                    rect.setAttribute('stroke', 'rgba(212, 233, 76, 0.6)');
+                    rect.setAttribute('stroke-width', '2');
+                    rect.setAttribute('stroke-dasharray', '5,5');
+                    svg.appendChild(rect);
+                }
+            }
+
+            // Draw selection highlights
+            selectedElements.forEach(buildId => {
+                const el = builderElements.find(e => e.id === buildId);
+                if (el) {
+                    const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+                    rect.setAttribute('x', el.rect.x - 2);
+                    rect.setAttribute('y', el.rect.y - 2);
+                    rect.setAttribute('width', el.rect.width + 4);
+                    rect.setAttribute('height', el.rect.height + 4);
+                    rect.setAttribute('fill', 'rgba(212, 233, 76, 0.1)');
+                    rect.setAttribute('stroke', '#d4e94c');
+                    rect.setAttribute('stroke-width', '3');
+                    svg.appendChild(rect);
+                }
+            });
+        }
+
+        /**
+         * Update the selection count display in the builder panel
+         */
+        function updateSelectionCount() {
+            const countEl = document.getElementById('builder-selection-count');
+            if (!countEl) return;
+
+            if (selectedGroupId) {
+                // Show group editing mode
+                const slideData = slides[currentSlide - 1];
+                const group = slideData?.animations?.groups?.find(g => g.id === selectedGroupId);
+                if (group) {
+                    countEl.innerHTML = `<strong>Editing Group ${group.order}</strong><br><span style="font-size: 10px; color: var(--amp-light-gray);">Click elements to add/remove</span>`;
+                    countEl.style.background = 'rgba(212, 233, 76, 0.15)';
+                }
+            } else {
+                // Normal selection mode
+                const count = selectedElements.size;
+                countEl.textContent = `${count} selected`;
+                countEl.style.background = 'rgba(212, 233, 76, 0.1)';
+            }
+        }
+
+        /**
+         * Update the Create Group button state
+         */
+        function updateCreateGroupButton() {
+            const btn = document.getElementById('builder-create-group-btn');
+            if (!btn) return;
+
+            // Disable when a group is selected (editing mode) OR no elements selected
+            btn.disabled = selectedGroupId !== null || selectedElements.size === 0;
+
+            if (selectedGroupId) {
+                btn.textContent = 'Click group to deselect';
+                btn.style.opacity = '0.5';
+            } else {
+                btn.textContent = '+ Create Group';
+                btn.style.opacity = selectedElements.size === 0 ? '0.4' : '1';
+            }
+        }
+
+        /**
+         * Create a new animation group from selected elements
+         */
+        function createAnimationGroup() {
+            if (selectedElements.size === 0) return;
+
+            // Get or initialize animations for current slide
+            const slideData = slides[currentSlide - 1];
+            if (!slideData.animations) {
+                slideData.animations = { groups: [] };
+            }
+
+            // Generate new group ID
+            const groupNum = slideData.animations.groups.length + 1;
+            const groupId = `group-${groupNum}`;
+
+            // Create group with selected elements
+            // Color is assigned at creation and persists through reordering
+            const newGroup = {
+                id: groupId,
+                order: groupNum,
+                colorIndex: groupNum % 5,
+                elementIds: Array.from(selectedElements)
+            };
+
+            slideData.animations.groups.push(newGroup);
+
+            // Clear selections
+            selectedElements.clear();
+
+            // Save animations
+            saveAnimations(currentSlide - 1);
+
+            // Re-render
+            renderGroups();
+            renderHighlights();
+            updateSelectionCount();
+            updateCreateGroupButton();
+
+            console.log(`Created animation group: ${groupId} with ${newGroup.elementIds.length} elements`);
+        }
+
+        /**
+         * Render the groups list in the builder panel
+         */
+        function renderGroups() {
+            const groupsList = document.getElementById('builder-groups-list');
+            if (!groupsList) return;
+
+            const slideData = slides[currentSlide - 1];
+            const groups = slideData?.animations?.groups || [];
+
+            if (groups.length === 0) {
+                groupsList.innerHTML = '<div style="color: var(--amp-light-gray); font-size: 11px; text-align: center; padding: 20px;">No groups yet. Select elements and click Create Group.</div>';
+                return;
+            }
+
+            // Ensure all groups have a colorIndex (migrate old groups)
+            let needsSave = false;
+            groups.forEach(group => {
+                if (group.colorIndex === undefined) {
+                    const idNum = parseInt(group.id.replace('group-', ''), 10) || 0;
+                    group.colorIndex = idNum % 5;
+                    needsSave = true;
+                }
+            });
+            if (needsSave) {
+                saveAnimations(currentSlide - 1);
+            }
+
+            groupsList.innerHTML = groups.map((group, index) => {
+                const isSelected = selectedGroupId === group.id;
+                return `
+                <div class="builder-group group-color-${group.colorIndex} ${isSelected ? 'group-selected' : ''}"
+                     data-group-id="${group.id}"
+                     onclick="selectGroup('${group.id}')">
+                    <div class="builder-group-header">
+                        <span class="builder-group-title">Group ${group.order}</span>
+                        <span class="builder-group-count">${group.elementIds.length} element${group.elementIds.length !== 1 ? 's' : ''}</span>
+                    </div>
+                    <div class="builder-group-controls" onclick="event.stopPropagation()">
+                        <button class="group-btn" onclick="moveGroupUp('${group.id}')" ${index === 0 ? 'disabled' : ''} title="Move up">▲</button>
+                        <button class="group-btn" onclick="moveGroupDown('${group.id}')" ${index === groups.length - 1 ? 'disabled' : ''} title="Move down">▼</button>
+                        <button class="group-btn group-delete" onclick="deleteGroup('${group.id}')" title="Delete group">×</button>
+                    </div>
+                </div>
+                `;
+            }).join('');
+        }
+
+        /**
+         * Move a group up in the build order
+         * @param {string} groupId - The group ID to move up
+         */
+        function moveGroupUp(groupId) {
+            const slideData = slides[currentSlide - 1];
+            const groups = slideData?.animations?.groups;
+            if (!groups) return;
+
+            const index = groups.findIndex(g => g.id === groupId);
+            if (index <= 0) return;
+
+            // Swap with previous
+            [groups[index - 1], groups[index]] = [groups[index], groups[index - 1]];
+
+            // Re-number orders
+            groups.forEach((g, i) => g.order = i + 1);
+
+            saveAnimations(currentSlide - 1);
+            renderGroups();
+
+            console.log(`Moved group ${groupId} up to position ${index}`);
+        }
+
+        /**
+         * Move a group down in the build order
+         * @param {string} groupId - The group ID to move down
+         */
+        function moveGroupDown(groupId) {
+            const slideData = slides[currentSlide - 1];
+            const groups = slideData?.animations?.groups;
+            if (!groups) return;
+
+            const index = groups.findIndex(g => g.id === groupId);
+            if (index < 0 || index >= groups.length - 1) return;
+
+            // Swap with next
+            [groups[index], groups[index + 1]] = [groups[index + 1], groups[index]];
+
+            // Re-number orders
+            groups.forEach((g, i) => g.order = i + 1);
+
+            saveAnimations(currentSlide - 1);
+            renderGroups();
+
+            console.log(`Moved group ${groupId} down to position ${index + 2}`);
+        }
+
+        /**
+         * Delete a group from the animation build order
+         * @param {string} groupId - The group ID to delete
+         */
+        function deleteGroup(groupId) {
+            const slideData = slides[currentSlide - 1];
+            const groups = slideData?.animations?.groups;
+            if (!groups) return;
+
+            // Remove group
+            const index = groups.findIndex(g => g.id === groupId);
+            if (index < 0) return;
+
+            const deletedGroup = groups[index];
+            groups.splice(index, 1);
+
+            // Re-number remaining groups
+            groups.forEach((g, i) => g.order = i + 1);
+
+            saveAnimations(currentSlide - 1);
+            renderGroups();
+
+            console.log(`Deleted group ${groupId} (had ${deletedGroup.elementIds.length} elements)`);
+        }
+
+        // ═══════════════════════════════════════════════════════════════════════
+        // GROUP SELECTION & MEMBERSHIP EDITING
+        // ═══════════════════════════════════════════════════════════════════════
+
+        /**
+         * Select a group for membership editing
+         * @param {string} groupId - The group ID to select
+         */
+        function selectGroup(groupId) {
+            const slideData = slides[currentSlide - 1];
+            const groups = slideData?.animations?.groups || [];
+            const group = groups.find(g => g.id === groupId);
+
+            if (!group) return;
+
+            // If clicking same group, deselect
+            if (selectedGroupId === groupId) {
+                deselectGroup();
+                return;
+            }
+
+            // Select this group
+            selectedGroupId = groupId;
+
+            // Clear normal element selection (for new group creation)
+            selectedElements.clear();
+
+            // Update UI
+            renderGroups();  // Re-render to show selected state
+            highlightGroupElements(group);  // Highlight elements on slide
+            updateSelectionCount();
+            updateCreateGroupButton();
+
+            console.log(`Selected group ${groupId} for editing (${group.elementIds.length} elements)`);
+        }
+
+        /**
+         * Deselect the currently selected group
+         */
+        function deselectGroup() {
+            if (!selectedGroupId) return;
+
+            console.log(`Deselected group ${selectedGroupId}`);
+            selectedGroupId = null;
+            clearGroupHighlights();
+            renderGroups();
+            renderHighlights();  // Restore normal selection highlights
+            updateSelectionCount();
+            updateCreateGroupButton();
+        }
+
+        /**
+         * Highlight elements belonging to the selected group on the slide
+         * @param {Object} group - The group object with elementIds and colorIndex
+         */
+        function highlightGroupElements(group) {
+            const iframe = document.getElementById('presentation-iframe');
+            if (!iframe) return;
+
+            const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
+            if (!iframeDoc) return;
+
+            // Clear any existing group highlights
+            clearGroupHighlights(iframeDoc);
+
+            // Inject group highlight CSS if not present
+            injectGroupHighlightCSS(iframeDoc);
+
+            // Apply highlight to each element in group
+            const colorClass = `group-highlight-${group.colorIndex}`;
+            group.elementIds.forEach(buildId => {
+                const el = iframeDoc.querySelector(`[data-build-id="${buildId}"]`);
+                if (el) {
+                    el.classList.add('group-member-highlight', colorClass);
+                }
+            });
+        }
+
+        /**
+         * Clear all group membership highlights from slide
+         * @param {Document} [iframeDoc] - Optional iframe document
+         */
+        function clearGroupHighlights(iframeDoc) {
+            if (!iframeDoc) {
+                const iframe = document.getElementById('presentation-iframe');
+                iframeDoc = iframe?.contentDocument || iframe?.contentWindow?.document;
+            }
+            if (!iframeDoc) return;
+
+            iframeDoc.querySelectorAll('.group-member-highlight').forEach(el => {
+                el.classList.remove(
+                    'group-member-highlight',
+                    'group-highlight-0', 'group-highlight-1',
+                    'group-highlight-2', 'group-highlight-3', 'group-highlight-4'
+                );
+            });
+        }
+
+        /**
+         * Inject CSS for group membership highlights into iframe
+         * @param {Document} iframeDoc - The iframe's document
+         */
+        function injectGroupHighlightCSS(iframeDoc) {
+            if (iframeDoc.getElementById('group-highlight-styles')) return;
+
+            const style = iframeDoc.createElement('style');
+            style.id = 'group-highlight-styles';
+            style.textContent = `
+                .group-member-highlight {
+                    outline-width: 3px;
+                    outline-style: solid;
+                    outline-offset: 4px;
+                    transition: outline-color 0.2s ease;
+                }
+                .group-highlight-0 { outline-color: #d4e94c; }  /* lime */
+                .group-highlight-1 { outline-color: #2dd4bf; }  /* teal */
+                .group-highlight-2 { outline-color: #a78bfa; }  /* purple */
+                .group-highlight-3 { outline-color: #f97316; }  /* orange */
+                .group-highlight-4 { outline-color: #ec4899; }  /* pink */
+            `;
+            iframeDoc.head.appendChild(style);
+        }
+
+        /**
+         * Toggle an element's membership in the selected group
+         * @param {string} buildId - The element's data-build-id
+         */
+        function toggleGroupMembership(buildId) {
+            if (!selectedGroupId) return;
+
+            const slideData = slides[currentSlide - 1];
+            const groups = slideData?.animations?.groups || [];
+            const group = groups.find(g => g.id === selectedGroupId);
+
+            if (!group) return;
+
+            const index = group.elementIds.indexOf(buildId);
+
+            if (index >= 0) {
+                // Element is in group - remove it
+                group.elementIds.splice(index, 1);
+                console.log(`Removed element ${buildId} from ${selectedGroupId}`);
+            } else {
+                // Element not in group - add it
+                group.elementIds.push(buildId);
+                console.log(`Added element ${buildId} to ${selectedGroupId}`);
+            }
+
+            // Save and update UI
+            saveAnimations(currentSlide - 1);
+            renderGroups();
+            highlightGroupElements(group);
+        }
 
         // ═══════════════════════════════════════════════════════════════════════
         // DYNAMIC MANIFEST LOADING
         // Attempts to load fresh data from manifest.json (for server deployments)
         // Falls back to injected data if fetch fails (file:// protocol)
+        // Also loads animations from localStorage when using file:// protocol
         // ═══════════════════════════════════════════════════════════════════════
         async function loadManifest() {
+            let manifestLoaded = false;
+
             try {
                 const cacheBuster = `?t=${Date.now()}`;
                 const response = await fetch(`slides/manifest.json${cacheBuster}`);
@@ -691,17 +2442,27 @@
                 document.querySelector('.presentation-title').textContent = deckName;
 
                 console.log('Loaded slides from manifest.json');
-                return true;
+                manifestLoaded = true;
             } catch (error) {
                 // fetch() fails with file:// protocol - use fallback data
                 if (FALLBACK_SLIDES && FALLBACK_SLIDES.length > 0) {
                     console.log('Using fallback slide data (file:// protocol or manifest unavailable)');
-                    return true;
+                    manifestLoaded = true;
+                } else {
+                    // No fallback data available - show error
+                    showError('Unable to load slides. Please ensure slides/manifest.json exists.');
+                    return false;
                 }
-                // No fallback data available - show error
-                showError('Unable to load slides. Please ensure slides/manifest.json exists.');
-                return false;
             }
+
+            // Load animations from localStorage (merges into slides array)
+            // This handles file:// protocol storage and also serves as fallback
+            // for http:// when manifest doesn't have animation data
+            if (manifestLoaded) {
+                loadAnimationsFromLocalStorage();
+            }
+
+            return manifestLoaded;
         }
 
         function showError(message) {
@@ -828,13 +2589,46 @@
             iframe.classList.add('transitioning');
 
             setTimeout(() => {
-                // Update source while invisible (with cache-busting)
-                iframe.src = `slides/${slide.filename}${cacheBuster}`;
+                if (isFileProtocol() && SLIDE_HTML_BASE64 && SLIDE_HTML_BASE64[currentSlide - 1]) {
+                    // Use srcdoc for file:// protocol to avoid cross-origin issues
+                    loadSlideWithSrcdoc(iframe, currentSlide - 1, () => {
+                        iframe.classList.remove('transitioning');
+                        // Initialize build state after slide loads (if in fullscreen)
+                        if (isInFullscreen() && !builderMode) {
+                            const fullyBuilt = buildState.nextSlideFullyBuilt;
+                            buildState.nextSlideFullyBuilt = false; // Reset flag
+                            initializeBuildState(currentSlide, fullyBuilt, true);
+                        }
+                        // Scan elements for builder mode now that slide content is loaded
+                        if (builderMode) {
+                            scanSlideElements();
+                            renderHighlights();
+                        }
+                        // Attach keyboard forwarder for navigation in fullscreen
+                        attachIframeKeyboardForwarder();
+                    });
+                } else {
+                    // Update source while invisible (with cache-busting)
+                    iframe.src = `slides/${slide.filename}${cacheBuster}`;
 
-                // Fade in after src is set (onload for smoother transition)
-                iframe.onload = () => {
-                    iframe.classList.remove('transitioning');
-                };
+                    // Fade in after src is set (onload for smoother transition)
+                    iframe.onload = () => {
+                        iframe.classList.remove('transitioning');
+                        // Initialize build state after slide loads (if in fullscreen)
+                        if (isInFullscreen() && !builderMode) {
+                            const fullyBuilt = buildState.nextSlideFullyBuilt;
+                            buildState.nextSlideFullyBuilt = false; // Reset flag
+                            initializeBuildState(currentSlide, fullyBuilt, true);
+                        }
+                        // Scan elements for builder mode now that slide content is loaded
+                        if (builderMode) {
+                            scanSlideElements();
+                            renderHighlights();
+                        }
+                        // Attach keyboard forwarder for navigation in fullscreen
+                        attachIframeKeyboardForwarder();
+                    };
+                }
             }, TRANSITION_DURATION);
 
             // Update counter and button states
@@ -844,6 +2638,127 @@
 
             // Update sidebar highlight
             updateSidebarHighlight();
+        }
+
+        /**
+         * Load slide into iframe using srcdoc (for file:// protocol)
+         * This avoids cross-origin issues and allows direct DOM access
+         * @param {HTMLIFrameElement} iframe - The iframe element
+         * @param {number} slideIndex - 0-indexed slide number
+         * @param {Function} onLoad - Callback when loaded
+         */
+        function loadSlideWithSrcdoc(iframe, slideIndex, onLoad) {
+            const binaryString = atob(SLIDE_HTML_BASE64[slideIndex]);
+            const bytes = new Uint8Array(binaryString.length);
+            for (let i = 0; i < binaryString.length; i++) {
+                bytes[i] = binaryString.charCodeAt(i);
+            }
+            const htmlContent = new TextDecoder().decode(bytes);
+
+            // Inject build animation CSS into the HTML before setting srcdoc
+            const htmlWithBuildCSS = injectBuildCSSIntoHTML(htmlContent);
+
+            iframe.srcdoc = htmlWithBuildCSS;
+            iframe.onload = () => {
+                // Set up edit handlers for server persistence
+                setupSlideEditHandlers(iframe, slideIndex + 1);
+                if (onLoad) onLoad();
+            };
+        }
+
+        /**
+         * Inject build animation CSS AND command handler into slide HTML content
+         * The command handler listens for postMessage build commands
+         * @param {string} htmlContent - The slide HTML
+         * @returns {string} HTML with build CSS and handler injected
+         */
+        function injectBuildCSSIntoHTML(htmlContent) {
+            const buildCSSAndHandler = `
+                <style id="build-animation-styles">
+                    [data-build-id].build-hidden {
+                        opacity: 0 !important;
+                        visibility: hidden !important;
+                    }
+                    [data-build-id].build-revealing {
+                        animation: buildFadeIn 0.4s ease-out forwards;
+                    }
+                    [data-build-id].build-visible {
+                        opacity: 1;
+                        visibility: visible;
+                    }
+                    @keyframes buildFadeIn {
+                        from { opacity: 0; transform: translateY(10px); }
+                        to { opacity: 1; transform: translateY(0); }
+                    }
+                </style>
+                <script id="build-command-handler">
+                (function() {
+                    // Assign data-build-id to elements on page load
+                    // This ensures elements can be found for animation playback
+                    function assignBuildIds() {
+                        var selectors = '[data-animatable], [contenteditable], h1, h2, h3, p, li, img, svg, [class*="-box"], [class*="-card"], [class*="-panel"], [class*="-window"], [class*="-item"], [class*="-block"]';
+                        var idCounter = 1;
+                        document.querySelectorAll(selectors).forEach(function(el) {
+                            var rect = el.getBoundingClientRect();
+                            if (rect.width < 10 || rect.height < 10) return;
+                            if (rect.width > 1536 || rect.height > 864) return;
+                            if (!el.getAttribute('data-build-id')) {
+                                el.setAttribute('data-build-id', 'build-' + idCounter++);
+                            }
+                        });
+                    }
+
+                    // Run on DOM ready
+                    if (document.readyState === 'loading') {
+                        document.addEventListener('DOMContentLoaded', assignBuildIds);
+                    } else {
+                        assignBuildIds();
+                    }
+
+                    window.addEventListener('message', function(event) {
+                        if (!event.data || !event.data.type) return;
+
+                        if (event.data.type === 'buildHideElements') {
+                            (event.data.elementIds || []).forEach(function(id) {
+                                var el = document.querySelector('[data-build-id="' + id + '"]');
+                                if (el) {
+                                    el.classList.remove('build-visible', 'build-revealing');
+                                    el.classList.add('build-hidden');
+                                }
+                            });
+                        }
+                        else if (event.data.type === 'buildRevealElements') {
+                            (event.data.elementIds || []).forEach(function(id) {
+                                var el = document.querySelector('[data-build-id="' + id + '"]');
+                                if (el) {
+                                    el.classList.remove('build-hidden', 'build-visible');
+                                    el.classList.add('build-revealing');
+                                    setTimeout(function() {
+                                        el.classList.remove('build-revealing');
+                                        el.classList.add('build-visible');
+                                    }, 400);
+                                }
+                            });
+                        }
+                        else if (event.data.type === 'buildShowAll') {
+                            // Show all build elements
+                            document.querySelectorAll('[data-build-id]').forEach(function(el) {
+                                el.classList.remove('build-hidden', 'build-revealing');
+                                el.classList.add('build-visible');
+                            });
+                        }
+                    });
+                })();
+                <\/script>
+            `;
+
+            // Inject before </body> to ensure DOM is ready
+            if (htmlContent.includes('</body>')) {
+                return htmlContent.replace('</body>', buildCSSAndHandler + '</body>');
+            } else if (htmlContent.includes('</head>')) {
+                return htmlContent.replace('</head>', buildCSSAndHandler + '</head>');
+            }
+            return htmlContent + buildCSSAndHandler;
         }
 
         function enterPresentation(slideNumber) {
@@ -857,8 +2772,14 @@
             // Initial slide load (no transition needed for first load)
             const slide = slides[currentSlide - 1];
             if (slide) {
-                const cacheBuster = `?t=${Date.now()}`;
-                document.getElementById('presentation-iframe').src = `slides/${slide.filename}${cacheBuster}`;
+                const iframe = document.getElementById('presentation-iframe');
+                if (isFileProtocol() && SLIDE_HTML_BASE64 && SLIDE_HTML_BASE64[currentSlide - 1]) {
+                    // Use srcdoc for file:// protocol to avoid cross-origin issues
+                    loadSlideWithSrcdoc(iframe, currentSlide - 1, null);
+                } else {
+                    const cacheBuster = `?t=${Date.now()}`;
+                    iframe.src = `slides/${slide.filename}${cacheBuster}`;
+                }
                 document.getElementById('slide-counter').textContent = `${currentSlide} / ${totalSlides}`;
                 document.getElementById('prev-btn').disabled = currentSlide <= 1;
                 document.getElementById('next-btn').disabled = currentSlide >= totalSlides;
@@ -869,6 +2790,10 @@
         }
 
         function exitToGallery() {
+            // Exit builder mode first if active
+            if (builderMode) {
+                exitAnimationBuilder();
+            }
             // Exit fullscreen first if active
             if (document.fullscreenElement || document.webkitFullscreenElement) {
                 if (document.exitFullscreen) {
@@ -900,6 +2825,9 @@
             if (currentSlide < totalSlides) {
                 currentSlide++;
                 updatePresentationSlide();
+                if (builderMode) {
+                    refreshBuilderForCurrentSlide();
+                }
             }
         }
 
@@ -907,11 +2835,42 @@
             if (currentSlide > 1) {
                 currentSlide--;
                 updatePresentationSlide();
+                if (builderMode) {
+                    refreshBuilderForCurrentSlide();
+                }
             }
+        }
+
+        /**
+         * Refresh the animation builder for the current slide
+         * Called when navigating slides while in builder mode
+         */
+        function refreshBuilderForCurrentSlide() {
+            // Clear selection state including group selection
+            selectedGroupId = null;
+            selectedElements.clear();
+            builderElements = [];
+            hoveredElementId = null;
+
+            // Clear any group highlights from the previous slide
+            clearGroupHighlights();
+
+            // Render groups immediately (they come from manifest, already correct)
+            renderGroups();
+            renderHighlights();
+            updateSelectionCount();
+            updateCreateGroupButton();
+
+            // NOTE: scanSlideElements() is called by iframe onload in
+            // updatePresentationSlideWithTransition() after slide actually loads
         }
 
         function goToSlide(n) {
             if (n >= 1 && n <= totalSlides && n !== currentSlide) {
+                // Exit builder mode when changing slides
+                if (builderMode) {
+                    exitAnimationBuilder();
+                }
                 currentSlide = n;
                 updatePresentationSlide();
             }
@@ -944,12 +2903,24 @@
             }
         }
 
-        // Recalculate scale when fullscreen changes
+        // Recalculate scale and handle build state when fullscreen changes
         document.addEventListener('fullscreenchange', () => {
             setTimeout(calculateScale, 50);
+            // Handle build state for fullscreen transitions
+            if (isInFullscreen()) {
+                onFullscreenEnter();
+            } else {
+                onFullscreenExit();
+            }
         });
         document.addEventListener('webkitfullscreenchange', () => {
             setTimeout(calculateScale, 50);
+            // Handle build state for fullscreen transitions
+            if (isInFullscreen()) {
+                onFullscreenEnter();
+            } else {
+                onFullscreenExit();
+            }
         });
 
         // ═══════════════════════════════════════════════════════════════════════
@@ -1443,6 +3414,104 @@
         }
 
         // ═══════════════════════════════════════════════════════════════════════
+        // IFRAME KEYBOARD FORWARDING
+        // ═══════════════════════════════════════════════════════════════════════
+        /**
+         * Check if the keyboard event target is an editable text element.
+         * Used to prevent navigation shortcuts from firing during text editing.
+         */
+        function isEditingText(e) {
+            const target = e.target;
+            const tagName = target.tagName;
+            if (tagName === 'INPUT' || tagName === 'TEXTAREA' || tagName === 'SELECT') {
+                return true;
+            }
+            if (target.isContentEditable) {
+                return true;
+            }
+            return false;
+        }
+
+        /**
+         * Attach keyboard listener to iframe document to forward navigation keys
+         * This ensures arrow keys work for slide navigation even when iframe has focus
+         */
+        function attachIframeKeyboardForwarder() {
+            const iframe = document.getElementById('presentation-iframe');
+            if (!iframe) return;
+
+            try {
+                const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+                if (!iframeDoc) return;
+
+                // Remove existing listener if any (to avoid duplicates)
+                iframeDoc.removeEventListener('keydown', iframeKeyHandler);
+                iframeDoc.addEventListener('keydown', iframeKeyHandler);
+            } catch (e) {
+                // Cross-origin iframe, can't attach listener
+                console.log('Cannot attach keyboard forwarder to iframe (cross-origin)');
+            }
+        }
+
+        /**
+         * Handle keyboard events from within the iframe
+         * Directly call navigation functions instead of dispatching events
+         */
+        function iframeKeyHandler(e) {
+            // Skip if in builder mode (let builder handle keys)
+            if (builderMode) return;
+            // Skip if user is editing text in a contenteditable or form field
+            if (isEditingText(e)) return;
+
+            switch(e.key) {
+                case 'ArrowRight':
+                case 'ArrowDown':
+                case ' ':
+                    e.preventDefault();
+                    advanceBuild();
+                    break;
+                case 'ArrowLeft':
+                case 'ArrowUp':
+                    e.preventDefault();
+                    reverseBuild();
+                    break;
+                case 'Escape':
+                    e.preventDefault();
+                    if (document.fullscreenElement || document.webkitFullscreenElement) {
+                        if (document.exitFullscreen) {
+                            document.exitFullscreen();
+                        } else if (document.webkitExitFullscreen) {
+                            document.webkitExitFullscreen();
+                        }
+                    } else {
+                        exitToGallery();
+                    }
+                    break;
+                case 'f':
+                case 'F':
+                    e.preventDefault();
+                    toggleFullscreen();
+                    break;
+                case 'Home':
+                    e.preventDefault();
+                    goToSlide(1);
+                    break;
+                case 'End':
+                    e.preventDefault();
+                    goToSlide(totalSlides);
+                    break;
+                default:
+                    if (e.key >= '1' && e.key <= '9') {
+                        e.preventDefault();
+                        const num = parseInt(e.key);
+                        if (num <= totalSlides) {
+                            goToSlide(num);
+                        }
+                    }
+            }
+        }
+
+        // ═══════════════════════════════════════════════════════════════════════
         // KEYBOARD NAVIGATION
         // ═══════════════════════════════════════════════════════════════════════
         document.addEventListener('keydown', (e) => {
@@ -1450,21 +3519,39 @@
             if (document.getElementById('presentation-view').classList.contains('hidden')) {
                 return;
             }
+            // Skip if user is editing text in a contenteditable or form field
+            if (isEditingText(e)) return;
 
             switch(e.key) {
                 case 'ArrowRight':
                 case 'ArrowDown':
                 case ' ':
+                    // Don't navigate if in builder mode
+                    if (builderMode) return;
                     e.preventDefault();
-                    nextSlide();
+                    // Use advanceBuild for fullscreen build progression
+                    advanceBuild();
                     break;
                 case 'ArrowLeft':
                 case 'ArrowUp':
+                    // Don't navigate if in builder mode
+                    if (builderMode) return;
                     e.preventDefault();
-                    prevSlide();
+                    // Use reverseBuild for fullscreen build regression
+                    reverseBuild();
                     break;
                 case 'Escape':
                     e.preventDefault();
+                    // If in builder mode with a group selected, deselect group first
+                    if (builderMode && selectedGroupId) {
+                        deselectGroup();
+                        return;
+                    }
+                    // If in builder mode (no group selected), exit builder
+                    if (builderMode) {
+                        exitAnimationBuilder();
+                        return;
+                    }
                     // If in fullscreen, exit fullscreen first (stay in presentation)
                     if (document.fullscreenElement || document.webkitFullscreenElement) {
                         if (document.exitFullscreen) {
@@ -1479,24 +3566,36 @@
                     break;
                 case 'f':
                 case 'F':
+                    // Don't toggle fullscreen if in builder mode
+                    if (builderMode) return;
                     e.preventDefault();
                     toggleFullscreen();
                     break;
                 case 'd':
                 case 'D':
+                    // Don't open download menu if in builder mode
+                    if (builderMode) return;
                     e.preventDefault();
                     toggleDownloadMenu();
                     break;
+                case 'b':
+                case 'B':
+                    e.preventDefault();
+                    toggleAnimationBuilder();
+                    break;
                 case 'Home':
+                    if (builderMode) return;
                     e.preventDefault();
                     goToSlide(1);
                     break;
                 case 'End':
+                    if (builderMode) return;
                     e.preventDefault();
                     goToSlide(totalSlides);
                     break;
                 default:
                     // Number keys 1-9 jump to that slide
+                    if (builderMode) return;
                     if (e.key >= '1' && e.key <= '9') {
                         e.preventDefault();
                         const num = parseInt(e.key);
@@ -1511,6 +3610,11 @@
         // INITIALIZATION
         // ═══════════════════════════════════════════════════════════════════════
         document.addEventListener('DOMContentLoaded', async () => {
+            // Check server connection for slide persistence
+            checkServerConnection();
+            // Periodically re-check connection (every 30 seconds)
+            setInterval(checkServerConnection, 30000);
+
             const loaded = await loadManifest();
             if (loaded) {
                 renderGallery();

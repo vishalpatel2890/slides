@@ -1,0 +1,25 @@
+# Status Dashboard Workflow
+# Displays unified slide queue status dashboard
+# Version 1.0 - Story 1.1: Status Data Aggregation
+name: status
+description: "Display unified slide queue status dashboard showing all decks with progress indicators"
+author: "Slide Builder"
+version: "1.0"
+
+# Path variables
+installed_path: "{project-root}/.slide-builder/workflows/status"
+
+# Workflow components
+instructions: "{installed_path}/instructions.md"
+
+# State management - read-only access
+status_file: "{project-root}/.slide-builder/status.yaml"
+single_plan_file: "{project-root}/.slide-builder/single/plan.yaml"
+
+# Output locations - deck plans live in output folders
+output_root: "{project-root}/output"
+# plan_file is dynamic: output/{deck_slug}/plan.yaml
+
+# Output configuration
+template: false
+standalone: true

@@ -3,7 +3,9 @@
  * Generate manifest.json for a slide deck
  * Usage: node scripts/generate-manifest.js [deck-slug]
  *
- * If no deck-slug provided, reads from .slide-builder/status.yaml
+ * If no deck-slug provided, auto-detects from output/ directory.
+ * - One deck: auto-selects it
+ * - Multiple decks: lists them and exits with usage message
  */
 
 const fs = require('fs');
@@ -35,20 +37,39 @@ function extractTitle(htmlContent, slideNum) {
     return `Slide ${slideNum}`;
 }
 
+function findDecks() {
+    const outputDir = path.join(PROJECT_ROOT, 'output');
+    if (!fs.existsSync(outputDir)) return [];
+
+    return fs.readdirSync(outputDir)
+        .filter(d => {
+            const fullPath = path.join(outputDir, d);
+            const planPath = path.join(fullPath, 'plan.yaml');
+            return fs.statSync(fullPath).isDirectory() && fs.existsSync(planPath);
+        })
+        .map(d => ({
+            slug: d,
+            mtime: fs.statSync(path.join(outputDir, d)).mtimeMs
+        }))
+        .sort((a, b) => b.mtime - a.mtime);
+}
+
 function main() {
-    // Get deck slug from arg or status.yaml
+    // Get deck slug from arg or auto-detect from output/
     let deckSlug = process.argv[2];
 
     if (!deckSlug) {
-        const statusPath = path.join(PROJECT_ROOT, '.slide-builder', 'status.yaml');
-        if (!fs.existsSync(statusPath)) {
-            console.error('Error: No deck slug provided and no status.yaml found');
+        const decks = findDecks();
+        if (decks.length === 0) {
+            console.error('Error: No decks found in output/ directory.');
+            console.error('Run /sb:plan-deck to create a deck first.');
             process.exit(1);
-        }
-        const status = readYaml(statusPath);
-        deckSlug = status.current_deck_slug || status.deck_slug;
-        if (!deckSlug) {
-            console.error('Error: No deck_slug found in status.yaml');
+        } else if (decks.length === 1) {
+            deckSlug = decks[0].slug;
+        } else {
+            console.error('Multiple decks found. Please specify which deck:\n');
+            decks.forEach(d => console.error(`  node scripts/generate-manifest.js ${d.slug}`));
+            console.error('');
             process.exit(1);
         }
     }

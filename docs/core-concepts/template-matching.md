@@ -82,6 +82,58 @@ Improve matching by updating `catalog.json`:
 }
 ```
 
+## Transparent Selection Process
+
+Template selection in Slide Builder uses LLM semantic scoring to provide transparent, explainable decisions.
+
+### How It Works
+
+1. **LLM Semantic Scoring**: Every template is evaluated against the slide intent using semantic similarity
+2. **Confidence Scoring**: Each template receives a 0-100% confidence score
+3. **Reasoning Display**: The system shows why each template was considered
+4. **User Override**: After seeing the reasoning, users can choose an alternative
+
+### Selection Output Example
+
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🎯 Template Selection for "Show our 3-step onboarding process"
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Candidates evaluated:
+▶ process-flow: matches "steps", "process" semantically → 92% confidence
+  timeline: chronological concept match → 71% confidence
+  agenda: list structure match → 45% confidence
+
+✓ Selected: process-flow (92% confidence)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+```
+
+### Confidence Levels
+
+| Level | Range | Behavior |
+|-------|-------|----------|
+| High | 80-100% | Proceed with selected template |
+| Medium | 50-79% | Show alternatives prominently |
+| Low | <50% | Strongly suggest custom generation |
+
+### Override Flow
+
+After viewing selection reasoning, users can:
+
+1. **Continue** - Build with the selected template
+2. **Select Alternative** - Choose from top-scoring alternatives
+3. **Generate Custom** - Create a fully custom slide without template
+
+This transparency ensures users understand decisions and can course-correct when the system's choice doesn't match their intent.
+
+### Benefits
+
+- **Trust**: Understand why a template was chosen
+- **Learning**: Improve future prompts based on match reasoning
+- **Control**: Override when the system's choice doesn't fit
+- **Flexibility**: Always have the option to go custom
+
 ## Related
 
 - [Catalog system](catalog.md)

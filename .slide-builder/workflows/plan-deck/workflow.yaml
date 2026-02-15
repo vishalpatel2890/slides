@@ -18,7 +18,7 @@ theme_file: "{config_path}/theme.json"
 
 # Catalog paths (template discovery)
 catalog_path: "{config_path}/catalog"
-catalog_manifest: "{catalog_path}/catalog.json"
+catalog_manifest: "{catalog_path}/slide-templates.json"
 
 # State management
 status_file: "{project-root}/.slide-builder/status.yaml"
@@ -41,14 +41,16 @@ variables:
   deck_name: ""
   # Generated - Step 2.5 (Epic 13: Enhanced Planning)
   proposed_agenda: []      # Generated agenda sections before user selection
-  agenda_sections: []      # User-confirmed agenda sections for Phase 2 discovery
+  agenda_sections: []      # User-confirmed agenda sections with discovery goals
   # Generated - Step 3+
   storyline: {}
-  slides: []
+  slides: []               # Each slide: number, status, storyline_role, agenda_section_id, tone, description
+  # Note: slides do NOT have template, design_plan, or background_mode fields — these decisions are deferred to build time
+  # Section discovery stores goals (communication_objective, audience_takeaway, narrative_advancement, content_requirements, suggested_slide_count)
 
-# Template matching is now catalog-driven
-# Read use_cases from catalog.json for intelligent template suggestions
-# Legacy mappings below kept for fallback if catalog is unavailable
+# Template matching is deferred to build-time (build-one/build-all workflows)
+# Planning phase focuses only on narrative structure, not visual design
+# Legacy mappings below kept for builder fallback if catalog is unavailable
 legacy_template_mapping:
   title: ["title", "intro", "opening", "welcome"]
   agenda: ["list", "bullets", "points", "agenda"]

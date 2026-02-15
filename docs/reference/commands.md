@@ -147,11 +147,11 @@ Export deck to Google Slides.
 
 ## Template commands
 
-### /sb:add-template
+### /sb-manage:add-slide-template
 
-Create a custom template through conversation.
+Create a custom slide template through conversation.
 
-**Usage**: `/sb:add-template`
+**Usage**: `/sb-manage:add-slide-template`
 
 **Input**: Template requirements and design feedback
 

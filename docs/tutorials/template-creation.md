@@ -18,7 +18,7 @@ Build custom slide templates for specialized layouts.
 ## Step 1: Start the template workflow
 
 ```
-/sb:add-template
+/sb-manage:add-slide-template
 ```
 
 ## Step 2: Describe your template

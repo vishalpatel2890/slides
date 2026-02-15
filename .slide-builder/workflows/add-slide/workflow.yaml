@@ -1,0 +1,27 @@
+# Add Slide Workflow - Add a new slide to an existing deck plan
+# Guided conversation for slide intent, position selection, and plan modification
+name: add-slide
+description: "Add a new slide to an existing deck plan with conversational discovery"
+author: "Slide Builder"
+version: "1.0"
+
+# Path variables
+installed_path: "{project-root}/.slide-builder/workflows/add-slide"
+
+# Workflow components
+instructions: "{installed_path}/instructions.md"
+
+# Config paths
+config_path: "{project-root}/.slide-builder/config"
+theme_file: "{config_path}/theme.json"
+catalog_path: "{config_path}/catalog"
+catalog_manifest: "{catalog_path}/slide-templates.json"
+
+# State file
+status_file: "{project-root}/.slide-builder/status.yaml"
+
+# Output locations
+output_root: "{project-root}/output"
+
+template: false
+standalone: true

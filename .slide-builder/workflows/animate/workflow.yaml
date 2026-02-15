@@ -1,0 +1,53 @@
+# Animate Workflow - AI-Powered Animation Generation
+# Intelligently generates animation groups for slides based on content structure
+
+name: animate
+description: "Generate animation build groups for a slide using AI analysis of content structure and narrative flow"
+author: "Slide Builder"
+version: "1.0"
+
+# Path variables
+installed_path: "{project-root}/.slide-builder/workflows/animate"
+
+# Config paths (shareable brand assets)
+config_path: "{project-root}/.slide-builder/config"
+theme_file: "{config_path}/theme.json"
+
+# Catalog paths (template metadata for type recognition)
+catalog_path: "{config_path}/catalog"
+catalog_manifest: "{catalog_path}/slide-templates.json"
+
+# Workflow components
+instructions: "{installed_path}/instructions.md"
+
+# State files
+status_file: "{project-root}/.slide-builder/status.yaml"
+
+# Output locations
+output_root: "{project-root}/output"
+
+# Variables
+variables:
+  workflow_version: "1.0"
+  # slide_number: passed as argument (e.g., /sb:animate 6)
+  # Resolved at runtime:
+  #   deck_slug: from status.yaml deck registry
+  #   slide_path: output/{deck_slug}/slides/slide-{N}.html
+  #   manifest_path: output/{deck_slug}/slides/manifest.json
+  #   plan_path: output/{deck_slug}/plan.yaml
+
+# Command interface
+# Usage: /sb:animate [slide_number]
+# - slide_number: which slide to generate animations for
+# - If multiple decks, user selects which deck
+
+# Workflow steps (defined in instructions.md)
+# Step 1: Mode Detection - Read status.yaml, determine deck, validate slide
+# Step 2: Load Slide Context - Read HTML, plan.yaml, manifest.json, check existing animations
+# Step 3: Analyze Slide Structure - Parse animatable elements, classify, generate groups
+# Step 4: Present Plan to User - Show proposed animation groups for approval
+# Step 5: Apply Animations - Write build IDs, update manifest, regenerate viewer
+# Step 6: Review - Open browser, report results
+
+template: false
+standalone: true

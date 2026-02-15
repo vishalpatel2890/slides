@@ -4,85 +4,364 @@
 # Current operating mode
 mode: deck
 
-# Current deck tracking
-current_deck_slug: "claude-code-fundamentals-week-2"
-deck_slug: "claude-code-fundamentals-week-2"
-current_slide: 12
-total_slides: 12
-built_count: 12
-output_folder: "output/claude-code-fundamentals-week-2"
-
-# Setup workflow tracking (preserved from setup)
-phase: complete
+# Setup workflow tracking (preserved)
+setup_phase: sample-review
 workflow_version: "3.0"
 feedback_iteration: 0
 
 # Assets collected
 assets:
-  website_url: https://amperity.com
-  style_reference: /Users/vishalpatel/Documents/rocd-reccomender/outputs/Alice and Olivia/value-roadmap-editable.html
-  pdf_paths: []
+  website_url: "https://amperity.com"
+  pdf_paths:
+    - "/Users/vishalpatel/Downloads/Amperity Brand Book 2025 v1.6.pdf"
   image_paths: []
-  brand_description: "Helpful, Clear, Innovative, Motivating, with Zing! Upbeat and inspiring, cut to the chase with brevity and precision, push beyond expected, boldly spur action, unexpected fun and wit."
+  brand_description: "Technical yet approachable. Bold, modern aesthetic with high contrast (dark backgrounds, bright lime accents). Delivers customer data confidence with clarity and innovation. Brand attributes: Helpful, Clear, Innovative, Motivating, Zing."
 
 # Extraction status
 extraction:
   website_analysis: complete
-  style_reference_analysis: complete
-  pdf_analysis: skipped
+  pdf_analysis: complete
   image_analysis: skipped
 
 # Theme status
 theme:
   file: .slide-builder/config/theme.json
-  status: approved
+  version: "5.0"
+  status: generated
   personality: bold
-  confidence: 0.9
+  confidence: 0.92
 
-# Catalog templates
-catalog:
-  directory: .slide-builder/config/catalog/
-  manifest: .slide-builder/config/catalog/catalog.json
-  count: 7
-  templates:
-    - id: title
-      name: Title Slide
-    - id: agenda
-      name: Agenda/List
-    - id: process-flow
-      name: Process Flow
-    - id: comparison
-      name: Comparison
-    - id: callout
-      name: Key Insight
-    - id: technical
-      name: Technical/Code
-    - id: rocd-initiative-template
-      name: ROCD Initiative Template
+# Brand colors extracted
+brand_colors:
+  primary: "#0C0C0C"      # Off-Black
+  accent: "#EAFF5F"       # Amp Yellow
+  secondary: "#54d3de"    # Prime Teal
+  dusk: "#004b57"
+  anvil: "#282B2E"
+  cement: "#E8EDEF"
+  slate: "#5A5F66"
+
+# Template catalog (authoritative data in the JSON file)
+catalog: .slide-builder/config/catalog/slide-templates.json
+
+# ═══ DECK REGISTRY ═══
+# Multiple decks tracked simultaneously, no single "active" pointer
+decks:
+  cotm-rocd-gap-analysis:
+    name: "Bridging COTM × ROCD"
+    status: complete
+    total_slides: 16
+    built_count: 16
+    current_slide: 14
+    output_folder: "output/cotm-rocd-gap-analysis"
+    created_at: "2026-02-12T12:00:00Z"
+    last_modified: "2026-02-14T03:00:00Z"
+    last_action: "Swapped slides 13 and 14"
+
+  claude-code-fundamentals-week-1:
+    name: "Claude Code Fundamentals - Week 1"
+    status: complete
+    total_slides: 12
+    built_count: 12
+    current_slide: 12
+    output_folder: "output/claude-code-fundamentals-week-1"
+    created_at: "2026-02-01T19:30:00Z"
+    last_modified: "2026-02-09T18:00:00Z"
+    last_action: "Moved Responsible AI Use slide from position 12 to position 4"
+
+  discovery-prioritization-workshop:
+    name: "Discovery Workshop Prioritization"
+    status: complete
+    total_slides: 11
+    built_count: 11
+    current_slide: 11
+    output_folder: "output/discovery-prioritization-workshop"
+    created_at: "2026-01-30T12:30:00Z"
+    last_modified: "2026-01-30T12:30:00Z"
+    last_action: "All 11 slides built"
+
+  michael-kors-rocd-2026-02:
+    name: "ROCD Executive Readout - Michael Kors"
+    status: complete
+    total_slides: 13
+    built_count: 13
+    current_slide: 13
+    output_folder: "output/michael-kors-rocd-2026-02"
+    source_template: "rocd-executive-readout"
+    created_at: "2026-02-10T09:00:00Z"
+    last_modified: "2026-02-10T09:30:00Z"
+    last_action: "Completed deck template instantiation - 13 slides built"
+
+  sc-fy27-h1-strategy:
+    name: "SC FY27 H1 Strategy"
+    status: complete
+    total_slides: 10
+    built_count: 10
+    current_slide: 10
+    output_folder: "output/sc-fy27-h1-strategy"
+    created_at: "2026-02-10T17:30:00Z"
+    last_modified: "2026-02-11T20:45:00Z"
+    last_action: "Batch built all 10 slides - deck complete"
+
+  claude-code-fundamentals-week-2:
+    name: "Claude Code Fundamentals - Week 2"
+    status: planned
+    total_slides: 15
+    built_count: 0
+    current_slide: 0
+    output_folder: "output/claude-code-fundamentals-week-2"
+    created_at: "2026-02-14T12:00:00Z"
+    last_modified: "2026-02-14T12:05:00Z"
+    last_action: "Added Agenda slide as position 2, total now 15 slides"
 
 # Last action tracking
-last_action: "Build-all complete - 12/12 slides built for Claude Code Fundamentals - Week 2"
-last_modified: "2026-01-29T00:00:00Z"
+last_modified: "2026-02-14T12:00:00Z"
 
 # Action history
 history:
-  - action: "Setup workflow started fresh"
-    timestamp: "2026-01-28T00:00:00Z"
-  - action: "Assets collected (1 website, 1 HTML style reference)"
-    timestamp: "2026-01-28T00:00:00Z"
-  - action: "Brand primitives extracted with Outfit font"
-    timestamp: "2026-01-28T00:00:00Z"
-  - action: "Theme.json v3.0 generated"
-    timestamp: "2026-01-28T00:00:00Z"
-  - action: "6 catalog templates generated"
-    timestamp: "2026-01-28T00:00:00Z"
-  - action: "Deck plan 'Claude Code Fundamentals' created with 13 slides"
-    timestamp: "2026-01-28T12:00:00Z"
-  - action: "Single slide planned - Week 2: Context & Conversation Management"
-    timestamp: "2026-01-28T22:00:00Z"
-  - action: "Build-all complete - 13/13 slides built for Claude Code Fundamentals"
-    timestamp: "2026-01-28T23:00:00Z"
-  - action: "Deck plan 'Claude Code Fundamentals - Week 2' created with 12 slides"
-    timestamp: "2026-01-28T23:30:00Z"
-  - action: "Build-all complete - 12/12 slides built for Claude Code Fundamentals - Week 2"
-    timestamp: "2026-01-29T00:00:00Z"
+  - action: "Added Agenda slide as position 2 - deck now 15 slides"
+    deck: claude-code-fundamentals-week-2
+    timestamp: "2026-02-14T12:05:00Z"
+  - action: "Deck plan created: Claude Code Fundamentals - Week 2 (14 slides)"
+    deck: claude-code-fundamentals-week-2
+    timestamp: "2026-02-14T12:00:00Z"
+  - action: "Swapped slides 13 and 14"
+    deck: cotm-rocd-gap-analysis
+    timestamp: "2026-02-14T03:00:00Z"
+  - action: "Generated 9-group animation for slide 14 (What Is ROCD?) - headers, inputs (3), arrows, outputs (3), details"
+    deck: cotm-rocd-gap-analysis
+    timestamp: "2026-02-14T02:10:00Z"
+  - action: "Built slide 14: Full ROCD Assessment Model (Target State - All Three Inputs)"
+    deck: cotm-rocd-gap-analysis
+    timestamp: "2026-02-13T22:15:00Z"
+  - action: "Rebuilt slide 13: Gap #4 Section Interstitial (Assessment Inputs Limited to Qualitative Discovery)"
+    deck: cotm-rocd-gap-analysis
+    timestamp: "2026-02-13T21:30:00Z"
+  - action: "Removed slide 9 (Reframe Dimensions) - redundant with new slide 8"
+    deck: cotm-rocd-gap-analysis
+    timestamp: "2026-02-13T19:05:00Z"
+  - action: "Added and built slide 8: The New Framework (two-layer dimension structure)"
+    deck: cotm-rocd-gap-analysis
+    timestamp: "2026-02-13T19:00:00Z"
+  - action: "Generated 4-group animation for slide 3 (ROCD Lite) - inputs first, then outputs one at a time"
+    deck: cotm-rocd-gap-analysis
+    timestamp: "2026-02-13T17:33:00Z"
+  - action: "Added slide 3: ROCD Lite for Prospects (simplified diagram - Qualitative Discovery only, no data insights or platform signals)"
+    deck: cotm-rocd-gap-analysis
+    timestamp: "2026-02-13T12:00:00Z"
+  - action: "Generated 5-group animation for slide 3 (The Vision) - diagram-only build: COTM box, arrow down, ROCD box, arrow up, VALUE hub"
+    deck: cotm-rocd-gap-analysis
+    timestamp: "2026-02-12T23:50:00Z"
+  - action: "Generated 7-group animation for slide 2 (What Is ROCD?) - ROCD visible, inputs build with Customers, then Prospects reveal, then outputs top-to-bottom"
+    deck: cotm-rocd-gap-analysis
+    timestamp: "2026-02-12T23:48:00Z"
+  - action: "Layout edited via /sb:edit: Aligned SVG arrows to box positions, split audience tags into individual pills, added Prospects* footnote on slide 2"
+    deck: cotm-rocd-gap-analysis
+    timestamp: "2026-02-12T23:30:00Z"
+    preserved_edits: 0
+    orphaned_edits: 0
+  - action: "Layout edited via /sb:edit: Fixed SVG arrow label clipping on slide 3 - repositioned Informs Assessment and Feeds Back as Proof inside circle path"
+    deck: cotm-rocd-gap-analysis
+    timestamp: "2026-02-12T23:00:00Z"
+    preserved_edits: 0
+    orphaned_edits: 0
+  - action: "Added and built slide 2: What Is ROCD? (framework overview)"
+    deck: cotm-rocd-gap-analysis
+    timestamp: "2026-02-12T22:00:00Z"
+  - action: "Deck complete - all 14 slides built"
+    deck: cotm-rocd-gap-analysis
+    timestamp: "2026-02-12T18:45:00Z"
+  - action: "Built slide 13: Suggested Sequencing"
+    deck: cotm-rocd-gap-analysis
+    timestamp: "2026-02-12T18:30:00Z"
+  - action: "Built slide 12: Next Three Priorities"
+    deck: cotm-rocd-gap-analysis
+    timestamp: "2026-02-12T18:15:00Z"
+  - action: "Built slide 11: Current State vs Target State"
+    deck: cotm-rocd-gap-analysis
+    timestamp: "2026-02-12T18:00:00Z"
+  - action: "Built slide 10: Gap #3 Section Interstitial"
+    deck: cotm-rocd-gap-analysis
+    timestamp: "2026-02-12T17:30:00Z"
+  - action: "Built slide 9: Wire Them Into One System"
+    deck: cotm-rocd-gap-analysis
+    timestamp: "2026-02-12T17:15:00Z"
+  - action: "Built slide 8: Two Workflows That Don't Hand Off"
+    deck: cotm-rocd-gap-analysis
+    timestamp: "2026-02-12T17:00:00Z"
+  - action: "Built slide 7: Gap #2 Section Interstitial"
+    deck: cotm-rocd-gap-analysis
+    timestamp: "2026-02-12T16:15:00Z"
+  - action: "Built slide 6: Reframe Dimensions Around Business Outcomes"
+    deck: cotm-rocd-gap-analysis
+    timestamp: "2026-02-12T16:00:00Z"
+  - action: "Built slide 5: The Language Mismatch (COTM vs ROCD)"
+    deck: cotm-rocd-gap-analysis
+    timestamp: "2026-02-12T15:45:00Z"
+  - action: "Built slide 4: Gap #1 Section Interstitial"
+    deck: cotm-rocd-gap-analysis
+    timestamp: "2026-02-12T15:15:00Z"
+  - action: "Built slide 3: Today, they're parallel systems"
+    deck: cotm-rocd-gap-analysis
+    timestamp: "2026-02-12T15:00:00Z"
+  - action: "Built slide 2: The Vision - COTM + ROCD as One System"
+    deck: cotm-rocd-gap-analysis
+    timestamp: "2026-02-12T14:15:00Z"
+  - action: "Built slide 1: Title - Bridging COTM × ROCD"
+    deck: cotm-rocd-gap-analysis
+    timestamp: "2026-02-12T12:30:00Z"
+  - action: "Deck plan created: Bridging COTM × ROCD (14 slides)"
+    deck: cotm-rocd-gap-analysis
+    timestamp: "2026-02-12T12:00:00Z"
+  - action: "Deleted deck: Claude Code Fundamentals - Week 2 (claude-code-fundamentals-week-2, 13 slides)"
+    timestamp: "2026-02-12T01:00:00Z"
+  - action: "Single slide planned: Business Value of CDP (three-column-icons)"
+    timestamp: "2026-02-12T00:00:00Z"
+  - action: "Batch built all 10 slides - deck complete"
+    deck: sc-fy27-h1-strategy
+    timestamp: "2026-02-11T20:45:00Z"
+  - action: "Full rebuild - all 10 slides rebuilt from scratch"
+    deck: sc-fy27-h1-strategy
+    timestamp: "2026-02-11T19:30:00Z"
+  - action: "Batch built 10/10 slides to output/sc-fy27-h1-strategy/"
+    timestamp: "2026-02-11T18:00:00Z"
+  - action: "Deck plan created: SC FY27 H1 Strategy (10 slides)"
+    timestamp: "2026-02-10T17:30:00Z"
+  - action: "Layout edited: Journey-Based Activation - vertical journey flow in left panel, slide-13 split structure"
+    timestamp: "2026-02-10T16:10:00Z"
+    preserved_edits: 0
+    orphaned_edits: 0
+  - action: "Layout edited: Intelligent Activation - complete redesign to journey-based activation (right message, right channel, right moment)"
+    timestamp: "2026-02-10T16:00:00Z"
+    preserved_edits: 0
+    orphaned_edits: 0
+  - action: "Single slide built: Democratized Insights (custom data flow visualization)"
+    timestamp: "2026-02-10T15:10:00Z"
+  - action: "Single slide planned: Democratized Insights (custom based on slide-13 - data flow visualization)"
+    timestamp: "2026-02-10T15:00:00Z"
+  - action: "Layout edited: Intelligent Activation - redesigned to journey orchestration visualization with animated flow paths"
+    timestamp: "2026-02-10T14:45:00Z"
+    preserved_edits: 0
+    orphaned_edits: 0
+  - action: "Layout edited: Center of Excellence - fixed SVG arrow positioning (converging and diverging arrowheads)"
+    timestamp: "2026-02-10T14:30:00Z"
+    preserved_edits: 0
+    orphaned_edits: 0
+  - action: "Single slide built: Intelligent Activation (custom bespoke visual)"
+    timestamp: "2026-02-10T12:15:00Z"
+  - action: "Single slide planned: Intelligent Activation (custom based on slide-13)"
+    timestamp: "2026-02-10T12:00:00Z"
+  - action: "Single slide built: Center of Excellence (custom bespoke visual)"
+    timestamp: "2026-02-10T10:15:00Z"
+  - action: "Single slide planned: Center of Excellence (rocd-initiative-template)"
+    timestamp: "2026-02-10T10:00:00Z"
+  - action: "Completed deck template: ROCD Executive Readout - Michael Kors (13 slides from rocd-executive-readout)"
+    timestamp: "2026-02-10T09:30:00Z"
+  - action: "Deleted deck: ROCD Executive Readout - Michael Kors (michael-kors-rocd-2026-02, 13 slides)"
+    timestamp: "2026-02-10T08:03:00Z"
+  - action: "Edited slide 1: Updated customer logo URL"
+    deck: michael-kors-rocd-2026-02
+    timestamp: "2026-02-10T01:00:00Z"
+  - action: "Completed deck template: ROCD Executive Readout - Michael Kors (7 slides from rocd-executive-readout)"
+    timestamp: "2026-02-09T23:30:00Z"
+  - action: "Started deck template instantiation: ROCD Executive Readout → michael-kors-rocd-2026-02"
+    timestamp: "2026-02-09T23:00:00Z"
+  - action: "Deleted deck: ROCD Executive Readout - Michael Kors (michael-kors-rocd-2026-02, 7 slides)"
+    timestamp: "2026-02-09T22:00:00Z"
+  - action: "Completed deck template: ROCD Executive Readout - Michael Kors (7 slides from rocd-executive-readout)"
+    timestamp: "2026-02-09T21:30:00Z"
+  - action: "Started deck template instantiation: ROCD Executive Readout → michael-kors-rocd-2026-02"
+    timestamp: "2026-02-09T21:00:00Z"
+  - action: "Generated 3-group animation for slide 4 (Responsible AI Use) - ratio visual, human elements, CTA"
+    deck: claude-code-fundamentals-week-1
+    timestamp: "2026-02-09T18:25:00Z"
+  - action: "Moved Responsible AI Use slide from position 12 to position 4"
+    deck: claude-code-fundamentals-week-1
+    timestamp: "2026-02-09T18:05:00Z"
+  - action: "Added and built slide 12: Responsible AI Use - Human touch as differentiator"
+    deck: claude-code-fundamentals-week-1
+    timestamp: "2026-02-09T18:00:00Z"
+  - action: "Restored deck to 11 slides - removed AI responsibility slide, rebuilt Claude Landscape"
+    deck: claude-code-fundamentals-week-1
+    timestamp: "2026-02-09T17:15:00Z"
+  - action: "Deleted deck: ROCD Executive Readout - Michael Kors (michael-kors-rocd-2026-01, 7 slides)"
+    timestamp: "2026-02-09T17:00:00Z"
+  - action: "Built slide 2: Mitchell Hashimoto quote on tool adoption - deck complete (11/11)"
+    deck: claude-code-fundamentals-week-1
+    timestamp: "2026-02-09T15:05:00Z"
+  - action: "Added slide 2: Mitchell Hashimoto quote on tool adoption (slides 2-10 renumbered to 3-11)"
+    deck: claude-code-fundamentals-week-1
+    timestamp: "2026-02-09T15:00:00Z"
+  - action: "Generated 4-group animations for slides 7 & 8 (Prerequisites Part 1 & 2) - step cards one at a time"
+    deck: claude-code-fundamentals-week-1
+    timestamp: "2026-02-09T14:52:00Z"
+  - action: "Edited slide 7 Step 3: added mkdir/cat heredoc command for AWS config"
+    deck: claude-code-fundamentals-week-1
+    timestamp: "2026-02-05T15:35:00Z"
+  - action: "Edited slide 7 Step 2: changed AWS CLI install from Homebrew to Direct Download method"
+    deck: claude-code-fundamentals-week-1
+    timestamp: "2026-02-05T15:30:00Z"
+  - action: "Edited slides 7 & 8: unified 2x2 card layout, content matched to Instructions.md (Steps 1-8)"
+    deck: claude-code-fundamentals-week-1
+    timestamp: "2026-02-05T12:00:00Z"
+  - action: "Deleted deck: Sample Pitch Deck - Amperity (amperity-pitch-2026-02, 2 slides)"
+    timestamp: "2026-02-06T02:08:00Z"
+  - action: "Generated 4-group animation for slide 5 (Every Claude Call Is the Same Shape) - synchronized property reveal"
+    deck: claude-code-fundamentals-week-1
+    timestamp: "2026-02-06T02:04:00Z"
+  - action: "Deleted deck: Claude Code Fundamentals (claude-code-fundamentals, 10 slides)"
+    timestamp: "2026-02-05T18:30:00Z"
+  - action: "Completed deck template: ROCD Executive Readout - Michael Kors (7 slides from rocd-executive-readout)"
+    timestamp: "2026-02-03T00:00:00Z"
+  - action: "Started deck template instantiation: ROCD Executive Readout → michael-kors-rocd-2026-01"
+    timestamp: "2026-02-03T00:00:00Z"
+  - action: "Completed deck template: Sample Pitch Deck - Amperity (2 slides from sample-pitch)"
+    timestamp: "2026-02-02T00:00:00Z"
+  - action: "Started deck template instantiation: Sample Pitch Deck → amperity-pitch-2026-02"
+    timestamp: "2026-02-02T00:00:00Z"
+  - action: "Generated 5-group animation for slide 4 (Three Products, One Model) - comparison column reveal"
+    deck: claude-code-fundamentals
+    timestamp: "2026-02-02T17:18:00Z"
+  - action: "Generated 8-group animation for slide 5 (Every Claude Call Is the Same Shape) - sequential per-property reveal"
+    deck: claude-code-fundamentals-week-1
+    timestamp: "2026-02-02T17:00:00Z"
+  - action: "Theme edit started - enforcing black/white only backgrounds per brand book"
+    timestamp: "2026-02-02T04:00:00Z"
+  - action: "Theme v4 saved to history (pre-edit backup)"
+    timestamp: "2026-02-02T04:00:00Z"
+  - action: "Generated 7-group animation for slide 6 (The Agentic Loop)"
+    timestamp: "2026-02-01T04:30:00Z"
+  - action: "Deck plan 'Claude Code Fundamentals - Week 1' created with 10 slides"
+    timestamp: "2026-02-01T23:00:00Z"
+  - action: "Layout edited slide 1: changed module tag from 'Weeks 1-3' to 'Week 1'"
+    timestamp: "2026-02-01T22:00:00Z"
+    preserved_edits: 0
+    orphaned_edits: 0
+  - action: "Slide 6: added 7-group animation build sequence (header, 4 steps with arrows, loop-back, insights)"
+    timestamp: "2026-02-01T21:45:00Z"
+    preserved_edits: 0
+    orphaned_edits: 0
+  - action: "Layout edited slide 6: SVG curved arrows between boxes, improved loop-back curvature and dashed style"
+    timestamp: "2026-02-01T21:00:00Z"
+    preserved_edits: 0
+    orphaned_edits: 0
+  - action: "Layout edited slide 6: fixed SVG loop arrow (connect boxes, more curvature, proper arrowhead)"
+    timestamp: "2026-02-01T20:15:00Z"
+    preserved_edits: 0
+    orphaned_edits: 0
+  - action: "Batch built 10/10 slides to output/claude-code-fundamentals/"
+    timestamp: "2026-02-01T19:45:00Z"
+  - action: "Deck plan 'Claude Code Fundamentals' created with 10 slides"
+    timestamp: "2026-02-01T19:30:00Z"
+  - action: "Fresh setup workflow started"
+    timestamp: "2026-01-31T00:00:00Z"
+  - action: "Asset collection complete, starting analysis"
+    timestamp: "2026-01-31T00:00:00Z"
+  - action: "Website analysis complete (amperity.com)"
+    timestamp: "2026-01-31T00:00:00Z"
+  - action: "PDF analysis complete (Brand Book 2025 v1.6, 62 pages)"
+    timestamp: "2026-01-31T00:00:00Z"
+  - action: "Theme v4.0 generated with official brand colors"
+    timestamp: "2026-01-31T00:00:00Z"
+  - action: "6 catalog templates updated with correct brand palette"
+    timestamp: "2026-01-31T00:00:00Z"

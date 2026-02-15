@@ -12,7 +12,11 @@ config_path: "{project-root}/.slide-builder/config"
 theme_file: "{config_path}/theme.json"
 theme_history_dir: "{config_path}/theme-history"
 catalog_path: "{config_path}/catalog"
-catalog_manifest: "{catalog_path}/catalog.json"
+catalog_manifest: "{catalog_path}/slide-templates.json"
+brand_knowledge_file: "{config_path}/brand-knowledge.json"
+
+# PDF Processing Configuration
+pdf_chunk_size: 1  # Pages per chunk - one page at a time for optimal context management
 
 # Workflow components
 instructions: "{installed_path}/instructions.md"
