@@ -2422,36 +2422,47 @@
         // Falls back to injected data if fetch fails (file:// protocol)
         // Also loads animations from localStorage when using file:// protocol
         // ═══════════════════════════════════════════════════════════════════════
+        function applyManifestData(manifest) {
+            slides = manifest.slides;
+            deckName = manifest.deckName;
+            totalSlides = manifest.slides.length;
+
+            document.querySelector('.title').textContent = deckName;
+            document.querySelector('.deck-badge').textContent = `${totalSlides} Slides`;
+            document.querySelector('.presentation-title').textContent = deckName;
+        }
+
         async function loadManifest() {
             let manifestLoaded = false;
 
+            // Try 1: Relative fetch (works when served via HTTP)
             try {
                 const cacheBuster = `?t=${Date.now()}`;
                 const response = await fetch(`slides/manifest.json${cacheBuster}`);
                 if (!response.ok) throw new Error('Manifest not found');
                 const manifest = await response.json();
-
-                // Update global state from manifest
-                slides = manifest.slides;
-                deckName = manifest.deckName;
-                totalSlides = manifest.slides.length;
-
-                // Update UI elements
-                document.querySelector('.title').textContent = deckName;
-                document.querySelector('.deck-badge').textContent = `${totalSlides} Slides`;
-                document.querySelector('.presentation-title').textContent = deckName;
-
+                applyManifestData(manifest);
                 console.log('Loaded slides from manifest.json');
                 manifestLoaded = true;
             } catch (error) {
-                // fetch() fails with file:// protocol - use fallback data
-                if (FALLBACK_SLIDES && FALLBACK_SLIDES.length > 0) {
-                    console.log('Using fallback slide data (file:// protocol or manifest unavailable)');
+                // Try 2: Fetch from save server (works on file:// when server is running)
+                try {
+                    const serverUrl = `http://localhost:3000/${deckSlug}/slides/manifest.json?t=${Date.now()}`;
+                    const response = await fetch(serverUrl);
+                    if (!response.ok) throw new Error('Save server manifest not found');
+                    const manifest = await response.json();
+                    applyManifestData(manifest);
+                    console.log('Loaded slides from save server manifest');
                     manifestLoaded = true;
-                } else {
-                    // No fallback data available - show error
-                    showError('Unable to load slides. Please ensure slides/manifest.json exists.');
-                    return false;
+                } catch (e) {
+                    // Try 3: Use fallback data baked into HTML at build time
+                    if (FALLBACK_SLIDES && FALLBACK_SLIDES.length > 0) {
+                        console.log('Using fallback slide data (file:// protocol or manifest unavailable)');
+                        manifestLoaded = true;
+                    } else {
+                        showError('Unable to load slides. Please ensure slides/manifest.json exists.');
+                        return false;
+                    }
                 }
             }
 
@@ -2653,7 +2664,11 @@
             for (let i = 0; i < binaryString.length; i++) {
                 bytes[i] = binaryString.charCodeAt(i);
             }
-            const htmlContent = new TextDecoder().decode(bytes);
+            let htmlContent = new TextDecoder().decode(bytes);
+
+            // Inject <base> tag so relative paths (icons, images) resolve correctly with srcdoc
+            const slidesBaseUrl = new URL('slides/', window.location.href).href;
+            htmlContent = htmlContent.replace('<head>', `<head><base href="${slidesBaseUrl}">`);
 
             // Inject build animation CSS into the HTML before setting srcdoc
             const htmlWithBuildCSS = injectBuildCSSIntoHTML(htmlContent);

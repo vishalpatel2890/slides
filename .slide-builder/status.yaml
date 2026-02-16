@@ -50,13 +50,13 @@ decks:
   cotm-rocd-gap-analysis:
     name: "Bridging COTM × ROCD"
     status: complete
-    total_slides: 16
-    built_count: 16
-    current_slide: 14
+    total_slides: 17
+    built_count: 17
+    current_slide: 12
     output_folder: "output/cotm-rocd-gap-analysis"
     created_at: "2026-02-12T12:00:00Z"
-    last_modified: "2026-02-14T03:00:00Z"
-    last_action: "Swapped slides 13 and 14"
+    last_modified: "2026-02-17T07:00:00Z"
+    last_action: "Built missing slide 12 (Current State vs Target State) - aligned files to plan (17 slides)"
 
   claude-code-fundamentals-week-1:
     name: "Claude Code Fundamentals - Week 1"
@@ -105,20 +105,67 @@ decks:
 
   claude-code-fundamentals-week-2:
     name: "Claude Code Fundamentals - Week 2"
-    status: planned
-    total_slides: 15
-    built_count: 0
-    current_slide: 0
+    status: complete
+    total_slides: 11
+    built_count: 11
+    current_slide: 11
     output_folder: "output/claude-code-fundamentals-week-2"
-    created_at: "2026-02-14T12:00:00Z"
-    last_modified: "2026-02-14T12:05:00Z"
-    last_action: "Added Agenda slide as position 2, total now 15 slides"
+    created_at: "2026-02-15T12:00:00Z"
+    last_modified: "2026-02-16T22:00:00Z"
+    last_action: "Built slide 11: Resources & Week 3 Preview (custom, light)"
+    last_slide_template: "custom"
+    last_slide_background: "light"
 
 # Last action tracking
-last_modified: "2026-02-14T12:00:00Z"
+last_modified: "2026-02-17T08:00:00Z"
 
 # Action history
 history:
+  - action: "Built missing slide 12 (Current State vs Target State) - renamed slides 12-16→13-17, built new slide 12, aligned plan to files (17 slides)"
+    deck: cotm-rocd-gap-analysis
+    timestamp: "2026-02-17T08:00:00Z"
+  - action: "Generated 8-group animation for slide 13 (What Is ROCD?) - arrows paired with boxes, inputs then outputs"
+    deck: cotm-rocd-gap-analysis
+    timestamp: "2026-02-17T07:00:00Z"
+  - action: "Generated 6-group animation for slide 3 (The Vision: One Connected System) - synchronized circular visual build"
+    deck: cotm-rocd-gap-analysis
+    timestamp: "2026-02-17T06:50:00Z"
+  - action: "Generated 4-group animation for slide 14 (Next Three Priorities) - header, 3 cards left-to-right"
+    deck: cotm-rocd-gap-analysis
+    timestamp: "2026-02-17T06:45:00Z"
+  - action: "Generated 3-group animation for slide 2 (ROCD Lite) - input, arrows, outputs"
+    deck: cotm-rocd-gap-analysis
+    timestamp: "2026-02-17T06:40:00Z"
+  - action: "Layout edited via /sb:edit: Made flow arrows visible on slide 13 (removed build-hidden, set opacity to 1)"
+    deck: cotm-rocd-gap-analysis
+    timestamp: "2026-02-16T22:05:00Z"
+    preserved_edits: 0
+    orphaned_edits: 0
+  - action: "Built slide 11: Resources & Week 3 Preview (custom, light) — deck complete"
+    deck: claude-code-fundamentals-week-2
+    timestamp: "2026-02-16T22:00:00Z"
+  - action: "Layout edited via /sb:edit: Made flow arrows visible on slide 2"
+    deck: cotm-rocd-gap-analysis
+    timestamp: "2026-02-16T21:15:00Z"
+    preserved_edits: 0
+    orphaned_edits: 0
+  - action: "Layout edited via /sb:edit: Updated card examples to slide-builder project with Amperity branding conventions"
+    deck: claude-code-fundamentals-week-2
+    timestamp: "2026-02-16T21:00:00Z"
+    preserved_edits: 0
+    orphaned_edits: 0
+  - action: "Built slide 9: Hands-On Exercise (custom split layout, dark)"
+    deck: claude-code-fundamentals-week-2
+    timestamp: "2026-02-16T13:10:00Z"
+  - action: "Built slide 8: What to Put in CLAUDE.md (custom 2x2 grid, light)"
+    deck: claude-code-fundamentals-week-2
+    timestamp: "2026-02-16T13:00:00Z"
+  - action: "Built slide 3: What Fills Context (custom horizontal bars visualization)"
+    deck: claude-code-fundamentals-week-2
+    timestamp: "2026-02-15T14:00:00Z"
+  - action: "Deck plan created (fresh start): Claude Code Fundamentals - Week 2 (11 slides)"
+    deck: claude-code-fundamentals-week-2
+    timestamp: "2026-02-15T12:00:00Z"
   - action: "Added Agenda slide as position 2 - deck now 15 slides"
     deck: claude-code-fundamentals-week-2
     timestamp: "2026-02-14T12:05:00Z"

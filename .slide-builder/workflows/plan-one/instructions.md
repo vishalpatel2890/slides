@@ -77,6 +77,154 @@ What slide do you need?
   </step>
 
   <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  <!-- PHASE 2.5: Content Type Detection & Targeted Follow-up (Story AD-3.1)   -->
+  <!-- Detects slide content type from intent and asks one targeted follow-up  -->
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
+  <step n="2.5" goal="Detect content type and ask targeted follow-up">
+    <critical>This step runs after intent capture but before template matching</critical>
+
+    <!-- Content Type Detection Algorithm -->
+    <content-type-detection>
+      <description>Keyword-based matching - case-insensitive, first match wins</description>
+
+      <content-types>
+        <type id="diagram" keywords="architecture, flow, process, system, connections, diagram, network, structure" />
+        <type id="comparison" keywords="vs, before/after, side-by-side, compare, comparison, versus, difference" />
+        <type id="data" keywords="metric, stat, numbers, chart, graph, percentage, statistics, data, revenue" />
+        <type id="list" keywords="bullets, features, items, steps, checklist, list, points, benefits" />
+        <type id="quote" keywords="testimonial, said, quote, attribution, customer, feedback" />
+        <type id="timeline" keywords="roadmap, milestones, dates, phases, schedule, timeline, journey, history" />
+        <type id="generic" keywords="" note="Default when no keywords match" />
+      </content-types>
+
+      <algorithm>
+        ```
+        detectContentType(userIntent):
+          intent_lower = userIntent.toLowerCase()
+
+          # Check each content type's keywords (order matters - first match wins)
+          for type in [diagram, comparison, data, list, quote, timeline]:
+            if any(keyword in intent_lower for keyword in type.keywords):
+              return type.id
+
+          return 'generic'
+        ```
+      </algorithm>
+    </content-type-detection>
+
+    <action>Apply content type detection algorithm to {{user_intent}}</action>
+    <action>Store result as {{detected_content_type}}</action>
+
+    <!-- Targeted Follow-up Questions by Content Type -->
+    <check if="detected_content_type == 'diagram'">
+      <ask>List the main components and how they connect</ask>
+      <action>Store response as {{content_type_details}}</action>
+    </check>
+
+    <check if="detected_content_type == 'comparison'">
+      <ask>What two things are you comparing? What's the key difference?</ask>
+      <action>Store response as {{content_type_details}}</action>
+    </check>
+
+    <check if="detected_content_type == 'data'">
+      <!-- Data Research Interface (Story AD-3.2) -->
+      <action>Initialize {{data_source}} = null</action>
+      <action>Initialize {{planning_research}} = empty array</action>
+
+      <ask context="**Data Slide Planning**
+
+You're creating a data-driven slide. How would you like to source the numbers?"
+           header="Data">
+        <choice label="I have the numbers" description="Proceed with your own data" />
+        <choice label="Need research" description="Search the web for relevant data" />
+        <choice label="Use placeholders" description="Add placeholder values to fill in later" />
+      </ask>
+
+      <!-- Branch: User has their own numbers -->
+      <check if="user selected 'I have the numbers'">
+        <ask>What are the key numbers or data points?</ask>
+        <action>Store response as {{content_type_details}}</action>
+        <action>Set {{data_source}} = "user_provided"</action>
+      </check>
+
+      <!-- Branch: Need research - execute WebSearch -->
+      <check if="user selected 'Need research'">
+        <action>Generate WebSearch query from {{user_intent}}:
+          1. Extract key nouns/entities from user intent
+          2. Add context keywords: "statistics", "data", "2026"
+          3. Keep query focused (3-7 words)
+          Example: "A slide showing market size stats for CDP" → "CDP market size statistics 2026"
+        </action>
+        <action>Execute WebSearch tool with generated query</action>
+
+        <check if="WebSearch returns results">
+          <action>Parse search results using LLM reasoning</action>
+          <action>Extract 2-4 concise, relevant findings as bullet points</action>
+          <action>Extract source URLs for attribution</action>
+          <action>Identify the primary entity being researched</action>
+          <action>Store in {{planning_research}} array:
+            - query: The search query used
+            - entity: Primary entity name
+            - findings: Array of 2-4 bullet points
+            - source_urls: Array of attribution URLs
+          </action>
+          <action>Set {{data_source}} = "research"</action>
+          <action>Set {{content_type_details}} = "Data sourced via web research"</action>
+
+          <output>
+✓ **Research Complete**
+
+**Query:** {{planning_research[0].query}}
+**Findings:**
+{{for finding in planning_research[0].findings}}
+- {{finding}}
+{{end for}}
+
+**Sources:** {{planning_research[0].source_urls.join(", ")}}
+          </output>
+        </check>
+
+        <check if="WebSearch returns no results OR WebSearch fails">
+          <output>Research wasn't able to find relevant results. Proceeding with placeholders.</output>
+          <action>Set {{data_source}} = "placeholder"</action>
+          <action>Set {{planning_research}} = empty array</action>
+          <action>Set {{content_type_details}} = "Data values are placeholders (research unavailable)"</action>
+        </check>
+      </check>
+
+      <!-- Branch: Use placeholders -->
+      <check if="user selected 'Use placeholders'">
+        <action>Set {{data_source}} = "placeholder"</action>
+        <action>Set {{content_type_details}} = "Data values are placeholders to be filled later"</action>
+      </check>
+    </check>
+
+    <check if="detected_content_type == 'list'">
+      <ask>Ranked by importance, or equal weight?</ask>
+      <action>Store response as {{content_type_details}}</action>
+    </check>
+
+    <check if="detected_content_type == 'quote'">
+      <ask>Exact quote and attribution?</ask>
+      <action>Store response as {{content_type_details}}</action>
+    </check>
+
+    <check if="detected_content_type == 'timeline'">
+      <ask>Milestones and dates — specific or approximate?</ask>
+      <action>Store response as {{content_type_details}}</action>
+    </check>
+
+    <check if="detected_content_type == 'generic'">
+      <!-- No targeted follow-up for generic content - proceed directly -->
+      <action>Set {{content_type_details}} = null</action>
+    </check>
+
+    <output if="detected_content_type != 'generic'">
+✓ Content type detected: **{{detected_content_type}}**
+    </output>
+  </step>
+
+  <!-- ═══════════════════════════════════════════════════════════════════════ -->
   <!-- PHASE 3: Template Matching (Catalog-Driven)                              -->
   <!-- ═══════════════════════════════════════════════════════════════════════ -->
   <step n="3" goal="Match intent to template using catalog">
@@ -286,12 +434,40 @@ Skipping discovery. Proceeding to save plan...
       visual_guidance: "{{visual_guidance_or_default}}"
       tone: "{{tone_based_on_theme}}"  # professional | bold | warm | technical
 
+      # Content Type (Story AD-3.1 - from Phase 2.5)
+      # Detected from user intent keywords
+      content_type: "{{detected_content_type}}"  # diagram | comparison | data | list | quote | timeline | generic
+      {{if content_type_details is not null}}
+      content_type_details: "{{content_type_details}}"  # User's response to targeted follow-up
+      {{end if}}
+
       # Discovery (Story 13.4 - optional, from Phase 4.5)
       # Included only if user engaged with quick discovery
       {{if discovery is not null}}
       discovery:
         key_message: "{{discovery.key_message}}"
         key_message_framing: "{{discovery.key_message_framing}}"
+      {{end if}}
+
+      # Data Research (Story AD-3.2 - optional, for data content type)
+      # Included only when content_type == 'data' and research was performed
+      {{if data_source is not null}}
+      data_source: "{{data_source}}"  # research | user_provided | placeholder
+      {{end if}}
+      {{if planning_research is not empty}}
+      planning_research:
+        {{for item in planning_research}}
+        - query: "{{item.query}}"
+          entity: "{{item.entity}}"
+          findings:
+            {{for finding in item.findings}}
+            - "{{finding}}"
+            {{end for}}
+          source_urls:
+            {{for url in item.source_urls}}
+            - "{{url}}"
+            {{end for}}
+        {{end for}}
       {{end if}}
 
       # Technical Details (if applicable)

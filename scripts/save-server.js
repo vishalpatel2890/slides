@@ -11,10 +11,26 @@
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
+const { execFile } = require('child_process');
 
 const PROJECT_ROOT = path.join(__dirname, '..');
 const OUTPUT_DIR = path.join(PROJECT_ROOT, 'output');
+const REGENERATE_SCRIPT = path.join(__dirname, 'regenerate-viewer.js');
 const port = parseInt(process.argv[2]) || 3000;
+
+/**
+ * Regenerate viewer index.html after manifest save
+ * Runs async so it doesn't block the response
+ */
+function regenerateViewer(deckSlug) {
+    execFile('node', [REGENERATE_SCRIPT, deckSlug], (err, stdout, stderr) => {
+        if (err) {
+            console.error(`⚠️  [${deckSlug}] Viewer regeneration failed:`, err.message);
+            return;
+        }
+        console.log(`🔄 [${deckSlug}] Viewer regenerated`);
+    });
+}
 
 function findDecks() {
     if (!fs.existsSync(OUTPUT_DIR)) return [];
@@ -113,6 +129,11 @@ const server = http.createServer((req, res) => {
                     path: `slides/${fileName}`,
                     timestamp: new Date().toISOString()
                 }));
+
+                // Regenerate viewer so FALLBACK_SLIDES stays in sync
+                if (isManifest) {
+                    regenerateViewer(deckSlug);
+                }
             } catch (e) {
                 console.error(`❌ [${deckSlug}] Failed to save ${fileName}:`, e.message);
                 res.writeHead(500, { 'Content-Type': 'application/json' });

@@ -1456,6 +1456,217 @@ If compliance score is below 80% (fewer than 80% of checks passed), warn user:
    ```
 </steps>
 
+→ Continue to Phase 4.5
+
+---
+
+## Phase 4.5: Browser Validation (Optional)
+
+<context>
+This phase validates the generated slide in a real browser when a browser-capable MCP is available.
+Validation only runs if a browser-capable MCP is detected. If no MCP is available, this phase
+skips gracefully and proceeds directly to Phase 5 without blocking the build.
+</context>
+
+### Step 1: Detect Browser MCP Availability
+
+<steps>
+1. Query for browser-capable MCP tools using ToolSearch:
+   - Query: "browser screenshot puppeteer chrome"
+   - This searches for tools matching browser/screenshot/puppeteer/chrome patterns
+2. Evaluate ToolSearch results:
+   - If tools found matching browser/screenshot/puppeteer patterns:
+     - Set `{{browser_mcp_available}}` = true
+     - Store matching tool names as `{{browser_tools}}`
+   - If no tools found:
+     - Set `{{browser_mcp_available}}` = false
+</steps>
+
+### Step 2: Route Based on MCP Availability
+
+<check if="{{browser_mcp_available}} == false">
+  <output>ℹ️ Browser validation skipped (no MCP available)</output>
+  <goto>Phase 5</goto>
+</check>
+
+<check if="{{browser_mcp_available}} == true">
+  <action>Log: "Browser MCP detected: {{browser_tools}}"</action>
+  <action>Continue to browser validation steps below</action>
+</check>
+
+### Step 3: Technical Validation
+
+<critical>All validation steps are wrapped in error handling. Any failure skips validation gracefully.</critical>
+
+<steps>
+1. **Render slide in browser:**
+   - Use browser MCP to navigate to the generated HTML file at `{{output_path}}`
+   - Set viewport to 1920x1080
+   - If navigation fails → Set `{{validation_error}}` = "Browser navigation failed", skip to Step 5
+
+2. **Perform technical checks:**
+   - Query `.slide` element dimensions:
+     - Expected: exactly 1920px width × 1080px height
+     - Store result as `{{dim_check}}` = PASS/FAIL with actual dimensions
+   - Query `[contenteditable]` elements:
+     - All visible text elements should have `contenteditable="true"`
+     - Store result as `{{edit_check}}` = PASS/FAIL with element count
+   - Capture browser console output:
+     - Check for JavaScript errors (filter out warnings)
+     - Store result as `{{console_check}}` = PASS/FAIL with error list
+   - If any query fails → Note partial validation, continue with available results
+
+3. **Store technical validation results:**
+   ```
+   {{technical_validation}} = {
+     dimensions: { passed: bool, actual: "WxH", expected: "1920x1080" },
+     contenteditable: { passed: bool, count: N, missing: [] },
+     console: { passed: bool, errors: [] }
+   }
+   ```
+</steps>
+
+### Step 4: Visual Quality Assessment
+
+<steps>
+1. **Capture screenshot:**
+   - Use browser MCP screenshot capability to capture full-page screenshot
+   - Store screenshot for LLM visual analysis
+   - If screenshot fails → Set `{{screenshot_error}}` = true, skip visual assessment
+
+2. **Analyze content density:**
+   - Compare actual content density to expected for `{{slide.storyline_role}}`
+   <reference title="Density Expectations by Role">
+   | Role | Expected Density | Description |
+   |------|------------------|-------------|
+   | opening | Sparse (20-30%) | Bold visual impact, minimal text |
+   | tension | Moderate (40-50%) | Problem statement, focused content |
+   | resolution | Substantive (50-60%) | Solution details, supporting points |
+   | evidence | Moderate to Dense (50-70%) | Data, proof points, charts |
+   | cta | Sparse to Moderate (30-50%) | Clear call-to-action, clean layout |
+   </reference>
+   - Store finding as `{{density_assessment}}`
+
+3. **Analyze whitespace distribution:**
+   - Check for empty regions > 30% of slide with no content
+   - Check for text/content clustered in one area leaving large voids
+   - Check if visual anchors would improve balance
+   - Store findings as `{{whitespace_findings}}`
+
+4. **Assess proportional sizing:**
+   - Check text sizes relative to slide area
+   - Flag headlines < 36pt as potentially too small
+   - Flag single bullets at small font as "timid"
+   - Store findings as `{{sizing_findings}}`
+
+5. **Check icon color contrast:**
+   - For each icon, identify its immediate parent background (card, panel, box)
+   - NOT the slide background - the container element's background
+   - Verify icon color contrasts with immediate background:
+     - White icons on light containers = FAIL (washed out)
+     - Dark icons on dark containers = FAIL (washed out)
+   - Store findings as `{{icon_contrast_findings}}`
+
+6. **Verify logo catalog compliance:**
+   - Find all `<img>` elements that appear to be logos
+   - Check src paths against logo catalog location:
+     - Valid: `.slide-builder/config/catalog/brand-assets/logos/*`
+     - Invalid: External URLs, other paths, inline SVG recreations
+   - Verify correct variant for background mode:
+     - Dark background → light/white logo variant
+     - Light background → dark logo variant
+   - Store findings as `{{logo_compliance_findings}}`
+</steps>
+
+### Step 5: Compile Validation Report
+
+<check if="{{validation_error}} is set">
+  <output>⚠️ Browser validation encountered an error: {{validation_error}}
+Skipping validation and proceeding to Phase 5.</output>
+  <goto>Phase 5</goto>
+</check>
+
+<reference title="Validation Report Format">
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🔍 BROWSER VALIDATION — Slide {{slide.number}}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📐 TECHNICAL CHECKS
+───────────────────────────────────────────────────────────────────────────────
+{{#if technical_validation.dimensions.passed}}✅{{else}}❌{{/if}} Dimensions: {{technical_validation.dimensions.actual}} (expected 1920x1080)
+{{#if technical_validation.contenteditable.passed}}✅{{else}}❌{{/if}} Contenteditable: {{technical_validation.contenteditable.count}} elements found
+{{#if technical_validation.console.passed}}✅{{else}}❌{{/if}} Console: {{#if technical_validation.console.passed}}No errors{{else}}{{technical_validation.console.errors.length}} error(s){{/if}}
+
+🎨 VISUAL QUALITY
+───────────────────────────────────────────────────────────────────────────────
+{{#if screenshot_error}}
+⚠️ Screenshot capture failed — visual assessment skipped
+{{else}}
+• **Density:** {{density_assessment}}
+• **Whitespace:** {{whitespace_findings}}
+• **Sizing:** {{sizing_findings}}
+• **Icon Contrast:** {{icon_contrast_findings}}
+• **Logo Compliance:** {{logo_compliance_findings}}
+{{/if}}
+
+{{#if has_issues}}
+💡 RECOMMENDATIONS
+───────────────────────────────────────────────────────────────────────────────
+{{#each recommendations}}
+• {{this}}
+{{/each}}
+{{/if}}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+```
+</reference>
+
+<steps>
+1. Compile all validation findings into the report format above
+2. Determine if any issues were found: `{{has_issues}}` = any FAIL results or visual quality concerns
+3. Generate specific recommendations based on findings:
+   - Dimensions wrong → "Check slide container CSS for fixed 1920x1080 dimensions"
+   - Missing contenteditable → "Add contenteditable='true' to text elements: {{missing_elements}}"
+   - Console errors → "Fix JavaScript errors: {{error_list}}"
+   - Density mismatch → "Adjust content amount for {{storyline_role}} role (expected {{expected_density}})"
+   - Whitespace issues → "{{whitespace_recommendation}}"
+   - Icon contrast fail → "Use {{suggested_variant}} icon variant for {{background_type}} container"
+   - Logo non-compliant → "Replace with catalog logo from .slide-builder/config/catalog/brand-assets/logos/"
+4. Display the compiled report to user
+</steps>
+
+### Step 6: Present User Options
+
+<ask context="Review the validation findings above. How would you like to proceed?"
+     header="Validate">
+  <choice label="Accept" description="Slide passes validation, continue to Phase 5" />
+  <choice label="Fix Issues" description="Return to Phase 3 to regenerate with corrections" />
+  <choice label="Skip" description="Ignore findings and continue to Phase 5" />
+</ask>
+
+<check if="user selected Accept">
+  <action>Log: "Validation accepted — proceeding to Phase 5"</action>
+  <goto>Phase 5</goto>
+</check>
+
+<check if="user selected Skip">
+  <action>Log: "Validation skipped by user — proceeding to Phase 5"</action>
+  <goto>Phase 5</goto>
+</check>
+
+<check if="user selected Fix Issues">
+  <action>Log: "User requested fixes — returning to Phase 3"</action>
+  <action>Compile fix instructions from recommendations into `{{regeneration_context}}`</action>
+  <action>Set `{{fix_mode}}` = true to indicate regeneration with corrections</action>
+  <output>🔄 Returning to slide generation with the following corrections:
+{{#each recommendations}}
+• {{this}}
+{{/each}}
+  </output>
+  <goto>Phase 3A or 3B with {{regeneration_context}}</goto>
+</check>
+
 → Continue to Phase 5
 
 ---

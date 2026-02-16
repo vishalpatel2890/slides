@@ -793,6 +793,120 @@ The field name must match the `data-field` attribute on the adjacent element.
 - Slide HTML files use numeric prefix: `slide-1.html`, `slide-2.html`
 - Config file always named `template-config.yaml`
 
+## Single-Slide Plan Schema (plan-one)
+
+The plan-one workflow creates `output/singles/plan.yaml` for single-slide planning. This section documents the schema fields specific to single-slide mode.
+
+### Content Type Fields (Story AD-3.1)
+
+Content type detection enables the system to ask targeted follow-up questions based on the type of slide content the user is creating.
+
+**Schema Fields:**
+
+```yaml
+# Content Type (from Phase 2.5)
+content_type: "diagram"  # Detected from user intent keywords
+content_type_details: "Frontend, API Gateway, User Service, Database"  # Optional: User's follow-up response
+```
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `content_type` | enum | Yes | Detected content type based on intent keywords |
+| `content_type_details` | string | No | User's response to the targeted follow-up question (if asked) |
+
+**Content Type Enum Values:**
+
+| Value | Description | Keywords Matched | Targeted Follow-up |
+|-------|-------------|------------------|-------------------|
+| `diagram` | Architecture, flow, or system diagrams | architecture, flow, process, system, connections, diagram, network, structure | "List the main components and how they connect" |
+| `comparison` | Side-by-side or before/after comparisons | vs, before/after, side-by-side, compare, comparison, versus, difference | "What two things are you comparing? What's the key difference?" |
+| `data` | Data-driven slides with charts or metrics | metric, stat, numbers, chart, graph, percentage, statistics, data, revenue | 3-way choice: "I have the numbers" / "Need research" / "Use placeholders" |
+| `list` | Bullet lists or feature enumerations | bullets, features, items, steps, checklist, list, points, benefits | "Ranked by importance, or equal weight?" |
+| `quote` | Testimonials or quotations | testimonial, said, quote, attribution, customer, feedback | "Exact quote and attribution?" |
+| `timeline` | Roadmaps or chronological content | roadmap, milestones, dates, phases, schedule, timeline, journey, history | "Milestones and dates — specific or approximate?" |
+| `generic` | Default when no keywords match | (none) | No follow-up asked |
+
+**Detection Algorithm:**
+
+1. Convert user intent to lowercase
+2. Check each content type's keywords in order (diagram → comparison → data → list → quote → timeline)
+3. First keyword match determines content type
+4. If no match found, default to `generic`
+
+**Backward Compatibility:**
+
+- `content_type` field is optional in existing plans
+- Plans created before Story AD-3.1 work without modification
+- `build-one` can optionally read `content_type` to inform generation (no changes required)
+
+### Data Research Fields (Story AD-3.2)
+
+When content type is `data`, the system presents a 3-way choice to help users source their numbers. This enables research-assisted slide creation for data-driven content.
+
+**Schema Fields:**
+
+```yaml
+# Data Source (from Phase 2.5 data follow-up)
+data_source: "research"  # research | user_provided | placeholder
+
+# Planning Research (when data research is performed)
+# Same schema as plan-deck from AD-2
+planning_research:
+  - query: "CDP market size statistics 2026"
+    entity: "CDP market"
+    findings:
+      - "Global CDP market projected to reach $15B by 2028"
+      - "Enterprise adoption accelerating post-pandemic"
+    source_urls:
+      - "https://forrester.com/cdp-report-2026"
+```
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `data_source` | enum | No | How data was sourced: `research` (WebSearch), `user_provided` (user's own numbers), `placeholder` (to fill later) |
+| `planning_research` | array | No | Research findings from WebSearch (only when data_source = "research") |
+
+**Data Source Enum Values:**
+
+| Value | Description | When Set |
+|-------|-------------|----------|
+| `research` | Data sourced via WebSearch | User selected "Need research" and search succeeded |
+| `user_provided` | User provided their own numbers | User selected "I have the numbers" |
+| `placeholder` | Placeholder values to fill later | User selected "Use placeholders" OR research failed |
+
+**planning_research Array Schema:**
+
+Each item in the `planning_research` array follows this structure:
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `query` | string | Yes | The WebSearch query used |
+| `entity` | string | Yes | Primary entity being researched |
+| `findings` | array | Yes | Array of 2-4 concise findings as bullet points |
+| `source_urls` | array | Yes | Attribution URLs (may be empty) |
+
+**3-Way Choice Flow:**
+
+When `content_type == 'data'` is detected:
+
+1. **"I have the numbers"** → Prompts freeform question for data points → stores in `content_type_details`, sets `data_source = "user_provided"`
+2. **"Need research"** → Executes WebSearch → stores findings in `planning_research`, sets `data_source = "research"` (or "placeholder" on failure)
+3. **"Use placeholders"** → Sets `data_source = "placeholder"`, notes placeholder status in `content_type_details`
+
+**Graceful Degradation:**
+
+If WebSearch fails or returns no results:
+- System informs user: "Research wasn't able to find relevant results. Proceeding with placeholders."
+- Sets `data_source = "placeholder"`
+- Sets `planning_research = []` (empty array)
+- Workflow continues without blocking
+
+**Backward Compatibility:**
+
+- `data_source` and `planning_research` fields are optional
+- Plans created before Story AD-3.2 work without modification
+- `build-one` can optionally read `planning_research` to inform content generation
+
 ## Enhanced Planning Patterns (Story 13.4)
 
 The plan-deck workflow includes an enhanced planning system with agenda structure and deep discovery for each section.
@@ -996,15 +1110,91 @@ agenda:
 | `description` | string | One-sentence purpose description |
 | `discovery` | object | Deep discovery data (see below) |
 
-### Discovery Object Schema
+### Discovery and Planning Context Schema
+
+The planning workflow captures discovery context at two levels: **plan-level** (applies to the entire deck) and **section-level** (applies to individual agenda sections).
+
+#### Plan-Level Discovery Fields
+
+These top-level fields in plan.yaml capture presentation-wide context from the adaptive discovery phase:
+
+```yaml
+# Presentation Settings (from Phase 2.5 and 2.6)
+presentation_setting: "live"  # live | sent_as_deck | recorded | hybrid
+desired_length: "8-10"        # Target slide count (range or single number)
+
+# Discovery Context (optional - from adaptive follow-ups in Phase 2.3)
+discovery_context:
+  # Flexible key-value pairs captured from follow-up answers
+  # Actual keys depend on what gaps were identified during discovery
+  known_objections:
+    - "Too expensive"
+    - "Integration complexity"
+  competitive_context: "Competing against incumbent vendor"
+  audience_priorities:
+    - "ROI"
+    - "time-to-value"
+  decision_timeline: "Q4 budget decision"
+
+# Planning Research (optional - from Phase 2.4 web research)
+planning_research:
+  - query: "Acme Corp company overview recent news 2026"
+    entity: "Acme Corp"
+    findings:
+      - "Acme Corp expanded data team from 5 to 20 in Q3 2025"
+      - "Recently acquired MarketSync for $45M"
+    source_urls:
+      - "https://techcrunch.com/acme-expansion"
+```
+
+**Plan-Level Field Details:**
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `presentation_setting` | enum | No | Delivery format: `live`, `sent_as_deck`, `recorded`, or `hybrid`. Influences slide density and content style. |
+| `desired_length` | string | No | Target slide count as range (e.g., "8-10") or single number (e.g., "12"). Computed from key points and purpose type. |
+| `discovery_context` | object | No | Flexible key-value pairs from adaptive follow-ups. Common keys: `known_objections`, `competitive_context`, `audience_priorities`, `decision_timeline`. |
+| `planning_research` | array | No | Web research findings from Phase 2.4. Array of objects with `query`, `entity`, `findings`, and `source_urls`. See [Planning Research Schema](#planning-research-schema) for details. |
+
+**Presentation Setting Impact:**
+
+| Setting | Slide Density | Content Style | Speaker Notes |
+|---------|---------------|---------------|---------------|
+| `live` | Lower — more visual, less text | Conversation prompts, key points | Detailed talking points |
+| `sent_as_deck` | Higher — more complete on each slide | Self-explanatory, full context | Minimal — content speaks for itself |
+| `recorded` | Medium — visual with key points | Clear headers, scannable | Voiceover script hints |
+| `hybrid` | Mixed — varies by section | Distinguish live vs self-serve sections | Marked by section type |
+
+**Discovery Context Consumption:**
+
+Phase 4 (Section Goal Discovery) incorporates `discovery_context` when generating section goals:
+- `known_objections` → Address in evidence/solution section goals
+- `competitive_context` → Frame differentiation in problem/solution sections
+- `audience_priorities` → Align communication objectives to priorities
+- `decision_timeline` → Inject urgency into CTA section goals
+
+#### Section-Level Discovery Fields
 
 Each agenda section includes a discovery object capturing user choices during planning:
 
 ```yaml
 discovery:
+  # Goals - collected during section goal discovery (Phase 4)
+  goals:
+    communication_objective: "What this section must accomplish"
+    audience_takeaway: "What the audience should think/feel after this section"
+    narrative_advancement: "How this section moves the story forward"
+    content_requirements: "What content/data/evidence is needed"
+    suggested_slide_count: 2
+
   # Required - collected during section message discovery (Step 2.6)
   key_message: "The main message or hook for this section"
   key_message_framing: "direct | question | story | data"
+
+  # Optional - populated when planning research is relevant to this section (Phase 4)
+  planning_research_refs:
+    - query: "Original WebSearch query"
+      relevant_finding: "Specific finding relevant to this section"
 ```
 
 **Discovery Field Details:**
@@ -1013,6 +1203,68 @@ discovery:
 |-------|------|----------|-------------|
 | `key_message` | string | Yes | The core message for slides in this section |
 | `key_message_framing` | enum | Yes | How the message is framed (direct/question/story/data) |
+| `planning_research_refs` | array | No | Research findings relevant to this section (see below) |
+
+#### Planning Research Refs Schema
+
+The `planning_research_refs` field links web research findings from Phase 2.4 to specific agenda sections. This optional field is populated in Phase 4 (Section Goal Discovery) when research findings are relevant to a section's narrative role and content requirements.
+
+**Array Schema:**
+
+```yaml
+planning_research_refs:
+  - query: string           # The original WebSearch query that produced this finding
+    relevant_finding: string  # The specific finding relevant to this section
+```
+
+**Field Details:**
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `query` | string | Yes | The exact WebSearch query from `planning_research` that produced this finding |
+| `relevant_finding` | string | Yes | A single finding (bullet point) from the research that is relevant to this section |
+
+**Example:**
+
+```yaml
+# Section: Evidence / Proof Points (narrative_role: evidence)
+discovery:
+  goals:
+    communication_objective: "Demonstrate measurable results for similar companies"
+    content_requirements: "Include Acme Corp's data team expansion (5→20) as evidence of technical maturity"
+    # ... other goal fields
+  planning_research_refs:
+    - query: "Acme Corp company overview recent news 2026"
+      relevant_finding: "Acme Corp expanded data team from 5 to 20 in Q3 2025"
+    - query: "Acme Corp company overview recent news 2026"
+      relevant_finding: "Reported 40% reduction in manual data processing"
+```
+
+**Relevance Matching by Narrative Role:**
+
+| Narrative Role | Likely Relevant Research | Typical Match |
+|----------------|-------------------------|---------------|
+| `evidence` | Company data, market stats, proof points | Strong match for customer research |
+| `solution` | Product/technology research, competitive data | Strong match for market research |
+| `problem` | Market challenges, industry pain points | Medium match for trend research |
+| `context` | Background market info, industry trends | Medium match for overview research |
+| `opening` | Usually NOT aligned | Rarely matched |
+| `cta` | Usually NOT aligned | Rarely matched |
+
+**Critical Rules:**
+
+1. **Only populate when genuinely relevant** — Do not add planning_research_refs just because research exists. Match findings to the section's narrative purpose.
+2. **Never add empty arrays** — If no research findings are relevant to a section, omit the `planning_research_refs` field entirely. Do NOT add `planning_research_refs: []`.
+3. **Enrich content_requirements** — When research is linked, the section's `content_requirements` should explicitly reference the findings (e.g., "cite Acme Corp's team growth").
+4. **Backward compatible** — Sections without `planning_research_refs` are valid. Consumers must check for field existence before accessing.
+
+**Consumption Guidance:**
+
+| Workflow | How to Use planning_research_refs |
+|----------|-----------------------------------|
+| `build-one` | Optionally read refs as informational context when generating slide content. No automatic resolution required. |
+| `plan-deck` (Phase 7) | Refs are persisted to plan.yaml as part of the section discovery object. |
+| Future enhancement | Could auto-inject research citations into slide content or speaker notes. |
 
 ### Slide Generation Integration
 
@@ -1037,10 +1289,98 @@ Use enriched context in Phase 3A/3B content generation
 
 ### Backwards Compatibility
 
-Plans created before Story 13.4 (without agenda section) continue to work:
+All discovery fields are optional — plans created before Epic AD-1 continue to work without modification:
+
+**Plan-Level Fields (Epic AD-1):**
+- `presentation_setting`, `desired_length`, `discovery_context` are optional
+- Workflows check for field existence before consuming
+- Old plans without these fields work with no errors
+- No migration required — new fields are additive, never required
+
+**Section-Level Fields (Story 13.4):**
 - Build-one checks for `agenda_section_id` field presence
 - If missing or no matching section found, uses original slide context
-- No migration required for existing plan.yaml files
+- Plans without agenda sections continue to work
+
+**Schema Consumer Guidelines:**
+- Always use optional chaining or existence checks when accessing discovery fields
+- Never assume any discovery field is present
+- Gracefully degrade to default behavior when fields are missing
+
+### Planning Research Schema
+
+The `planning_research` array stores web research findings collected during Phase 2.4 of the plan-deck workflow. This optional field enables downstream workflows to incorporate current, contextual information about entities mentioned in the presentation.
+
+**Array Schema:**
+
+```yaml
+planning_research:
+  - query: string      # The WebSearch query used
+    entity: string     # Entity name being researched (company, product, market, etc.)
+    findings: string[] # Concise bullet points (2-4 findings per entity)
+    source_urls: string[] # Attribution URLs from search results
+```
+
+**Field Details:**
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `query` | string | Yes | The exact WebSearch query used to find information |
+| `entity` | string | Yes | Name of the entity being researched (detected from user's initial context) |
+| `findings` | array | Yes | Array of 2-4 concise, relevant findings as bullet points |
+| `source_urls` | array | Yes | Array of URLs for attribution (may be empty if no sources available) |
+
+**Complete Example:**
+
+```yaml
+planning_research:
+  - query: "Acme Corp company overview recent news 2026"
+    entity: "Acme Corp"
+    findings:
+      - "Acme Corp expanded data team from 5 to 20 in Q3 2025"
+      - "Recently acquired MarketSync for $45M"
+      - "Primary competitor is DataPilot in CDP space"
+    source_urls:
+      - "https://techcrunch.com/acme-expansion"
+      - "https://acmecorp.com/press/acquisition"
+  - query: "CDP market size trends 2026"
+    entity: "CDP market"
+    findings:
+      - "Global CDP market projected to reach $15B by 2028"
+      - "Enterprise adoption accelerating post-pandemic"
+    source_urls:
+      - "https://forrester.com/cdp-report-2026"
+```
+
+**Edge Case - No Relevant Findings:**
+
+When a WebSearch returns no useful results for an entity, the findings array contains a single "No relevant findings" entry and source_urls is empty:
+
+```yaml
+planning_research:
+  - query: "XYZ Corp company overview recent news 2026"
+    entity: "XYZ Corp"
+    findings:
+      - "No relevant findings for XYZ Corp"
+    source_urls: []
+```
+
+**Backward Compatibility:**
+
+The `planning_research` field is **optional**. Plans created before Epic AD-2 (or when research is skipped/fails) will not have this field, and all workflows must handle its absence gracefully:
+
+- Always check for field existence before consuming
+- Never assume planning_research is present
+- Gracefully degrade to default behavior when missing
+
+**Consumption Guidance:**
+
+| Phase/Workflow | How planning_research is Used |
+|----------------|-------------------------------|
+| Phase 2.4 (plan-deck) | Creates and populates the array from WebSearch results |
+| Phase 4 (plan-deck) | Cross-references findings to populate `planning_research_refs` in relevant section discovery objects |
+| Phase 7 (plan-deck) | Persists to plan.yaml when not empty |
+| Slide Generation | May incorporate findings into content via `planning_research_refs` (informational context) |
 
 ## Workflow Rules Schema (theme.json)
 
