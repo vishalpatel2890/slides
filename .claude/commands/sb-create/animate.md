@@ -8,6 +8,7 @@ Generate intelligent animation groups for a slide based on its content structure
 
 **Usage:**
 - `/sb:animate [slide_number]` - Generate animations for the specified slide
+- When invoked from the viewer's "Animate with AI" button, the deck context (`Deck: {slug}`) is automatically included in the prompt, skipping deck selection
 
 <steps CRITICAL="TRUE">
 1. Read the workflow configuration at @.slide-builder/workflows/animate/workflow.yaml

@@ -1096,7 +1096,6 @@ Try again with one of the template IDs listed above.</output>
     - Discovers slide HTML files in output/{{deck_slug}}/slides/
     - Extracts titles from h1 tags
     - Generates manifest.json with slide metadata
-    - Populates viewer-template.html with slide data
     - Writes index.html for browser viewing
   </action>
 

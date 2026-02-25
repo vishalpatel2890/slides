@@ -7,12 +7,19 @@
 <workflow>
 
   <step n="1" goal="Mode detection and slide validation">
-    <action>Read .slide-builder/status.yaml to get the deck registry from the `decks` field</action>
-    <action>Follow deck selection protocol:
-      - If zero decks registered: output "No decks found. Run /sb:plan-deck or /sb:plan-one first." and HALT
-      - If one deck registered: auto-select that deck slug
-      - If multiple decks registered: present a numbered list and ask the user which deck to animate
-    </action>
+    <action>Check if the prompt/arguments contain a "Deck: {slug}" context line (provided when invoked from the viewer's Animate with AI button)</action>
+    <check if="prompt contains 'Deck: {slug}' line">
+      <action>Extract the deck slug from the "Deck:" line and store as {deck_slug}</action>
+      <action>Skip the status.yaml deck selection protocol below</action>
+    </check>
+    <check if="no 'Deck:' context line found (e.g., manual /sb-create:animate invocation)">
+      <action>Read .slide-builder/status.yaml to get the deck registry from the `decks` field</action>
+      <action>Follow deck selection protocol:
+        - If zero decks registered: output "No decks found. Run /sb:plan-deck or /sb:plan-one first." and HALT
+        - If one deck registered: auto-select that deck slug
+        - If multiple decks registered: present a numbered list and ask the user which deck to animate
+      </action>
+    </check>
     <action>Store the selected deck as {deck_slug}</action>
     <action>Resolve paths:
       - slide_dir = output/{deck_slug}/slides/
@@ -286,6 +293,8 @@ Found {element_count} animatable elements.
   </step>
 
   <step n="5" goal="Apply animations to slide HTML and manifest">
+    <critical>Elements use data-build-id attribute (NOT id). All three viewers find elements via querySelector('[data-build-id="..."]') — never getElementById(). See build-one/instructions.md Viewer DOM Contract for full specification.</critical>
+
     <!-- Sub-step 5a: Assign build IDs to slide HTML -->
     <action>For each animatable element that does NOT already have a data-build-id attribute:
       - Add data-build-id="{planned_id}" to the element's opening tag

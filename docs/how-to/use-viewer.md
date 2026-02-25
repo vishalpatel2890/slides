@@ -4,13 +4,7 @@ Navigate the interactive presentation viewer.
 
 ## Opening the viewer
 
-After building slides:
-
-```bash
-open output/{deck-slug}/index.html
-```
-
-Works with `file://` protocol (no server required).
+After building slides, use the VS Code extension's Present Deck command, which serves the viewer at `http://localhost:52100/`.
 
 ## Gallery view
 

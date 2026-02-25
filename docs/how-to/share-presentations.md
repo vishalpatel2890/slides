@@ -15,7 +15,7 @@ The entire deck is self-contained:
 
 3. Recipients extract and open `index.html`
 
-Works offline with `file://` protocol.
+Recipients should serve the folder via a local HTTP server to view.
 
 ## Option 2: Web hosting
 

@@ -430,13 +430,38 @@ Arrow styles by personality:
 - CORPORATE: 2px stroke, straight lines
 - PLAYFUL: 2-3px stroke, curved lines
 
-### Step 2.9: Display Extraction Summary
+### Step 2.9: Extract Brand Context for brandContext Field
+
+<critical>
+During brand primitive extraction, you have already gathered brand voice, design philosophy, color usage rationale, and typography notes from the analyzed assets. Now organize this information into a structured `brandContext` object that will be included in theme.json.
+</critical>
+
+Using the analysis results from Steps 2.2-2.8, extract and compose the following brand context fields:
+
+1. **voice** (string): Brand voice and tone description. Derive from brand description, tone_of_voice data from PDF extraction, and overall personality classification. Example: "Professional but approachable. Use active voice and concise sentences."
+
+2. **designPhilosophy** (string): Core design principles and visual approach. Derive from personality classification, spacing principles, layout philosophy, and visual density observations. Example: "Clean, modern minimalism with strategic use of brand color as accent."
+
+3. **colorUsage** (string or object): Guidelines for when and how to use specific brand colors. Derive from color extraction rules, restrictions, and the role-to-color mappings established in Step 2.2-2.5. Example: "Use primary blue for headlines and key call-to-action elements only. Secondary teal for supporting data and chart accents."
+
+4. **typographyNotes** (string): Notes on typography choices, pairing rationale, and usage guidelines. Derive from typography extraction rules, font selection reasoning, and hierarchy decisions from Step 2.7. Example: "Inter for headings provides a modern, geometric feel. Body font ensures readability at smaller sizes."
+
+5. **customInstructions** (string or array, optional): Any additional brand guidelines extracted from PDFs, brand descriptions, or dos/donts that inform slide generation. Derive from dos_and_donts, imagery restrictions, and logo usage rules.
+
+Store the composed brandContext object for inclusion in theme.json during Step 3.1.
+
+<reference title="brandContext schema documentation">
+See `docs/reference/theme-schema.md#brandContext` for the expected data structure, field descriptions, and examples.
+</reference>
+
+### Step 2.10: Display Extraction Summary
 
 **Report to user:**
 - Colors table (primary, secondary, accent, background, text)
 - Typography (heading font, body font, mono font, scale)
 - Shapes (corners, shadows, arrows)
 - Personality classification with confidence and notes
+- Brand context summary (voice, design philosophy, key color usage notes, typography rationale)
 - Number of sources analyzed
 
 ---
@@ -516,10 +541,21 @@ Arrow styles by personality:
       "colorSectionDark": "**Color:** Dark background, light text, accent highlights",
       "colorSectionLight": "**Color:** Light background, dark text, secondary accents"
     }
+  },
+  "brandContext": {
+    "voice": "Professional but approachable. Use active voice and concise sentences.",
+    "designPhilosophy": "Clean, modern minimalism with strategic use of brand color as accent. Prioritize whitespace and visual hierarchy.",
+    "colorUsage": "Use primary blue for headlines and key call-to-action elements only. Secondary teal for supporting data and chart accents.",
+    "typographyNotes": "Inter for headings provides a modern, geometric feel. Body font ensures readability at smaller sizes.",
+    "customInstructions": ["Always include the company tagline on title slides", "Limit bullet points to 4 per slide maximum"]
   }
 }
 ```
 </example>
+
+<critical>
+When building the theme.json structure, include the `brandContext` object composed in Step 2.9. The brandContext field stores unstructured brand context data that informs AI-driven slide generation. See `docs/reference/theme-schema.md#brandContext` for the expected data structure.
+</critical>
 
 ### Step 3.1.5: Generate workflowRules
 
@@ -668,20 +704,56 @@ Add this workflowRules object to the theme.json structure before proceeding to v
 
 ### Step 3.2: Validate Theme
 
-<checklist title="Theme validation">
-- [ ] All required sections present (meta, colors, typography, shapes, layouts, personality, workflowRules)
-- [ ] All colors are valid hex format
-- [ ] All fonts have fallbacks
+<critical>
+Validate the generated theme against the required schema fields before saving. This ensures every theme.json meets quality standards. Reference: `docs/reference/theme-schema.md` for authoritative field documentation.
+</critical>
+
+<checklist title="Required fields validation (errors if missing)">
+- [ ] `name` — theme display name (string, non-empty)
+- [ ] `version` — theme version identifier (string, non-empty)
+- [ ] `colors.primary` — main brand color (valid hex)
+- [ ] `colors.secondary` — supporting brand color (valid hex)
+- [ ] `colors.accent` — highlight/CTA color (valid hex)
+- [ ] `colors.background.default` — main background (valid hex)
+- [ ] `colors.background.alt` — alternate background (valid hex)
+- [ ] `colors.text.heading` — heading text color (valid hex)
+- [ ] `colors.text.body` — body text color (valid hex)
+- [ ] `typography.fonts.heading` — heading font stack (string with fallbacks)
+- [ ] `typography.fonts.body` — body font stack (string with fallbacks)
+- [ ] `typography.scale` — font size scale (object with at least one entry)
+- [ ] `typography.weights` — font weight values (object with at least one entry)
+- [ ] `shapes.borderRadius` — border radius scale (object with at least one entry)
+- [ ] `shapes.shadow` — box shadow scale (object with at least one entry)
+- [ ] `shapes.border` — border style scale (object with at least one entry)
+- [ ] `components` — component style presets (object, must exist, can be empty `{}`)
+</checklist>
+
+<checklist title="Recommended optional fields (warn if missing)">
+- [ ] `colors.background.dark` — dark background variant
+- [ ] `colors.text.onDark` — text color for dark backgrounds
+- [ ] `colors.semantic` — semantic color tokens (success, warning, error)
+- [ ] `colors.dataViz` — chart and graph colors
+- [ ] `colors.brand` — additional brand color tokens
+- [ ] `typography.fonts.mono` — monospace font stack
+- [ ] `personality` — brand personality classification and traits
+- [ ] `meta` — extraction metadata and lock state
+- [ ] `brandContext` — unstructured brand context data (voice, design philosophy, etc.)
+</checklist>
+
+<checklist title="Format and structure validation">
+- [ ] All color values are valid hex format (`^#([0-9A-Fa-f]{6}|[0-9A-Fa-f]{3})$`)
+- [ ] All fonts have CSS fallbacks
 - [ ] All sizes include units (px)
-- [ ] Personality classification is valid (bold/minimal/corporate/playful)
+- [ ] Personality classification is valid (bold/minimal/corporate/playful) if present
 - [ ] workflowRules.rhythm exists with defaultMode, maxConsecutiveDark, maxConsecutiveLight, forceBreakAfter
 - [ ] workflowRules.colorSchemes has both dark and light schemes
 - [ ] workflowRules.narrativeDefaults has opening, context, evidence, cta sections minimum
 - [ ] workflowRules.designPlanPatterns has colorSectionDark and colorSectionLight
+- [ ] brandContext includes at least voice or designPhilosophy if brand context was extractable
 - [ ] JSON is valid (can stringify without errors)
 </checklist>
 
-If validation fails, apply fallback values and re-validate.
+If any required fields are missing, apply fallback values and re-validate. Log warnings for missing recommended optional fields but do not block theme generation.
 
 ### Step 3.3: Write theme.json
 

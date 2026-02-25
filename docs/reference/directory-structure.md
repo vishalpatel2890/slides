@@ -49,8 +49,7 @@ Framework configuration and state.
 │       ├── agenda.html
 │       └── [templates].html
 │
-├── templates/               # Framework templates
-│   └── viewer-template.html # Viewer generation template
+├── templates/               # Framework templates (slide templates only)
 │
 ├── credentials/             # OAuth tokens (gitignored)
 ├── single/                  # Single slide workspace (gitignored)

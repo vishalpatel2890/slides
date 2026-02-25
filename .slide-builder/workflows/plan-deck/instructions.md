@@ -78,6 +78,7 @@ Run `/sb-brand:setup` to create a complete theme, or `/sb-brand:theme-edit` to a
    - Check if `.slide-builder/config/catalog/brand-assets/logos/logo-catalog.json` exists → load as `{{logo_catalog}}`, set `{{logo_catalog_available}}` = true
    - Check if `.slide-builder/config/catalog/brand-assets/images/images-catalog.json` exists → load as `{{images_catalog}}`, set `{{images_catalog_available}}` = true
    - If any catalog exists, store a summary of available assets for reference in visual suggestions
+   - **Color Intelligence Note:** Assets may include `colorMetadata` with `backgroundAffinity` (light, dark, both, any) indicating which slide backgrounds they work best on. Build workflows will use this for smart asset selection and warn about mismatches.
 4. Read `status.yaml` and check the `decks:` registry for existing decks
 5. If `decks:` has any entries:
    - List all decks with their status, slide counts, and last action
@@ -928,9 +929,17 @@ When `{{planning_research}}` is available, integrate research findings into rele
 2. Identify `recurring_themes` from key_points
 3. Generate slides from agenda sections:
    - For each section, generate `suggested_slide_count` (from goals) number of slides
-   - Each slide gets: number (sequential), status="pending", storyline_role, agenda_section_id, tone, description
-   - **description** (multiline block scalar): Detailed presentation notes — what the slide communicates, why it matters in the narrative, speaker context (pacing, emphasis, transitions), audience impact, and content specifics
-   - Do NOT include template, design_plan, or background_mode fields — these decisions are deferred to build time
+   - Each slide gets these fields:
+     - `number` (sequential integer)
+     - `status`: "pending"
+     - `storyline_role`: opening | tension | evidence | resolution | cta
+     - `agenda_section_id`: link to parent section
+     - `tone`: professional | bold | warm | technical | urgent
+     - `background_mode`: dark | light
+     - `suggested_template`: template ID from catalog (e.g., "title", "agenda", "comparison", "content-with-image")
+     - `description`: Short one-line title or explainer (NOT multiline — keep it concise)
+     - `design_plan` (multiline block scalar `|`): Detailed visual design notes covering **Layout**, **Typography**, **Visual Elements**, **Color**, **Spacing**, and **Animation hint**
+     - `key_points`: Array of talking points / bullet content for the slide (min 1 item)
 4. **Verify** the slide breakdown against Critical Requirements table before presenting
 5. Present the full proposed narrative structure and slide breakdown to the user
 </steps>
@@ -946,13 +955,20 @@ When `{{planning_research}}` is available, integrate research findings into rele
 | cta | cta |
 </reference>
 
-<reference title="Description field guidelines">
-The description should read like detailed presentation notes:
-- What the slide communicates (the core message)
-- Why it matters at this point in the narrative arc
-- Speaker context: pacing, emphasis, transitions from previous slide
-- Audience impact: what they should think or feel
-- Content specifics: not just bullet points, but HOW they should be presented
+<reference title="Slide field guidelines">
+**description**: Short one-line title or explainer (e.g., "Title slide: MCP Foundations — Week 3")
+
+**design_plan** (multiline block scalar): Detailed visual design notes structured as:
+- **Layout:** Spatial arrangement, alignment, regions
+- **Typography:** Font sizes, weights, hierarchy
+- **Visual Elements:** Icons, images, gradients, accents
+- **Color:** Background, text, and accent colors
+- **Spacing:** Margins, padding, vertical rhythm
+- **Animation hint:** Entry/exit animations, build order
+
+**key_points**: Array of the slide's core talking points or bullet content
+
+**suggested_template**: Match to available template catalog (title, agenda, comparison, content-with-image, etc.)
 </reference>
 
 **Report to user:**

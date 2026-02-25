@@ -112,8 +112,7 @@ The design standards file (`.slide-builder/config/design-standards.md`) contains
 │           │   └── white/        # White icons for dark backgrounds
 │           ├── images/           # Brand images
 │           └── logos/            # Brand logos
-├── templates/           # Framework templates (NOT shareable)
-│   └── viewer-template.html  # Master template for deck viewer generation
+├── templates/           # Framework templates (slide templates only, NOT shareable)
 ├── workflows/           # Core framework (versioned)
 │   ├── setup/
 │   │   ├── workflow.yaml

@@ -1,0 +1,40 @@
+# Edit Plan Workflow - Targeted plan.yaml modifications via natural language
+# Triggered from Plan Editor "Edit with Claude" modal
+name: edit-plan
+description: "Edit an existing deck plan via natural language instruction — modifies plan.yaml fields, structure, or narrative"
+author: "Slide Builder"
+version: "1.0"
+
+# Path variables
+installed_path: "{project-root}/.slide-builder/workflows/edit-plan"
+
+# Workflow components
+instructions: "{installed_path}/instructions.md"
+
+# Config paths
+config_path: "{project-root}/.slide-builder/config"
+
+# Context file (written by Plan Editor before invoking this command)
+context_file: "{project-root}/.slide-builder/plan-editor-context.md"
+
+# Plan schema reference
+plan_schema: "{project-root}/.slide-builder/workflows/plan/plan-schema.md"
+
+# State management
+status_file: "{project-root}/.slide-builder/status.yaml"
+
+# Output locations
+output_root: "{project-root}/output"
+
+# Variables
+variables:
+  workflow_version: "1.0"
+  # Passed as argument:
+  #   instruction: natural language edit request (e.g., "Make the opening more compelling")
+  # Derived at runtime:
+  #   deck_slug: from status.yaml current_deck_slug or context file
+  #   plan_path: output/{deck_slug}/plan.yaml or .slide-builder/decks/{deckId}/plan.yaml
+
+# Single-pass edit — no interactive prompts
+template: false
+standalone: true
