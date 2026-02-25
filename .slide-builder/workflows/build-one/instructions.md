@@ -40,6 +40,53 @@ Before writing any HTML file, verify your output satisfies ALL of these. These a
 | 7 | Auto-save script | `saveEdits()` function present before `</body>` |
 | 8 | Animatable markers | Structural elements (boxes, cards, icons, images) have `data-animatable="true"` |
 | 9 | Slide identity | `.slide` div has `data-slide-id="{random-hex-8}"` for stable animation matching |
+| 10 | Viewer DOM Contract | Animatable elements use `data-build-id` (not `id`); viewers use `querySelector('[data-build-id="..."]')` — never `getElementById()`. See Viewer DOM Contract reference below |
+
+---
+
+<reference title="Viewer DOM Contract">
+
+### Required Data Attributes
+
+| Attribute | Purpose | Set By |
+|-----------|---------|--------|
+| `data-build-id` | Unique identifier for build-animation targeting | `/sb:animate` workflow or viewer `assignBuildIds()` at runtime |
+| `data-animatable` | Marks structural elements eligible for animation | `build-one` (this workflow) |
+| `data-field` | Identifies editable text fields for save/restore | `build-one` (this workflow) |
+| `data-slide-id` | Stable hex ID for the slide container | `build-one` (this workflow) |
+
+### Element Lookup Contract
+
+All three viewers (Slide Viewer V2, PresentServer, viewer-template.html) locate animatable elements using **attribute selectors only**:
+
+```js
+// CORRECT — all viewers use this pattern
+document.querySelector('[data-build-id="build-title-1"]');
+document.querySelectorAll('[data-build-id]');
+
+// WRONG — never use getElementById for build elements
+document.getElementById('build-title-1');  // ❌ NOT USED
+```
+
+### Build Animation CSS Class Lifecycle
+
+Viewers apply these classes to `[data-build-id]` elements during presentation:
+
+| State | CSS Class | Effect |
+|-------|-----------|--------|
+| Hidden (initial) | `build-hidden` | `opacity: 0; visibility: hidden` |
+| Revealing (animating) | `build-revealing` | `animation: buildFadeIn 0.4s ease-out forwards` |
+| Visible (final) | `build-visible` | `opacity: 1; visibility: visible` |
+
+### Build ID Naming Convention
+
+Build IDs follow the pattern: `build-{semantic-role}-{counter}`
+
+Examples: `build-title-1`, `build-card-2`, `build-icon-3`
+
+These IDs are **NOT** assigned by build-one. They are assigned later by the `/sb:animate` workflow or by viewer `assignBuildIds()` functions at runtime.
+
+</reference>
 
 ---
 
@@ -157,6 +204,7 @@ This is the exact structure your output must follow. The catalog templates in `.
 </head>
 <body>
   <div class="slide" data-slide-id="a1b2c3d4">
+    <!-- data-build-id is assigned by /sb:animate workflow or by viewers at runtime via assignBuildIds() — NOT by build-one -->
     <p class="eyebrow" contenteditable="true" data-field="eyebrow" data-animatable="true">Category Label</p>
     <h1 class="title" contenteditable="true" data-field="title" data-animatable="true">Main Title Goes Here</h1>
     <p class="subtitle" contenteditable="true" data-field="subtitle" data-animatable="true">Supporting subtitle with additional context.</p>
@@ -554,38 +602,34 @@ If an icon concept has no catalog match, OMIT it entirely — never use emoji or
 2. If exists:
    - Load catalog, store as `{{icon_catalog}}`
    - Set `{{icon_catalog_available}}` = true
+   - Note: v2.0 schema — each icon variant is a separate entry with `backgroundAffinity`, `base_icon`, and direct `file` reference
 3. If missing:
    - Warn user: "Icon catalog not found. Run `/sb-manage:add-icon` to set up."
    - Set `{{icon_catalog_available}}` = false
    - Continue without icon constraints
 </steps>
 
-<reference title="Icon selection algorithm">
+<reference title="Icon selection algorithm (metadata-driven, v2.0 schema)">
 | Step | Action |
 |------|--------|
-| 1 | Match concept to icon.id (case-insensitive) |
-| 2 | Match concept to icon.tags array |
+| 1 | Find icons where `base_icon` matches concept (case-insensitive) |
+| 2 | If no `base_icon` match → search icon `tags` array for concept |
 | 3 | If no match → OMIT icon entirely |
+| 4 | Filter matched icons by `backgroundAffinity` == slide's `background_mode` |
+| 5 | If multiple matches remain → prefer larger `size` (e.g., 100 over 50) |
+| 6 | Use the icon's `file` field directly for path construction (no folder-based variant logic) |
+| 7 | If no variant matches the background → warn user and suggest alternatives |
 </reference>
 
-<reference title="Icon variant by background">
-| Background Mode | Variant Folder |
-|-----------------|----------------|
-| `dark` | `white/` |
-| `light` | `dark/` |
-</reference>
-
-<reference title="Available icons">
-| ID | Tags |
-|----|------|
-| accuracy | target, precision, quality |
-| brainstorm | ideas, creativity, innovation |
-| business-network | networking, team, collaboration |
-| communication | messaging, chat, feedback |
-| customer-insight | customer, analysis, research |
-| customer-insights-manager | analytics, dashboard, metrics |
-| faq | questions, help, support |
-| idea-bank | innovation, lightbulb, solution |
+<reference title="Icon catalog v2.0 schema">
+Each icon variant is an individual entry with these fields:
+- `id`: Unique identifier (e.g., "accuracy-dark-100")
+- `base_icon`: Groups variants together (e.g., "accuracy")
+- `file`: Direct filename reference (e.g., "icons8-accuracy-100-dark.png")
+- `size`: Icon size in pixels (50 or 100)
+- `backgroundAffinity`: Which background this icon works on ("light" = dark icon, "dark" = white icon)
+- `tags`: Searchable keywords for concept matching
+All icon files are in the flat `icons/` directory (no variant subfolders).
 </reference>
 
 → Continue to Phase 2.7
@@ -604,6 +648,7 @@ If a logo concept has no catalog match, OMIT it entirely — never draw or recre
 2. If exists:
    - Load catalog, store as `{{logo_catalog}}`
    - Set `{{logo_catalog_available}}` = true
+   - Note: Logos may have `colorMetadata` with backgroundAffinity for smart selection
 3. If missing:
    - Set `{{logo_catalog_available}}` = false
    - Continue (logos optional)
@@ -616,13 +661,16 @@ If a logo concept has no catalog match, OMIT it entirely — never draw or recre
 | `light` | variant where usage contains "light background" or variant_id="dark" |
 </reference>
 
-<reference title="Logo selection algorithm">
+<reference title="Logo selection algorithm with color intelligence">
 | Step | Action |
 |------|--------|
 | 1 | Match concept to logo.id (case-insensitive) |
 | 2 | Match concept to logo.tags array |
 | 3 | If no match → OMIT logo entirely |
-| 4 | Select variant based on background_mode |
+| 4 | **Smart Selection:** If matched logo has `colorMetadata.backgroundAffinity`, check compatibility with slide's `background_mode` (see Smart Asset Selection below) |
+| 5 | If incompatible → warn user and suggest alternatives |
+| 6 | If no `colorMetadata` → proceed with variant selection without warning (fallback behavior) |
+| 7 | Select variant based on background_mode |
 </reference>
 
 → Continue to Phase 2.8
@@ -641,18 +689,22 @@ If a concept has no catalog match, OMIT it entirely — never generate or substi
 2. If exists:
    - Load catalog, store as `{{images_catalog}}`
    - Set `{{images_catalog_available}}` = true
+   - Note: Images may have `colorMetadata` with backgroundAffinity for smart selection
 3. If missing:
    - Set `{{images_catalog_available}}` = false
    - Continue (images optional)
 </steps>
 
-<reference title="Image selection algorithm">
+<reference title="Image selection algorithm with color intelligence">
 | Step | Action |
 |------|--------|
 | 1 | Match concept to image.id (case-insensitive) |
 | 2 | Match concept to image.category |
 | 3 | Match concept to image.tags array |
 | 4 | If no match → OMIT image entirely |
+| 5 | **Smart Selection:** If matched image has `colorMetadata.backgroundAffinity`, check compatibility with slide's `background_mode` (see Smart Asset Selection below) |
+| 6 | If incompatible → warn user and suggest alternatives |
+| 7 | If no `colorMetadata` → proceed without warning (fallback behavior) |
 </reference>
 
 <reference title="Image categories">
@@ -665,6 +717,123 @@ If a concept has no catalog match, OMIT it entirely — never generate or substi
 | `photo` | Photography assets |
 | `illustration` | Custom illustrations |
 </reference>
+
+→ Continue to Phase 2.8.5
+
+---
+
+## Phase 2.8.5: Smart Asset Selection (Color Intelligence)
+
+<critical>
+When selecting brand assets, use color metadata to ensure visual compatibility with the slide's background.
+This is advisory only — always proceed with user's request even if incompatible.
+</critical>
+
+### ColorMetadata Schema
+
+Brand assets may include `colorMetadata` with the following fields:
+
+<reference title="ColorMetadata fields">
+| Field | Type | Description |
+|-------|------|-------------|
+| `backgroundAffinity` | `'light' \| 'dark' \| 'both' \| 'any'` | Which backgrounds this asset works best on |
+| `hasTransparency` | `boolean` | Whether asset has transparent regions |
+| `dominantColors` | `string[]` | Up to 5 hex color values dominant in the asset |
+| `contrastNeeds` | `'high' \| 'medium' \| 'low'` | How much contrast the asset needs to be visible |
+| `assetType` | `'logo' \| 'icon' \| 'photo' \| 'illustration' \| 'shape'` | Classification of the asset |
+| `manualOverride` | `boolean` | True if user manually verified this metadata |
+</reference>
+
+### Compatibility Check Algorithm
+
+<steps>
+1. **Get slide background mode:** Extract `background_mode` from slide plan (default: "dark")
+2. **For each asset being placed on the slide:**
+   - Look up asset in its catalog (icons, logos, or images)
+   - Check if `colorMetadata` exists on the asset
+   - If `colorMetadata` exists:
+     - Check `backgroundAffinity` compatibility:
+       - `"any"` or `"both"` → Compatible with any background ✓
+       - `"dark"` → Compatible only with dark backgrounds
+       - `"light"` → Compatible only with light backgrounds
+     - If `backgroundAffinity` matches `background_mode` → Proceed silently ✓
+     - If incompatible → Show warning and suggest alternatives
+   - If `colorMetadata` does NOT exist → Proceed without warning (fallback)
+</steps>
+
+<reference title="Compatibility matrix">
+| Slide Background | backgroundAffinity | Compatible? |
+|------------------|-------------------|-------------|
+| `dark` | `"dark"` | ✓ Yes |
+| `dark` | `"light"` | ✗ No - warn |
+| `dark` | `"both"` | ✓ Yes |
+| `dark` | `"any"` | ✓ Yes |
+| `light` | `"light"` | ✓ Yes |
+| `light` | `"dark"` | ✗ No - warn |
+| `light` | `"both"` | ✓ Yes |
+| `light` | `"any"` | ✓ Yes |
+| any | (no metadata) | ✓ Yes (fallback) |
+</reference>
+
+### Mismatch Warning Format
+
+When an asset has incompatible `backgroundAffinity`, display this warning:
+
+<reference title="Asset compatibility warning template">
+```
+⚠️ Asset Compatibility Warning
+
+The requested asset '{{asset_name}}' has backgroundAffinity='{{asset_affinity}}'
+but this slide has a {{slide_background_mode}} background.
+
+Consider these compatible alternatives:
+{{#each compatible_alternatives limit=3}}
+• {{this.name}}: {{this.description}} (affinity: {{this.backgroundAffinity}})
+{{/each}}
+
+Proceeding with original selection. The asset may not display optimally.
+```
+</reference>
+
+### Finding Compatible Alternatives
+
+<steps>
+1. When mismatch detected, scan the same catalog (icons/logos/images) for alternatives
+2. Filter to assets where:
+   - `colorMetadata.backgroundAffinity` matches slide's `background_mode`, OR
+   - `colorMetadata.backgroundAffinity` is `"both"` or `"any"`
+3. Rank by semantic similarity to the original concept (tags, description)
+4. Return top 1-3 alternatives
+5. If no compatible alternatives exist, note: "No compatible alternatives available"
+</steps>
+
+### Fallback Behavior
+
+<critical>
+Assets without `colorMetadata` MUST work unchanged for backwards compatibility.
+</critical>
+
+<reference title="Fallback rules">
+| Scenario | Behavior |
+|----------|----------|
+| Asset has no `colorMetadata` | Proceed without warning |
+| Asset has `colorMetadata` but no `backgroundAffinity` | Proceed without warning |
+| Catalog not loaded | Proceed with standard selection |
+| User explicitly requests incompatible asset | Warn, then proceed with their request |
+</reference>
+
+### Integration with Phase 3A
+
+During template build (Phase 3A), apply smart selection when placing brand assets:
+
+<steps>
+1. For each icon/logo/image to be placed:
+   - Run compatibility check (above)
+   - If compatible → use asset silently
+   - If incompatible → display warning, suggest alternatives, then use original
+   - If no metadata → use asset silently (fallback)
+2. Log asset selection decisions: "Selected {{asset_name}} ({{compatibility_status}})"
+</steps>
 
 → Continue to Phase 2.9
 
@@ -1115,17 +1284,25 @@ If concept has no catalog match → OMIT element entirely. Do NOT substitute.
    - **New schema**: description → title/messaging, design_plan → layout, enriched_section_goals → content direction
    - **Legacy schema**: intent → title, key_points → body, enriched_key_message → headline guidance
    - Include `available_research` as supporting data if relevant
-7. Apply brand asset selection from catalogs:
+7. Apply brand asset selection from catalogs with **Smart Asset Selection** (Phase 2.8.5):
    **Icons** (if `{{icon_catalog_available}}`):
-   - Match concept against `{{icon_catalog}}` using id or tags
-   - Use variant folder based on `background_mode` (dark bg → white/, light bg → dark/)
+   - Find icons where `base_icon` matches concept OR `tags` contain concept
+   - Filter by `backgroundAffinity` == slide's `background_mode`
+   - Prefer larger `size` if multiple matches
+   - Use icon's `file` field directly for path (flat directory, no variant subfolders)
    - If no match → OMIT icon entirely (no emoji, no generated SVG)
    **Logos** (if `{{logo_catalog_available}}`):
    - Match concept against `{{logo_catalog}}` using id or tags
+   - **Color Intelligence:** Check `colorMetadata.backgroundAffinity` against slide's `background_mode`
+     - If compatible or no metadata → proceed silently
+     - If incompatible → warn user, suggest alternatives, then proceed
    - Select variant based on `background_mode` (dark bg → light variant, light bg → dark variant)
    - If no match → OMIT logo entirely (no drawing, no recreation)
    **Images** (if `{{images_catalog_available}}`):
    - Match concept against `{{images_catalog}}` using id, category, or tags
+   - **Color Intelligence:** Check `colorMetadata.backgroundAffinity` against slide's `background_mode`
+     - If compatible or no metadata → proceed silently
+     - If incompatible → warn user, suggest alternatives, then proceed
    - If no match → OMIT image entirely (no generation, no substitution)
 8. Apply `{{design_constraints}}`: font sizes, spacing, content density limits
 9. Assemble complete HTML following Authoritative Example structure
@@ -1325,9 +1502,9 @@ TECHNICAL: 1920x1080px, contenteditable on all text, unique data-field, CSS vari
 
 BRAND ASSET RULES (if catalogs available):
 Icons:
-- ONLY from icon-catalog.json, NEVER emoji or generated SVG
-- Variant: dark bg → white/, light bg → dark/
-- Sizes: 50px or 100px
+- ONLY from icon-catalog.json (v2.0 schema), NEVER emoji or generated SVG
+- Select by: match `base_icon` or `tags`, filter by `backgroundAffinity` == slide's `background_mode`, prefer larger `size`
+- Use `file` field directly for path (flat icons/ directory, no variant subfolders)
 - If concept not in catalog → OMIT icon
 
 Logos:
@@ -1631,7 +1808,7 @@ Skipping validation and proceeding to Phase 5.</output>
    - Console errors → "Fix JavaScript errors: {{error_list}}"
    - Density mismatch → "Adjust content amount for {{storyline_role}} role (expected {{expected_density}})"
    - Whitespace issues → "{{whitespace_recommendation}}"
-   - Icon contrast fail → "Use {{suggested_variant}} icon variant for {{background_type}} container"
+   - Icon contrast fail → "Select icon with backgroundAffinity matching {{background_type}} from catalog"
    - Logo non-compliant → "Replace with catalog logo from .slide-builder/config/catalog/brand-assets/logos/"
 4. Display the compiled report to user
 </steps>
@@ -1686,15 +1863,24 @@ Skipping validation and proceeding to Phase 5.</output>
 
 ## Phase 6: Update Status
 
+<critical>
+This phase is MANDATORY — never skip it. The Plan Editor UI reads slide status directly from plan.yaml.
+If you skip this step, built slides will still appear as "pending" in the UI.
+</critical>
+
 <steps>
 1. (Deck mode) Update `output/{{deck_slug}}/plan.yaml`:
-   - Find slide by number, change status to "built"
+   <action>Read the file, find the slide entry where `number: {{slide_number}}`, change its `status` field from `"pending"` to `"built"`</action>
+   <action>Write the updated plan.yaml back to disk</action>
+   <action>Verify: re-read plan.yaml and confirm the slide's status is now `"built"`</action>
+
 2. (Deck mode) Update `.slide-builder/status.yaml`:
-   - `decks.{{deck_slug}}.built_count`: Increment by 1
+   - `decks.{{deck_slug}}.built_count`: **Recompute from plan.yaml** — re-read `output/{{deck_slug}}/plan.yaml`, count all slides where `status === "built"`, and set `built_count` to that count (do NOT increment by 1). Log: `Status update: built_count recomputed to ${actual_built} (was ${previous_built_count})`.
    - `decks.{{deck_slug}}.current_slide`: Slide number just built
    - `decks.{{deck_slug}}.last_action`: Description
    - `decks.{{deck_slug}}.last_modified`: ISO 8601 timestamp
    - Status transitions: `planned` + first build → `building`; built_count == total → `complete`
+
 3. Update top-level status.yaml: `last_modified`, append to `history`
 </steps>
 

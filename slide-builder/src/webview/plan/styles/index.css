@@ -1,0 +1,357 @@
+/**
+ * Tailwind CSS entry point with custom properties from UX Design Specification.
+ *
+ * Story Reference: 18-3 Task 7 - Set up Tailwind CSS and custom properties
+ * UX Reference: notes/ux-design/ux-design-specification.md#3.1 Color System, #3.2 Typography
+ */
+
+@import "tailwindcss";
+
+/* =============================================================================
+ * CSS Custom Properties from UX Design Specification
+ * ============================================================================= */
+
+:root {
+  /* Primary Brand Colors */
+  --primary: #3a61ff;
+  --primary-hover: #2d50e6;
+  --primary-light: #e8edff;
+
+  /* Background Colors */
+  --bg: hsl(220 20% 97%);
+  --surface: hsl(220 15% 95%);
+  --card: #ffffff;
+
+  /* Border */
+  --border: hsl(220 15% 88%);
+
+  /* Text Colors */
+  --fg: hsl(220 15% 15%);
+  --fg-secondary: hsl(220 8% 45%);
+  --fg-muted: hsl(220 8% 60%);
+  --fg-faint: hsl(220 8% 72%);
+
+  /* Semantic Colors */
+  --success: #22c55e;
+  --success-light: #dcfce7;
+  --warning: #eab308;
+  --warning-light: #fef9c3;
+  --error: #ef4444;
+  --error-light: #fee2e2;
+
+  /* Confidence Score Tiers */
+  --confidence-high: #22c55e;
+  --confidence-medium: #eab308;
+  --confidence-low: #ef4444;
+
+  /* Build Status Colors - AC-19.4.6: gray (--fg-faint) for pending */
+  --status-pending: var(--fg-faint);
+  --status-building: #3b82f6;
+  --status-built: #22c55e;
+  --status-error: #ef4444;
+
+  /* =========================================================================
+   * Narrative Phase Colors - Editorial Design System
+   * Each narrative phase has a distinctive accent for section differentiation
+   * ========================================================================= */
+
+  /* Hook - Captures attention (warm coral/orange) */
+  --phase-hook: #f97316;
+  --phase-hook-light: #fff7ed;
+  --phase-hook-border: #fdba74;
+
+  /* Context - Sets the scene (rich blue) */
+  --phase-context: #3b82f6;
+  --phase-context-light: #eff6ff;
+  --phase-context-border: #93c5fd;
+
+  /* Evidence - Builds credibility (emerald green) */
+  --phase-evidence: #10b981;
+  --phase-evidence-light: #ecfdf5;
+  --phase-evidence-border: #6ee7b7;
+
+  /* Detail - Supporting information (neutral slate) */
+  --phase-detail: #64748b;
+  --phase-detail-light: #f8fafc;
+  --phase-detail-border: #cbd5e1;
+
+  /* Transition - Bridges sections (violet) */
+  --phase-transition: #8b5cf6;
+  --phase-transition-light: #f5f3ff;
+  --phase-transition-border: #c4b5fd;
+
+  /* CTA - Call to action (vibrant rose) */
+  --phase-cta: #e11d48;
+  --phase-cta-light: #fff1f2;
+  --phase-cta-border: #fda4af;
+
+  /* Border Radius Tokens */
+  --radius: 12px;
+  --radius-sm: 8px;
+  --radius-xs: 4px;
+  --radius-full: 9999px;
+
+  /* Spacing (based on 4px grid) */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+
+  /* Typography */
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--fg);
+  background-color: var(--bg);
+}
+
+/* =============================================================================
+ * Base Styles
+ * ============================================================================= */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+/* Reset margins/padding only for specific elements, not universally */
+html, body, h1, h2, h3, h4, h5, h6, p, ul, ol, figure, blockquote, dl, dd {
+  margin: 0;
+  padding: 0;
+}
+
+ul, ol {
+  list-style: none;
+}
+
+body {
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Root container - provides outer breathing room */
+#root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Remove default focus outline, will be added via Tailwind */
+:focus {
+  outline: none;
+}
+
+/* Focus visible for keyboard navigation */
+:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+/* =============================================================================
+ * Scrollbar Styling (for VS Code consistency)
+ * ============================================================================= */
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: hsl(220 15% 80%);
+  border-radius: var(--radius-full);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(220 15% 70%);
+}
+
+/* =============================================================================
+ * Accordion Animation (Radix Accordion)
+ * Story Reference: 19-2 Task 2 - AC-19.2.3, AC-19.2.5
+ * ============================================================================= */
+
+@keyframes accordion-down {
+  from {
+    height: 0;
+    opacity: 0;
+  }
+  to {
+    height: var(--radix-accordion-content-height);
+    opacity: 1;
+  }
+}
+
+@keyframes accordion-up {
+  from {
+    height: var(--radix-accordion-content-height);
+    opacity: 1;
+  }
+  to {
+    height: 0;
+    opacity: 0;
+  }
+}
+
+.animate-accordion-down {
+  animation: accordion-down 200ms ease-out;
+}
+
+.animate-accordion-up {
+  animation: accordion-up 200ms ease-out;
+}
+
+/* =============================================================================
+ * Slide Card Entrance Animation
+ * Story Reference: 19-4 - Visual Polish - Staggered card reveals
+ * ============================================================================= */
+
+@keyframes slide-card-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-slide-card-enter {
+  animation: slide-card-enter 300ms ease-out forwards;
+}
+
+/* Staggered delays for card entrance - applied via inline style */
+.slide-card-stagger {
+  opacity: 0;
+  animation: slide-card-enter 300ms ease-out forwards;
+}
+
+/* =============================================================================
+ * Section Highlight Pulse
+ * Subtle pulse when section is expanded to draw attention
+ * ============================================================================= */
+
+@keyframes section-glow {
+  0%, 100% {
+    box-shadow: none;
+  }
+  50% {
+    box-shadow: 0 0 0 2px var(--primary-light);
+  }
+}
+
+/* =============================================================================
+ * Background Atmosphere
+ * Subtle gradient for depth instead of flat color
+ * ============================================================================= */
+
+.bg-atmosphere {
+  background: linear-gradient(
+    180deg,
+    hsl(220 20% 97%) 0%,
+    hsl(220 15% 96%) 50%,
+    hsl(220 18% 95%) 100%
+  );
+}
+
+/* =============================================================================
+ * Section Phase Accents - Enterprise Clean
+ * Subtle left-border only, no gradient backgrounds
+ * ============================================================================= */
+
+.section-phase-hook {
+  border-left: 3px solid var(--phase-hook);
+}
+
+.section-phase-context {
+  border-left: 3px solid var(--phase-context);
+}
+
+.section-phase-evidence {
+  border-left: 3px solid var(--phase-evidence);
+}
+
+.section-phase-detail {
+  border-left: 3px solid var(--phase-detail);
+}
+
+.section-phase-transition {
+  border-left: 3px solid var(--phase-transition);
+}
+
+.section-phase-cta {
+  border-left: 3px solid var(--phase-cta);
+}
+
+/* Default/uncategorized section */
+.section-phase-default {
+  border-left: 3px solid var(--border);
+}
+
+/* =============================================================================
+ * Layout Utilities - Consistent spacing for app shell
+ * ============================================================================= */
+
+/* Main content area padding - consistent horizontal gutters */
+.layout-padding {
+  padding-left: var(--space-6);
+  padding-right: var(--space-6);
+}
+
+/* Content max-width constraint with auto margins for centering */
+.layout-content {
+  max-width: 56rem; /* 896px - optimal reading width */
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Header bar consistent padding */
+.layout-header {
+  padding: var(--space-4) var(--space-6);
+}
+
+/* Section spacing - vertical rhythm between sections */
+.layout-section {
+  padding-top: var(--space-6);
+  padding-bottom: var(--space-6);
+}
+
+/* Card container padding */
+.layout-card-content {
+  padding: var(--space-4);
+}
+
+/* =============================================================================
+ * Reduced Motion (AC-21.3.10)
+ * Respects prefers-reduced-motion: disables hover lifts, transitions, animations
+ * ============================================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  /* Disable hover lift transforms on slide cards */
+  .group\/card:hover {
+    transform: none !important;
+  }
+}
+
+/* BR-2.2: Toast fade-in animation */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translate(-50%, 8px); }
+  to { opacity: 1; transform: translate(-50%, 0); }
+}

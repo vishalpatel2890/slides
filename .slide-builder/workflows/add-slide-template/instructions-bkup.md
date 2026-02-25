@@ -296,10 +296,7 @@ Reply:
       <output>
 **Preview Your Template**
 
-Open this file in your browser:
-`file://{{absolute_catalog_path}}/{{template_id}}.html`
-
-Or from terminal:
+Open this file in your browser via localhost or serve it locally:
 ```bash
 open .slide-builder/config/catalog/{{template_id}}.html
 ```

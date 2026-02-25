@@ -9,6 +9,7 @@ Your job is to:
 2. Loop over pending slides, delegating each to build-one
 3. Handle errors gracefully (continue on failure)
 4. Track progress and summarize results
+5. Track and summarize any asset compatibility warnings from build-one (Smart Asset Selection)
 </context>
 
 <success_criteria>
@@ -95,6 +96,7 @@ Build-one handles: theme loading, template matching, HTML generation, viewer reg
    - `{{built_count}}` = 0
    - `{{failed_count}}` = 0
    - `{{failed_slides}}` = []
+   - `{{asset_warnings}}` = [] (to track Smart Asset Selection warnings from build-one)
 
 2. For each slide in `{{pending_slides}}` (already sorted by number):
 
@@ -122,6 +124,8 @@ Build-one handles: theme loading, template matching, HTML generation, viewer reg
 
    d. If build-one succeeds:
       - Increment `{{built_count}}`
+      - **Collect asset warnings:** If build-one reported any Smart Asset Selection warnings, append to `{{asset_warnings}}`:
+        - Store: `{slide: {{slide.number}}, asset: {{warned_asset}}, affinity: {{asset_affinity}}, slide_bg: {{background_mode}}}`
       <check if="build_mode == 'yolo'">
         <action>Report: "✓ Slide {{slide.number}} built ({{selected_template}}, {{background_mode}})"</action>
       </check>
@@ -167,6 +171,23 @@ Build-one handles: theme loading, template matching, HTML generation, viewer reg
 | All succeeded | "✓ Built {{built_count}} slides. Viewer at output/{{deck_slug}}/index.html" |
 | Partial success | "Built {{built_count}}, failed {{failed_count}}. Failed slides: {{failed_slides}}. Run `/sb-create:build-one` to retry individual slides." |
 | All failed | "❌ All slides failed. Run `/sb-create:build-one` to debug individual slides." |
+
+### Asset Compatibility Summary (Smart Asset Selection)
+
+<check if="{{asset_warnings}}.length > 0">
+  <action>Display batch-level summary of asset compatibility warnings:</action>
+  <output>
+⚠️ **Asset Compatibility Notes** ({{asset_warnings.length}} warning(s)):
+{{#each asset_warnings}}
+• Slide {{this.slide}}: '{{this.asset}}' (affinity: {{this.affinity}}) on {{this.slide_bg}} background
+{{/each}}
+
+These assets may not display optimally. Run `/sb-manage:update-brand-assets` to review asset color metadata.
+  </output>
+</check>
+<check if="{{asset_warnings}}.length == 0">
+  <note>No asset compatibility warnings — all assets matched their slide backgrounds.</note>
+</check>
 
 ---
 

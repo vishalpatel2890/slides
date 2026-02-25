@@ -1,0 +1,45 @@
+/* =============================================================================
+ * TemplateEditPanel - Styles for slide template editing panel
+ * Story Reference: slide-template-preview-1
+ * Pattern Reference: deck-template-detail.css (preview button styles)
+ * ============================================================================= */
+
+/* Header actions group - wraps preview and close buttons */
+.template-edit-panel__header-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+/* Preview (Eye icon) button in panel header */
+.template-edit-panel__preview-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  padding: 4px;
+  border-radius: 3px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--vscode-foreground);
+  opacity: 0.8;
+  transition: opacity 0.2s, background 0.2s;
+}
+
+.template-edit-panel__preview-btn:hover {
+  opacity: 1;
+  background: var(--vscode-toolbar-hoverBackground);
+}
+
+.template-edit-panel__preview-btn:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: -2px;
+  opacity: 1;
+}
+
+/* Keyboard accessibility - activates on Enter or Space */
+.template-edit-panel__preview-btn:focus {
+  opacity: 1;
+}

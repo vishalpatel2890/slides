@@ -14,7 +14,7 @@ Technical specifications and factual lookup material.
 | Reference | Content |
 |-----------|---------|
 | [Theme schema](theme-schema.md) | Complete theme.json specification |
-| [Plan schema](plan-schema.md) | Deck and slide plan format |
+| [Plan schema](../../.slide-builder/workflows/plan/plan-schema.md) | Deck and slide plan format |
 | [Catalog schema](catalog-schema.md) | Template catalog format |
 | [Manifest schema](manifest-schema.md) | Slide manifest format |
 

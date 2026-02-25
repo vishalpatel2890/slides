@@ -1,0 +1,198 @@
+{
+  "name": "slide-builder",
+  "displayName": "Slide Builder",
+  "description": "Visual Plan Editor and Deck Catalog for Slide Builder",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.105.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onCustomEditor:slideBuilder.planEditor",
+    "workspaceContains:.slide-builder"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "slide-builder",
+          "title": "Slide Builder",
+          "icon": "resources/slide-builder-icon.svg"
+        }
+      ]
+    },
+    "views": {
+      "slide-builder": [
+        {
+          "type": "webview",
+          "id": "slideBuilder.catalogView",
+          "name": "Catalog"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "slideBuilder.openCatalog",
+        "title": "Open Catalog",
+        "category": "Slide Builder"
+      },
+      {
+        "command": "slideBuilder.viewDeck",
+        "title": "View Slides",
+        "category": "Slide Builder"
+      },
+      {
+        "command": "slideBuilder.presentDeck",
+        "title": "Present Deck",
+        "category": "Slide Builder"
+      },
+      {
+        "command": "slideBuilder.buildDeck",
+        "title": "Build All Slides",
+        "category": "Slide Builder"
+      },
+      {
+        "command": "slideBuilder.buildSlide",
+        "title": "Build Current Slide",
+        "category": "Slide Builder"
+      },
+      {
+        "command": "slideBuilder.newDeck",
+        "title": "New Deck",
+        "category": "Slide Builder"
+      },
+      {
+        "command": "slideBuilder.brandSetup",
+        "title": "Set Up Brand",
+        "category": "Slide Builder"
+      },
+      {
+        "command": "slideBuilder.openThemeEditor",
+        "title": "Open Theme Editor",
+        "category": "Slide Builder"
+      },
+      {
+        "command": "slideBuilder.aiThemeEdit",
+        "title": "AI Theme Edit",
+        "category": "Slide Builder"
+      }
+    ],
+    "customEditors": [
+      {
+        "viewType": "slideBuilder.planEditor",
+        "displayName": "Slide Builder Plan Editor",
+        "selector": [
+          {
+            "filenamePattern": "**/plan.yaml"
+          }
+        ],
+        "priority": "default"
+      }
+    ],
+    "configuration": {
+      "title": "Slide Builder",
+      "properties": {
+        "slideBuilder.claudeCode.launchMode": {
+          "type": "string",
+          "enum": [
+            "extension",
+            "terminal"
+          ],
+          "default": "extension",
+          "enumDescriptions": [
+            "Launch Claude Code as a VS Code extension (sidebar/panel/editor tab)",
+            "Launch Claude Code CLI in integrated terminal"
+          ],
+          "description": "How to launch Claude Code when Slide Builder commands are invoked"
+        },
+        "slideBuilder.claudeCode.position": {
+          "type": "string",
+          "enum": [
+            "editor-tab",
+            "sidebar",
+            "panel"
+          ],
+          "default": "editor-tab",
+          "enumDescriptions": [
+            "Open Claude Code as a tab in the main editor area",
+            "Open Claude Code in the sidebar (primary or secondary)",
+            "Open Claude Code in the bottom panel"
+          ],
+          "description": "Where to open Claude Code extension (only applies when launchMode is 'extension')",
+          "markdownDescription": "Where to open Claude Code extension. *Only applies when launch mode is 'extension'.*"
+        },
+        "slideBuilder.ui.sidebarWidthPercent": {
+          "type": "number",
+          "minimum": 15,
+          "maximum": 60,
+          "default": 40,
+          "description": "Slide Builder catalog sidebar width as percentage of screen width (15-60%)",
+          "markdownDescription": "Width of Slide Builder catalog sidebar as a percentage of screen width. Valid range: **15-60%**."
+        },
+        "slideBuilder.ui.rememberManualAdjustments": {
+          "type": "boolean",
+          "default": true,
+          "description": "Remember manual sidebar width and position adjustments across VS Code sessions",
+          "markdownDescription": "When enabled, Slide Builder remembers your manual sidebar resizing and position changes across VS Code restarts."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run build",
+    "build": "node esbuild.mjs --production",
+    "watch": "node esbuild.mjs --watch",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:extension": "vscode-test",
+    "lint": "tsc --noEmit && tsc --noEmit -p tsconfig.webview.json",
+    "package": "vsce package"
+  },
+  "devDependencies": {
+    "@axe-core/react": "^4.11.1",
+    "@testing-library/jest-dom": "^6.x",
+    "@testing-library/react": "^16.x",
+    "@types/node": "^22.x",
+    "@types/react": "^19.x",
+    "@types/react-dom": "^19.x",
+    "@types/vscode": "^1.105.0",
+    "@vscode/test-electron": "^2.x",
+    "axe-core": "^4.11.1",
+    "esbuild": "^0.24.x",
+    "jsdom": "^26.x",
+    "tailwindcss": "^4.x",
+    "typescript": "^5.x",
+    "vitest": "^2.x",
+    "vitest-axe": "^0.1.0"
+  },
+  "dependencies": {
+    "@dnd-kit/core": "^6.x",
+    "@dnd-kit/sortable": "^10.x",
+    "@radix-ui/react-accordion": "^1.x",
+    "@radix-ui/react-alert-dialog": "^1.x",
+    "@radix-ui/react-context-menu": "^2.2.16",
+    "@radix-ui/react-dialog": "^1.x",
+    "@radix-ui/react-dropdown-menu": "^2.x",
+    "@radix-ui/react-popover": "^1.1.15",
+    "@radix-ui/react-scroll-area": "^1.x",
+    "@radix-ui/react-select": "^2.x",
+    "@radix-ui/react-switch": "^1.x",
+    "@radix-ui/react-tooltip": "^1.x",
+    "class-variance-authority": "^0.7.x",
+    "clsx": "^2.x",
+    "get-pixels": "^3.3.3",
+    "html-to-image": "^1.11.13",
+    "html2canvas": "^1.4.1",
+    "jspdf": "^4.2.0",
+    "lucide-react": "^0.469.x",
+    "puppeteer": "^24.37.5",
+    "react": "^19.x",
+    "react-colorful": "^5.6.1",
+    "react-dom": "^19.x",
+    "tailwind-merge": "^2.x",
+    "yaml": "^2.x"
+  }
+}

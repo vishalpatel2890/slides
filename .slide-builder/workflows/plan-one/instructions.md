@@ -33,6 +33,7 @@ Run `/sb:setup` to create your theme from brand assets.
         - Check if `.slide-builder/config/catalog/brand-assets/icons/icon-catalog.json` exists → load as `{{icon_catalog}}`, set `{{icon_catalog_available}}` = true
         - Check if `.slide-builder/config/catalog/brand-assets/logos/logo-catalog.json` exists → load as `{{logo_catalog}}`, set `{{logo_catalog_available}}` = true
         - Check if `.slide-builder/config/catalog/brand-assets/images/images-catalog.json` exists → load as `{{images_catalog}}`, set `{{images_catalog_available}}` = true
+        **Color Intelligence Note:** Assets may include `colorMetadata` with `backgroundAffinity` indicating which slide backgrounds they work best on (light, dark, both, any). Build workflows will use this for smart asset selection.
       </action>
       <output>
 **Theme Verified**
@@ -47,9 +48,9 @@ Brand assets: {{icon_count}} icons, {{logo_count}} logos, {{image_count}} images
   </step>
 
   <!-- ═══════════════════════════════════════════════════════════════════════ -->
-  <!-- PHASE 2: Intent Capture                                                  -->
+  <!-- PHASE 2: Content Capture                                                  -->
   <!-- ═══════════════════════════════════════════════════════════════════════ -->
-  <step n="2" goal="Capture slide intent">
+  <step n="2" goal="Capture slide description and content">
     <ask>
 **Single Slide Planning**
 
@@ -227,7 +228,7 @@ You're creating a data-driven slide. How would you like to source the numbers?"
   <!-- ═══════════════════════════════════════════════════════════════════════ -->
   <!-- PHASE 3: Template Matching (Catalog-Driven)                              -->
   <!-- ═══════════════════════════════════════════════════════════════════════ -->
-  <step n="3" goal="Match intent to template using catalog">
+  <step n="3" goal="Match description to template using catalog">
     <critical>Template matching is now catalog-driven. Read catalog.json first.</critical>
 
     <action>Read `.slide-builder/config/catalog/slide-templates.json`</action>
@@ -300,6 +301,7 @@ I understand you need:
 {{if images_catalog_available}}- Images: {{images_catalog.images.length}} images by category{{end if}}
 
 *Note: Only catalog assets will be used - no generated/drawn elements.*
+*Color Intelligence: Assets with `colorMetadata` will be intelligently matched to your slide's background mode during build.*
 {{end if}}
     </output>
 
@@ -308,8 +310,8 @@ Is this correct? (yes to proceed, or provide corrections)
     </ask>
 
     <check if="user says no or provides corrections">
-      <action>Incorporate feedback into the parsed intent</action>
-      <goto step="3">Re-match template with updated intent</goto>
+      <action>Incorporate feedback into the parsed description</action>
+      <goto step="3">Re-match template with updated description</goto>
     </check>
 
     <check if="user says yes or confirms">
@@ -419,8 +421,8 @@ Skipping discovery. Proceeding to save plan...
       created: {{current_iso_timestamp}}
       last_modified: {{current_iso_timestamp}}
 
-      # Core Intent
-      intent: "{{user_intent}}"
+      # Core Description (short one-line title; detailed content in key_points)
+      description: "{{user_intent}}"
       suggested_template: "{{suggested_template}}"
 
       # Audience Context (optional - include if mentioned)
@@ -487,7 +489,7 @@ Skipping discovery. Proceeding to save plan...
 
     <!-- Generate slug for preview of output location -->
     <slug-generation>
-      <action>Generate slug from intent (first 30 chars):
+      <action>Generate slug from description (first 30 chars):
         1. Convert to lowercase
         2. Replace spaces with hyphens
         3. Remove special characters (keep only a-z, 0-9, hyphens)

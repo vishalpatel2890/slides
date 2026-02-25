@@ -11,26 +11,9 @@
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
-const { execFile } = require('child_process');
-
 const PROJECT_ROOT = path.join(__dirname, '..');
 const OUTPUT_DIR = path.join(PROJECT_ROOT, 'output');
-const REGENERATE_SCRIPT = path.join(__dirname, 'regenerate-viewer.js');
 const port = parseInt(process.argv[2]) || 3000;
-
-/**
- * Regenerate viewer index.html after manifest save
- * Runs async so it doesn't block the response
- */
-function regenerateViewer(deckSlug) {
-    execFile('node', [REGENERATE_SCRIPT, deckSlug], (err, stdout, stderr) => {
-        if (err) {
-            console.error(`⚠️  [${deckSlug}] Viewer regeneration failed:`, err.message);
-            return;
-        }
-        console.log(`🔄 [${deckSlug}] Viewer regenerated`);
-    });
-}
 
 function findDecks() {
     if (!fs.existsSync(OUTPUT_DIR)) return [];
@@ -44,7 +27,7 @@ function findDecks() {
 }
 
 const server = http.createServer((req, res) => {
-    // CORS headers - allow requests from file:// and any origin
+    // CORS headers - allow cross-origin requests
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET, PUT, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
@@ -130,10 +113,6 @@ const server = http.createServer((req, res) => {
                     timestamp: new Date().toISOString()
                 }));
 
-                // Regenerate viewer so FALLBACK_SLIDES stays in sync
-                if (isManifest) {
-                    regenerateViewer(deckSlug);
-                }
             } catch (e) {
                 console.error(`❌ [${deckSlug}] Failed to save ${fileName}:`, e.message);
                 res.writeHead(500, { 'Content-Type': 'application/json' });
@@ -169,7 +148,6 @@ server.listen(port, () => {
     console.log(`\n📂 Available decks (${decks.length}):`);
     decks.forEach(d => {
         console.log(`   • ${d}`);
-        console.log(`     file://${path.join(OUTPUT_DIR, d, 'index.html')}`);
     });
     console.log(`\n📝 API:`);
     console.log(`   GET  /status`);

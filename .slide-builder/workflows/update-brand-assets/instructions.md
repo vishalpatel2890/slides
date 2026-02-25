@@ -9,7 +9,7 @@ Your job is to maintain three catalog manifests that ensure only approved brand 
 - `images-catalog.json` - Decorative images, backgrounds, and illustrations
 
 **Asset Storage Locations:**
-- Icons: `.slide-builder/config/catalog/brand-assets/icons/` (dark/ and white/ variants)
+- Icons: `.slide-builder/config/catalog/brand-assets/icons/` (flat directory, variant suffix in filename)
 - Logos: `.slide-builder/config/catalog/brand-assets/logos/`
 - Images: `.slide-builder/config/catalog/brand-assets/images/`
 </context>
@@ -18,7 +18,7 @@ Your job is to maintain three catalog manifests that ensure only approved brand 
 A successful run produces:
 1. An updated or created catalog manifest (icon, logo, or images)
 2. Assets properly tagged with semantic keywords
-3. Correct variant registration (dark/light for logos, dark/white for icons)
+3. Correct variant registration (dark/light for logos; per-variant entries with backgroundAffinity for icons)
 4. User has reviewed and approved all catalog entries
 </success_criteria>
 
@@ -170,24 +170,27 @@ Use the Read tool to visually analyze the provided file. This enables classifica
 ## Phase 2: Scan & Catalog Icons Mode
 
 <critical>
-Parse icon filenames to extract icon IDs. The naming pattern is: `icons8-{id}-{size}.png`
+Parse icon filenames to extract icon IDs. The naming pattern is: `icons8-{id}-{size}-{variant}.png`
+Each variant (dark/white) × size (50/100) becomes its own catalog entry with backgroundAffinity.
 </critical>
 
-<reference title="Icon ID extraction">
+<reference title="Icon ID extraction (v2.0 flat structure)">
 ```
-Filename: icons8-brainstorm-100.png
-→ Remove prefix "icons8-": brainstorm-100.png
-→ Remove size suffix "-100.png": brainstorm
-→ Icon ID: "brainstorm"
+Filename: icons8-brainstorm-100-dark.png
+→ Remove prefix "icons8-": brainstorm-100-dark.png
+→ Parse: id="brainstorm", size=100, variant="dark"
+→ Catalog entry ID: "brainstorm-dark-100"
+→ base_icon: "brainstorm"
+→ backgroundAffinity: "light" (dark icons work on light backgrounds)
 ```
 </reference>
 
 <steps>
-1. List all PNG files in `icons/dark/`
-2. Extract unique icon IDs from filenames (strip `icons8-` prefix and `-{size}.png` suffix)
+1. List all PNG files in `icons/` root (flat directory, no subfolders)
+2. Extract icon IDs, sizes, and variants from filenames (pattern: `icons8-{id}-{size}-{variant}.png`)
 3. Load existing `icon-catalog.json` if it exists (use empty array if not)
-4. Identify which icons are NOT yet in the catalog
-5. Report count of uncataloged icons to user
+4. Identify which icon variants are NOT yet in the catalog (match by `file` field)
+5. Report count of uncataloged icon variants to user
 6. Use AskUserQuestion to choose tagging approach:
 
 <ask header="Tagging" context="Found {{uncataloged_count}} uncataloged icons.">
@@ -205,10 +208,12 @@ Filename: icons8-brainstorm-100.png
 ### Phase 2A: Batch Auto-Tagging (Icons)
 
 <steps>
-1. For each uncataloged icon (process silently without reporting each one):
-   - Use Read tool to view the icon image: `icons/dark/icons8-{{icon_id}}-100.png`
+1. For each uncataloged icon base_icon group (process silently without reporting each one):
+   - Use Read tool to view the largest dark variant: `icons/icons8-{{icon_id}}-100-dark.png`
    - Analyze the visual and generate: name, description, and 5-8 semantic tags
-   - Store in pending list
+   - Create entries for ALL variants of this icon (dark/white × each size) with shared tags
+   - Set backgroundAffinity: dark variants → "light", white variants → "dark"
+   - Store all variant entries in pending list
 2. Present complete batch for user review:
    - Show each icon image
    - Display suggested name, description, and tags
@@ -235,15 +240,15 @@ Read the 100px dark variant for best visibility.
 </critical>
 
 <steps>
-For each uncataloged icon:
+For each uncataloged icon (grouped by base_icon):
 
-1. Use Read tool to display the icon image: `icons/dark/icons8-{{icon_id}}-100.png`
+1. Use Read tool to display the icon image: `icons/icons8-{{icon_id}}-100-dark.png`
 2. Generate AI-suggested name, description, and tags based on visual analysis
 3. Report to user:
-   - Current progress (X of Y icons)
+   - Current progress (X of Y icon groups)
    - The icon image (displayed via Read)
    - AI suggestions for name, description, and tags
-   - Which file variants exist (dark 50px, dark 100px, white 50px, white 100px)
+   - Which file variants exist in flat directory (e.g., dark-50, dark-100, white-50, white-100)
 4. Use AskUserQuestion for confirmation:
 
 <ask header="Tags">
@@ -283,11 +288,16 @@ For each uncataloged icon:
    - Display name
    - Description
    - Semantic tags (5-8 recommended)
-8. Copy files to catalog folders with correct naming:
-   - `icons/dark/icons8-{{icon_id}}-{{size}}.png`
-   - `icons/white/icons8-{{icon_id}}-{{size}}.png` (if available)
-9. Add icon entry to pending list
-10. Continue to Phase 5 with `{{asset_type}}` = "icon"
+8. Copy files to flat icons directory with correct naming:
+   - `icons/icons8-{{icon_id}}-{{size}}-dark.png`
+   - `icons/icons8-{{icon_id}}-{{size}}-white.png` (if available)
+9. Auto-detect backgroundAffinity from variant:
+   - dark variant → backgroundAffinity: "light"
+   - white variant → backgroundAffinity: "dark"
+10. Create individual catalog entries per variant with v2.0 schema fields:
+    - `id`, `base_icon`, `name`, `description`, `file`, `size`, `backgroundAffinity`, `hasTransparency`, `dominantColors`, `contrastNeeds`, `tags`
+11. Add icon entries to pending list
+12. Continue to Phase 5 with `{{asset_type}}` = "icon"
 </steps>
 
 ---
@@ -450,20 +460,33 @@ Route save operation to the correct catalog based on `{{asset_type}}`.
 2. Load existing catalog if it exists, or create new structure:
 
 <check if="catalog doesn't exist">
-**For icon-catalog.json:**
+**For icon-catalog.json (v2.0 schema):**
 ```json
 {
-  "version": "1.0",
+  "version": "2.0",
   "generated": "{{date}}",
   "lastModified": "{{timestamp}}",
   "folder_structure": {
-    "base_path": ".slide-builder/config/catalog/brand-assets/icons",
-    "variants": { "dark": "dark/", "white": "white/" },
-    "sizes": ["50", "100"]
+    "base_path": ".slide-builder/config/catalog/brand-assets/icons"
   },
-  "naming_pattern": "icons8-{id}-{size}.png",
   "fallback_behavior": "omit",
   "icons": []
+}
+```
+Each icon entry uses v2.0 format:
+```json
+{
+  "id": "accuracy-dark-100",
+  "base_icon": "accuracy",
+  "name": "Accuracy",
+  "description": "...",
+  "file": "icons8-accuracy-100-dark.png",
+  "size": 100,
+  "backgroundAffinity": "light",
+  "hasTransparency": true,
+  "dominantColors": ["#000000"],
+  "contrastNeeds": "high",
+  "tags": ["accuracy", "target", "goal"]
 }
 ```
 
@@ -536,13 +559,33 @@ Never write a catalog file with invalid or incomplete entries. If unfixable issu
 
 ---
 
+## Brand Context & Theme Validation Cross-Reference
+
+<reference title="brandContext population and theme validation">
+This workflow manages brand asset catalogs (icons, logos, images) and does **not** modify theme.json directly. Brand context population (`brandContext` field) and theme schema validation are handled by the **setup workflow** (`.slide-builder/workflows/setup/instructions.md`):
+
+- **brandContext population:** During brand setup (Phase 2, Step 2.9), the setup workflow extracts brand context (voice, design philosophy, color usage notes, typography notes) from analyzed assets and populates the `theme.brandContext` field. See `docs/reference/theme-schema.md#brandContext` for the expected data structure.
+
+- **Theme validation:** During brand setup (Phase 3, Step 3.2), the setup workflow validates the generated theme against the required schema fields (name, version, colors.primary/secondary/accent, colors.background.default/alt, colors.text.heading/body, typography.fonts.heading/body, typography.scale, typography.weights, shapes.borderRadius/shadow/border, components). See `docs/reference/theme-schema.md` for the authoritative field documentation.
+
+When this workflow is used in conjunction with brand setup or theme editing, the setup and theme-edit workflows handle brandContext population and schema validation respectively. If this workflow is extended in the future to modify theme.json, ensure that:
+1. The `brandContext` field is preserved or updated appropriately
+2. Theme validation is performed against the required schema fields before saving
+3. See `slide-builder/src/shared/themeValidation.ts` for the authoritative validation logic
+</reference>
+
+---
+
 ## Quick Reference
 
-<reference title="Icon variant selection (for build-one)">
-| Background Mode | Icon Variant | Reason |
-|-----------------|--------------|--------|
-| `dark` | `white/` | White icons visible on dark backgrounds |
-| `light` | `dark/` | Dark icons visible on light backgrounds |
+<reference title="Icon selection (v2.0 metadata-driven)">
+| Step | Action |
+|------|--------|
+| 1 | Match `base_icon` or `tags` to concept |
+| 2 | Filter by `backgroundAffinity` == slide's `background_mode` |
+| 3 | Prefer larger `size` if multiple matches |
+| 4 | Use `file` field directly (flat directory, no variant subfolders) |
+Note: dark icons (backgroundAffinity: "light") work on light backgrounds; white icons (backgroundAffinity: "dark") work on dark backgrounds.
 </reference>
 
 <reference title="Logo variant selection (for build-one)">

@@ -1,0 +1,134 @@
+/**
+ * Shared VS Code theme integration tokens.
+ * Maps VS Code --vscode-* CSS variables to design tokens.
+ *
+ * Architecture Reference: ADR-008 - CSS Custom Properties
+ * Import this file in every webview entry's CSS for consistent theming.
+ */
+
+:root {
+  /* Primary Brand Colors */
+  --primary: #3a61ff;
+  --primary-hover: #2d50e6;
+  --primary-light: #e8edff;
+
+  /* Background Colors (mapped from VS Code vars when available) */
+  --bg: var(--vscode-editor-background, hsl(220 20% 97%));
+  --surface: var(--vscode-sideBar-background, hsl(220 15% 95%));
+  --card: var(--vscode-editorWidget-background, #ffffff);
+
+  /* Border */
+  --border: var(--vscode-panel-border, hsl(220 15% 88%));
+
+  /* Text Colors */
+  --fg: var(--vscode-editor-foreground, hsl(220 15% 15%));
+  --fg-secondary: var(--vscode-descriptionForeground, hsl(220 8% 45%));
+  --fg-muted: hsl(220 8% 60%);
+  --fg-faint: hsl(220 8% 72%);
+
+  /* Semantic Colors */
+  --success: #22c55e;
+  --success-light: #dcfce7;
+  --warning: #eab308;
+  --warning-light: #fef9c3;
+  --error: #ef4444;
+  --error-light: #fee2e2;
+
+  /* Border Radius Tokens */
+  --radius: 12px;
+  --radius-sm: 8px;
+  --radius-xs: 4px;
+  --radius-full: 9999px;
+
+  /* Spacing (based on 4px grid) */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+
+  /* Typography */
+  font-family: var(--vscode-font-family, 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif);
+  font-size: var(--vscode-font-size, 13px);
+  line-height: 1.5;
+  color: var(--fg);
+  background-color: var(--bg);
+}
+
+/* =============================================================================
+ * Base Styles (shared across all webviews)
+ * ============================================================================= */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html, body, h1, h2, h3, h4, h5, h6, p, ul, ol, figure, blockquote, dl, dd {
+  margin: 0;
+  padding: 0;
+}
+
+ul, ol {
+  list-style: none;
+}
+
+body {
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+:focus {
+  outline: none;
+}
+
+:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+/* =============================================================================
+ * Scrollbar Styling (for VS Code consistency)
+ * ============================================================================= */
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: hsl(220 15% 80%);
+  border-radius: var(--radius-full);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(220 15% 70%);
+}
+
+/* =============================================================================
+ * Reduced Motion
+ * ============================================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

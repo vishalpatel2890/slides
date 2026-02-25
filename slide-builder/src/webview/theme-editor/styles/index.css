@@ -1,0 +1,8 @@
+/**
+ * Theme Editor webview styles.
+ *
+ * Story Reference: bt-2-1 Task 4.4 — Tailwind CSS import for styling
+ */
+
+@import "tailwindcss";
+@import "../../shared/styles/theme.css";

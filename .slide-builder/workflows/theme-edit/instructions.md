@@ -499,6 +499,35 @@ Your response:
   <step n="6" goal="Phase 6: Save Theme and Update Templates">
     <critical>Save final theme and regenerate templates if shapes changed</critical>
 
+    <!-- Validate required fields before saving (AC-41: ensure modifications don't remove required fields) -->
+    <critical>After applying theme modifications, verify that no required fields have been removed or set to null/undefined. All required fields must be present and valid before writing theme.json.</critical>
+
+    <action>Validate {{working_theme}} against required schema fields before saving:
+
+    **Required string fields (must be non-empty strings):**
+    - name, version
+    - colors.primary, colors.secondary, colors.accent
+    - colors.background.default, colors.background.alt
+    - colors.text.heading, colors.text.body
+    - typography.fonts.heading, typography.fonts.body
+
+    **Required non-empty record fields (must be objects with at least one entry):**
+    - typography.scale, typography.weights
+    - shapes.borderRadius, shapes.shadow, shapes.border
+
+    **Required existence fields (must exist, can be empty object):**
+    - components
+
+    If any required field is missing, null, or undefined:
+    - Do NOT save the theme
+    - Report the missing fields to user
+    - Suggest restoring from the backup version
+    - Reference: `docs/reference/theme-schema.md` for authoritative field documentation
+    </action>
+
+    <!-- Preserve brandContext during edits -->
+    <action>Verify that existing `brandContext` data has been preserved during theme edits. Do not remove or overwrite `brandContext` unless the user specifically requested changes to brand context fields. If {{original_theme}} had a `brandContext` object, ensure {{working_theme}} still contains it.</action>
+
     <!-- Save theme.json -->
     <action>Write {{working_theme}} to .slide-builder/config/theme.json</action>
 

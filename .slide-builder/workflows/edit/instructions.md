@@ -295,6 +295,8 @@ No problem. Let's try again.
           required_attributes:
             - "contenteditable='true' on ALL text elements"
             - "data-field attribute on ALL text elements"
+            - "data-build-id preserved on elements that remain in layout"
+          preserve_build_ids: "Preserve all existing data-build-id attributes on elements that remain semantically equivalent"
           preserve_fields: {{field_names_list}}
           style_requirements:
             - "Include theme CSS variables in :root"
@@ -302,6 +304,7 @@ No problem. Let's try again.
             - "Use theme typography (font-family, sizes, weights)"
             - "Maintain brand personality: {{theme.personality.classification}}"
             - "Reference catalog templates for layout patterns when applicable"
+            - "Preserve all existing data-build-id attributes — these are used by all three viewers (PresentServer, VS Code Catalog, standalone browser) for build animation targeting"
     </action>
 
     <!-- AC4.2.3: Invoke frontend-design skill -->
@@ -311,6 +314,7 @@ No problem. Let's try again.
       - Pass theme for style consistency
       - Pass constraints for required attributes
       - Instruct skill to preserve existing data-field names where semantically equivalent
+      - If the current HTML has elements with `data-build-id` attributes, preserve those attributes on any elements that remain semantically equivalent in the regenerated output
       - Request new HTML layout that implements the edit instruction
     </action>
 
@@ -320,6 +324,7 @@ No problem. Let's try again.
     <action>Validate regenerated_html:
       - Has contenteditable="true" on all text elements
       - Has data-field attributes on all text elements
+      - Has data-build-id attributes preserved on elements that existed in original HTML
       - Has theme CSS variables in :root style block
       - Has correct 1920x1080 dimensions in viewport/body
       - Has auto-save JavaScript script
